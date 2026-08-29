@@ -180,29 +180,29 @@ npx wrangler secret put API_KEY
 
 ---
 
-### Option 2: Deploy to Hugging Face Spaces (Docker) — *[Community-Provided / Untested]*
+### Option 2: Self-Hosted Container Deployment (Docker / Fly.io)
 
-**Prerequisite**: A free [Hugging Face Account](https://huggingface.co/join).
+You can run `berean-mcp` as a standalone, self-contained container on **Fly.io**, **Railway**, or any **VPS/Docker host**. The included `Dockerfile` downloads the complete SQLite databases into the image during build.
 
-> [!WARNING]
-> **Experimental / Untested Deployment**:
-> Hugging Face Spaces deployment using Docker is provided as an experimental community alternative. It has not undergone formal automated integration testing.
-
-Hugging Face provides **2 vCPUs, 16 GB RAM, 50 GB storage** with a persistent HTTPS endpoint:
-
-1. **Create Space**: Go to [Hugging Face Spaces](https://huggingface.co/spaces) → **Create New Space** → Select **Docker** (Blank).
-2. **Push Repository**:
+1. **Deploy to Fly.io**:
    ```bash
-   git remote add hf https://huggingface.co/spaces/<your-username>/berean-mcp
-   git push hf main
+   cd berean-mcp
+   fly launch --no-deploy
+   fly deploy
+   ```
+2. **Or Run Locally with Docker**:
+   ```bash
+   cd berean-mcp
+   docker build -t berean-mcp .
+   docker run -d -p 7860:7860 --name berean-mcp berean-mcp
    ```
 3. **Connect Antigravity / Clients**:
-   Use your Hugging Face Space URL in `mcp_config.json`:
+   Use your container URL (e.g. `http://localhost:7860/mcp` or `https://berean-mcp.fly.dev/mcp`) in `mcp_config.json`:
    ```json
    {
      "mcpServers": {
        "berean": {
-         "url": "https://<your-username>-berean-mcp.hf.space/mcp",
+         "url": "https://berean-mcp.fly.dev/mcp",
          "transport": "streamable-http"
        }
      }

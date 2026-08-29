@@ -1,4 +1,4 @@
-# Hugging Face Spaces / Self-Contained Docker Deployment for Berean MCP Server
+# Self-Contained Container Deployment for Berean MCP Server (Fly.io / Docker / VPS)
 FROM node:20-slim
 
 # Install Python & virtual environment tools to download standalone SQLite databases
@@ -22,7 +22,7 @@ RUN npm install
 # Copy source code and lookup data
 COPY . .
 
-# Hugging Face Spaces listens on port 7860 by default
+# Server listens on port 7860 by default
 ENV PORT=7860
 EXPOSE 7860
 

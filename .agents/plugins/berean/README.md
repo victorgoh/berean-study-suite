@@ -74,22 +74,21 @@ If you want to host your own dedicated MCP server on Cloudflare Workers (100% fr
 
 ---
 
-#### 🤗 Option C: Deploy to Hugging Face Spaces (100% Free / Docker)
-If you want free cloud hosting without configuring cloud databases:
+#### 🐳 Option C: Deploy via Container (Docker / Fly.io)
+If you want containerized cloud hosting without configuring cloud databases:
 
-1. Create a new Space at [hf.co/spaces](https://huggingface.co/spaces) with SDK: **Docker**.
-2. Push your `berean-mcp` folder to your Hugging Face Space repository:
+1. Deploy to Fly.io or your Docker host:
    ```bash
    cd berean-mcp
-   git remote add hf https://huggingface.co/spaces/<your-username>/berean-mcp
-   git push hf main
+   fly launch --no-deploy
+   fly deploy
    ```
-3. Update `mcp_config.json`:
+2. Update `mcp_config.json`:
    ```json
    {
      "mcpServers": {
        "berean": {
-         "url": "https://<your-username>-berean-mcp.hf.space/mcp",
+         "url": "https://berean-mcp.fly.dev/mcp",
          "transport": "streamable-http"
        }
      }

@@ -13,8 +13,8 @@ The Berean MCP Server provides access to **25 verified classical public domain c
 | Environment | Transport | Endpoint URL |
 | :--- | :--- | :--- |
 | **Cloudflare Workers (Global Edge)** | Streamable HTTP | `https://berean-mcp.<your-subdomain>.workers.dev/mcp?key=YOUR_API_KEY` |
-| **Hugging Face Spaces (Docker)** | Streamable HTTP | `https://<your-username>-berean-mcp.hf.space/mcp` |
-| **Local Machine (Zero Network)** | Stdio | `tsx scripts/run_local_stdio.ts` |
+| **Self-Hosted Container (Docker / Fly.io)** | Streamable HTTP | `https://berean-mcp.fly.dev/mcp` or `http://localhost:7860/mcp` |
+| **Local Machine (Zero Network)** | Stdio | `npx -y tsx berean-mcp/scripts/run_local_stdio.ts` |
 
 ---
 
