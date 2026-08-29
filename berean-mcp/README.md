@@ -22,11 +22,11 @@ Try out the live public instance hosted on Cloudflare Workers:
 
 ## ⚡ Architecture & Performance
 
-- **26 MCP Tools & 8 Composite Study Packs**: Provides granular single-engine tools as well as high-speed composite Study Packs delivering up to 170,000 characters (~30,000 words) of verified biblical analysis in a single round-trip.
+- **27 MCP Tools & 9 Composite Study Packs**: Provides granular single-engine tools as well as high-speed composite Study Packs delivering up to 170,000 characters (~30,000 words) of verified biblical analysis in a single round-trip.
 - **Edge Cloudflare Execution**: Sub-50ms cold start, multi-tier LRU caching, and streaming JSON-RPC / Streamable HTTP transports.
 - **Hybrid Storage**:
   - **Cloudflare D1 (Serverless SQLite)**: Ultra-fast indexing for Strong's Hebrew Lexicon (BDB), ISBE/Easton's Encyclopedias, and OT/NT Morphological datasets.
-  - **Cloudflare R2 (Object Storage)**: High-capacity storage for 29 classical commentary sets, BSB/NET/KJV/OHGB Bible databases, and cross-reference collections.
+  - **Cloudflare R2 (Object Storage)**: High-capacity storage for 27 classical commentary sets, BSB/NET/KJV/OHGB Bible databases, and cross-reference collections.
 - **Token Optimization**: Reclaims **33,000+ tokens of context window** on every turn.
 
 ---
@@ -99,9 +99,15 @@ npx wrangler secret put API_KEY
 | **Marvin Vincent** | `Vincent` | New Testament | Greek lexical etymology & cultural imagery |
 | **Daniel Whedon** | `Whedon` | Whole Bible | Wesleyan-Arminian biblical commentary with logical rigor |
 | **John Peter Lange** | `Lange` | Whole Bible | Tri-fold Exegetical, Doctrinal, and Homiletical analysis |
-| **Cambridge Bible (CBSC)** | `CBSC` | Whole Bible | Scholarly historical and grammatical notes |
-| **Thomas Brooks** | `Brooks` | Whole Bible | Puritan spiritual treatises & pastoral aphorisms |
-| **Preacher's Homiletical** | `PHC` | Whole Bible | Comprehensive paragraph-by-paragraph sermon outlines |
+| **J. C. Ryle** | `Ryle` | Gospels | Evangelical pastoral reflections on the Gospels |
+| **John Trapp** | `Trapp` | Whole Bible | Puritan classic famous for pithy epigrams & spiritual wit |
+| **E. W. Bullinger** | `Bullinger` | Whole Bible | Figures of speech, chiasms, and Hebrew structural idioms |
+| **Henry Alford** | `Alford` | New Testament | Critical Greek Testament & manuscript lineages |
+| **Bob Utley** | `Utley` | Selected Books | Verse-by-verse historical-grammatical exegesis |
+| **David Guzik** | `Guzik` | Whole Bible | Accessible, verse-by-verse expository commentary |
+| **H. A. Ironside** | `Ironside` | Selected Books | Christ-centered expository notes |
+| **G. Campbell Morgan** | `Morgan` | Whole Bible | Structural exposition & overarching biblical motifs |
+| **Gary Everett** | `Everett` | Whole Bible | Comprehensive thematic study notes & original language exegesis |
 
 ---
 
@@ -115,27 +121,28 @@ npx wrangler secret put API_KEY
 5. **`lesson_creator_study_pack`**: Bundles Scripture, Chapter Summaries, Charles Ellicott, Albert Barnes, and The Expositor's Bible for teachers.
 6. **`prayer_guide_study_pack`**: Bundles Scripture, Charles Spurgeon / Joseph Benson Adoration, John Wesley Examination, and Biblical Promises for 1st-person ACTS prayer.
 7. **`covenant_theology_pack`**: Bundles Scripture, John Calvin's Covenant Exposition, John Gill's Prophecy, ISBE Encyclopedia, and Canonical Cross-References.
-8. **`commentary_study_pack`**: Dynamic multi-commentary bundler allowing custom multi-perspective lookups across any subset of the available commentators in a single call.
+8. **`topic_study_pack`**: Bundles Nave's Topical Concordance, Torrey's New Topical Textbook, Easton's Bible Dictionary, and cross-references.
+9. **`commentary_study_pack`**: Dynamic multi-commentary bundler allowing custom multi-perspective lookups across any subset of the available commentators in a single call.
 
 ### 2. Specialized Single-Engine Tools
-9. **`bible_lookup`**: Retrieve full chapter and verse ranges across BSB, NET, KJV, ASV, WEB, and OHGB.
-10. **`bible_search`**: High-speed full-text search with regex and testament filters.
-11. **`commentary_lookup`**: Query any individual commentator with intelligent alias normalization.
-12. **`cross_references`**: Query Treasury of Scripture Knowledge (TSK) cross-reference collections.
-13. **`lexicon_lookup`**: Strong's, Thayer's Greek, BDB Hebrew, and LSJ Lexicons.
-14. **`morphology_lookup`**: Original language grammatical and parsing breakdowns.
-15. **`topic_study`**: Topical concordance lookups (Nave's & Torrey's).
-16. **`character_lookup`**: Biographical profiles of biblical figures.
-17. **`location_lookup`**: GPS coordinates and Google Maps links for biblical cities and sites.
-18. **`theological_dictionary`**: Easton's Bible Dictionary and ISBE Encyclopedia entries.
-19. **`parallel_passages`**: Gospel harmonies and synoptic comparisons.
-20. **`biblical_promises`**: Topic-indexed biblical promises for faith and prayer.
-21. **`book_analysis`**: Historical background, authorship, and date for all 66 books.
-22. **`chapter_summary`**: Structural summaries and central themes for any chapter.
-23. **`bible_names`**: Etymological meanings and origins of biblical names.
-24. **`chronology`**: Biblical timelines and historical genealogies.
-25. **`daily_reading`**: 365-day whole-Bible reading schedules with automatic Scripture embedding.
-26. **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, and study packs.
+10. **`bible_lookup`**: Retrieve full chapter and verse ranges across BSB, NET, KJV, ASV, WEB, and OHGB.
+11. **`bible_search`**: High-speed full-text search with regex and testament filters.
+12. **`commentary_lookup`**: Query any individual commentator with intelligent alias normalization.
+13. **`cross_references`**: Query Treasury of Scripture Knowledge (TSK) cross-reference collections.
+14. **`lexicon_lookup`**: Strong's, Thayer's Greek, BDB Hebrew, and LSJ Lexicons.
+15. **`morphology_lookup`**: Original language grammatical and parsing breakdowns.
+16. **`topic_study`**: Topical concordance lookups (Nave's & Torrey's).
+17. **`character_lookup`**: Biographical profiles of biblical figures.
+18. **`location_lookup`**: GPS coordinates and Google Maps links for biblical cities and sites.
+19. **`theological_dictionary`**: Easton's Bible Dictionary and ISBE Encyclopedia entries.
+20. **`parallel_passages`**: Gospel harmonies and synoptic comparisons.
+21. **`biblical_promises`**: Topic-indexed biblical promises for faith and prayer.
+22. **`book_analysis`**: Historical background, authorship, and date for all 66 books.
+23. **`chapter_summary`**: Structural summaries and central themes for any chapter.
+24. **`bible_names`**: Etymological meanings and origins of biblical names.
+25. **`chronology`**: Biblical timelines and historical genealogies.
+26. **`daily_reading`**: 365-day whole-Bible reading schedules with automatic Scripture embedding.
+27. **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, and study packs.
 
 ---
 

@@ -187,6 +187,31 @@ export function getOpenApiSpec(serverUrl: string = "https://berean-mcp.victorgoh
           }
         }
       },
+      "/tools/devotional_study_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs"],
+          summary: "Daily Devotional & Quiet Time Study Pack",
+          description: "Generates rich personal quiet time study notes bundling Scripture, Maclaren exposition, Spurgeon adoration, Barnes practical remarks, Henry aphorisms, and Biblical promises.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Psalm 23:1-3", description: "Scripture passage for quiet time meditation" },
+                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV", "OHGB"], default: "BSB" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: {
+            "200": { description: "Devotional study pack output" }
+          }
+        }
+      },
       "/tools/prayer_guide_study_pack": {
         post: {
           tags: ["⚡ Composite Study Packs"],
