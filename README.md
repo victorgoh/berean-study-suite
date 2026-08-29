@@ -73,9 +73,7 @@ The **Berean MCP Server** delivers 24 granular tools and 8 high-performance comp
 - **Node.js 18+** (for the MCP server)
 - **Google Antigravity IDE**, **Claude Code**, or **Cursor**
 - **Pandoc** (optional, for Word document exports: `brew install pandoc`)
-- **Remote Cloud Deployment (Optional)**:
-  - **Cloudflare Account** (recommended for zero-cost serverless edge deployment with Cloudflare Workers, D1, and R2)
-  - **Docker / Fly.io / Container Host** (optional, for self-hosted container deployment)
+- **Cloudflare Account (Optional)**: For zero-cost serverless edge deployment with Cloudflare Workers, D1, and R2 (not required for 100% local use).
 
 ### 2. Installation
 

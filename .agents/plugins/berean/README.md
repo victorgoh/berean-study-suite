@@ -74,30 +74,7 @@ If you want to host your own dedicated MCP server on Cloudflare Workers (100% fr
 
 ---
 
-#### 🐳 Option C: Deploy via Container (Docker / Fly.io)
-If you want containerized cloud hosting without configuring cloud databases:
-
-1. Deploy to Fly.io or your Docker host:
-   ```bash
-   cd berean-mcp
-   fly launch --no-deploy
-   fly deploy
-   ```
-2. Update `mcp_config.json`:
-   ```json
-   {
-     "mcpServers": {
-       "berean": {
-         "url": "https://berean-mcp.fly.dev/mcp",
-         "transport": "streamable-http"
-       }
-     }
-   }
-   ```
-
----
-
-#### 💻 Option D: Run Locally (Local Node.js / Stdio)
+#### 💻 Option C: Run Locally (Local Node.js / Stdio)
 If you prefer running the MCP server entirely offline on your local machine:
 
 1. Install dependencies:

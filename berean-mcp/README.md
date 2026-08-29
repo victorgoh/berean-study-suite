@@ -180,38 +180,7 @@ npx wrangler secret put API_KEY
 
 ---
 
-### Option 2: Self-Hosted Container Deployment (Docker / Fly.io)
-
-You can run `berean-mcp` as a standalone, self-contained container on **Fly.io**, **Railway**, or any **VPS/Docker host**. The included `Dockerfile` downloads the complete SQLite databases into the image during build.
-
-1. **Deploy to Fly.io**:
-   ```bash
-   cd berean-mcp
-   fly launch --no-deploy
-   fly deploy
-   ```
-2. **Or Run Locally with Docker**:
-   ```bash
-   cd berean-mcp
-   docker build -t berean-mcp .
-   docker run -d -p 7860:7860 --name berean-mcp berean-mcp
-   ```
-3. **Connect Antigravity / Clients**:
-   Use your container URL (e.g. `http://localhost:7860/mcp` or `https://berean-mcp.fly.dev/mcp`) in `mcp_config.json`:
-   ```json
-   {
-     "mcpServers": {
-       "berean": {
-         "url": "https://berean-mcp.fly.dev/mcp",
-         "transport": "streamable-http"
-       }
-     }
-   }
-   ```
-
----
-
-### Option 3: Run Locally (Local Offline Node.js / Stdio & HTTP)
+### Option 2: Run 100% Locally (Offline Node.js / Stdio & Local HTTP)
 
 Zero internet required. Runs directly on your machine using your local `~/.biblemate/data` databases:
 
