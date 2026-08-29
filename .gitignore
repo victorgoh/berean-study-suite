@@ -4,12 +4,18 @@ Thumbs.db
 *.swp
 *.swo
 
+# IDE and Editor settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
 # Environment secrets
 .env
 .env.*
 !.env.example
 
-# Python bytecode/cache
+# Python bytecode/cache/environments
 **/__pycache__/
 *.pyc
 *.pyo
@@ -28,28 +34,14 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Berean study outputs (keep folder structure and README)
-/berean/*
-!/berean/README.md
-/biblemate/*
-
-# Output exports (keep folder structure and README)
-/export/*
-!/export/README.md
-!/export/docx/
-/export/docx/*
-!/export/docx/README.md
-!/export/md/
-/export/md/*
-!/export/md/README.md
-
-# Notes (keep folder structure and README)
-/notes/*
-!/notes/README.md
-
-# Generated Images (keep folder structure and README)
-/images/*
-!/images/README.md
+# On-demand local study outputs, exports, and temporary files
+/berean/
+/export/
+/images/
+/notes/
+/studies/
+/scratch/
+/biblemate/
 
 # Large local raw databases / test artifacts
 cmti/
@@ -61,7 +53,3 @@ cmti/
 *.zip
 *.whl
 *.log
-
-# Scratch
-/scratch/*
-!/scratch/README.md

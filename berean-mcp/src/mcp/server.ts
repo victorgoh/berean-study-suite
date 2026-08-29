@@ -460,13 +460,18 @@ export function createMcpServer(env: Env) {
       workflow.description,
       workflow.argsSchema,
       async (args: any) => {
+        const customInstructions = (workflow as any).instructions;
+        const promptBody = customInstructions
+          ? `${customInstructions}\n\nUser Arguments: ${JSON.stringify(args || {})}`
+          : `Execute workflow '${workflow.name}' with the following input:\n${JSON.stringify(args || {}, null, 2)}`;
+
         return {
           messages: [
             {
               role: "user" as const,
               content: {
                 type: "text" as const,
-                text: `Execute workflow: ${workflow.name} for passage: ${args.passage}`
+                text: promptBody
               }
             }
           ]

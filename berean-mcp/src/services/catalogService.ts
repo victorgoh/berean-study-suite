@@ -1,8 +1,10 @@
 import { BIBLE_REGISTRY, COMMENTARIES_LIST, LEXICON_REGISTRY } from "../config/databaseMap.js";
+import { RESOURCE_DEFINITIONS } from "../mcp/resources.js";
+import { WORKFLOW_PROMPTS } from "../mcp/prompts.js";
 import { Env } from "../types.js";
 
 export interface ResourceCatalogOptions {
-  category?: "all" | "bibles" | "commentaries" | "lexicons" | "study_packs" | "personas";
+  category?: "all" | "bibles" | "commentaries" | "lexicons" | "study_packs" | "personas" | "skills" | "workflows" | "rules";
 }
 
 export async function getAvailableResources(
@@ -39,6 +41,32 @@ export async function getAvailableResources(
     { name: "verse-scripter", focus: "Concise scripture indexing, citation accuracy, formatting" },
     { name: "biblical-content-interpreter", focus: "Evaluating news, contemporary culture, and philosophy through a biblical lens" },
     { name: "berean-plus-orchestrator", focus: "Dynamic multi-phase study orchestration with phase quality checkpoints" }
+  ];
+
+  const skills = [
+    {
+      name: "berean",
+      uri: "berean://skills/berean",
+      description: "Structured multi-phase research pipeline: Planning, Scripture & Morphology Retrieval, Exegesis, Covenant Theology, Pastoral Application, and Master Final Manuscript."
+    },
+    {
+      name: "berean-plus",
+      uri: "berean://skills/berean-plus",
+      description: "Dynamic goal-oriented research workflow with dynamic persona matching and quality audit checkpoints between phases."
+    }
+  ];
+
+  const workflows = Object.values(WORKFLOW_PROMPTS).map(w => ({
+    name: w.name,
+    description: w.description
+  }));
+
+  const rules = [
+    {
+      name: "typography",
+      uri: "berean://rules/typography",
+      description: "Universal standards: zero raw LaTeX math notation, standard Unicode characters (→, ⇒, ▶), no fragile ASCII box diagrams, explicit Scripture translation tags [Romans 8:28 (BSB)], clean docx rendering."
+    }
   ];
 
   const catalog: any = {};
@@ -80,7 +108,26 @@ export async function getAvailableResources(
       personas.map(p => `- **${p.name}**: ${p.focus}`).join("\n"));
   }
 
+  if (cat === "all" || cat === "skills") {
+    catalog.skills = skills;
+    sections.push(`### 🧠 Autonomous Skills & Pipelines (${skills.length})\n` +
+      skills.map(s => `- **${s.name}** (\`${s.uri}\`): ${s.description}`).join("\n"));
+  }
+
+  if (cat === "all" || cat === "workflows") {
+    catalog.workflows = workflows;
+    sections.push(`### 📋 Workflows & Prompts (${workflows.length})\n` +
+      workflows.map(w => `- **${w.name}**: ${w.description}`).join("\n"));
+  }
+
+  if (cat === "all" || cat === "rules") {
+    catalog.rules = rules;
+    sections.push(`### 📐 Formatting & Typography Rules (${rules.length})\n` +
+      rules.map(r => `- **${r.name}** (\`${r.uri}\`): ${r.description}`).join("\n"));
+  }
+
   const formattedText = `# Berean MCP Resource Catalog\n\n` + sections.join("\n\n---\n\n");
 
   return { catalog, formattedText };
 }
+

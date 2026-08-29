@@ -149,5 +149,33 @@ export const WORKFLOW_PROMPTS = {
     argsSchema: {
       topic_or_article: z.string().describe("Contemporary topic, news event, or article summary to analyze")
     }
+  },
+  "image-generation": {
+    name: "image-generation",
+    description: "Craft a historically faithful, reverent prompt for biblical illustration and slide generation.",
+    argsSchema: {
+      scene_description: z.string().describe("Biblical scene, passage, or historical setting to illustrate")
+    }
+  },
+  "docx-export": {
+    name: "docx-export",
+    description: "Format and structure a study manuscript for publication-ready Microsoft Word (.docx) export.",
+    argsSchema: {
+      file_path: z.string().describe("Path to the markdown manuscript to format/export")
+    }
+  },
+  "berean-init": {
+    name: "berean-init",
+    description: "Initialize Berean study workflows (/berean, /berean-plus, /docx, /image) in the current project workspace.",
+    instructions: "Inspect the current workspace. Create `.agents/workflows/` if it does not exist, and write the 4 lightweight shortcut files (`berean.md`, `berean-plus.md`, `docx.md`, `image.md`) pointing to the Berean MCP server tools and `berean://` resources. Report when initialization is complete.",
+    argsSchema: {}
+  },
+  "berean-check": {
+    name: "berean-check",
+    description: "Check and verify if the active workspace has the Berean study workflows and MCP connectivity properly configured.",
+    instructions: "Inspect the current workspace for `.agents/workflows/` files (`berean.md`, `berean-plus.md`, `docx.md`, `image.md`), verify connectivity to the Berean MCP server via `get_available_resources`, and report the health and operational status of the workspace.",
+    argsSchema: {}
   }
 };
+
+

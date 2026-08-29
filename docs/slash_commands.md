@@ -1,6 +1,6 @@
 # Slash Commands & Workflows Reference Guide
 
-The **Berean Study Suite** uses a lean, high-leverage set of **4 core slash commands** in the Antigravity IDE, backed by **9 high-speed composite Study Packs** and **18 specialized single-engine MCP tools** (27 MCP tools total) from the Berean MCP Server.
+The **Berean Study Suite** operates on a pure, zero-overhead MCP architecture. You can trigger comprehensive studies using natural language prompts (or the 4 optional UI slash shortcuts in Antigravity), backed by **9 high-speed composite Study Packs** and **18 specialized single-engine MCP tools** (27 MCP tools total) from the **Berean MCP Server**.
 
 ---
 
@@ -11,9 +11,20 @@ These 4 workflows provide fast, dedicated access to the primary study engines an
 | Command | Purpose | Assigned Persona | Example Usage |
 | :--- | :--- | :--- | :--- |
 | **`/berean`** | Runs a complete, structured 7-phase expository study pipeline. | *Biblical Content Interpreter* / *Master Biblical Writer* | `/berean Romans 8:28-39` |
-| **`/berean-plus`** | Advanced dynamically audited study with dynamic quality gates and persona rotation. | *Study Plan & Phase Quality Auditor* | `/berean-plus Exegesis of Isaiah 53` |
+| **`/berean-plus`** | Advanced dynamically audited study with dynamic quality gates and persona rotation. | *Study Quality Auditor* / *Berean-Plus Orchestrator* | `/berean-plus Exegesis of Isaiah 53` |
 | **`/image`** | Generates high-resolution biblical illustrations and sermon slide backgrounds. | *Verse Scripter* | `/image Moses and the parting of the Red Sea` |
-| **`/docx`** | Converts any markdown study manuscript into a styled Microsoft Word (`.docx`) file in `export/docx/`. | *Verse Scripter* | `/docx berean/berean_2026-08-28_romans_8.md` |
+| **`/docx`** | Converts any markdown study manuscript into a styled Microsoft Word (`.docx`) file. | *Master Biblical Writer* | `/docx berean_romans_8.md` |
+
+---
+
+## 🛠️ Instant Workspace Commands (`berean init` & `berean check`)
+
+You can execute these setup and diagnostic commands directly in chat in any project:
+
+| Prompt | Purpose | Execution Details |
+| :--- | :--- | :--- |
+| **`berean init`** | Installs slash shortcuts in the active workspace. | Inspects project, creates `.agents/workflows/`, and writes `/berean`, `/berean-plus`, `/docx`, and `/image`. |
+| **`berean check`** | Diagnoses workspace health and MCP connection. | Verifies connectivity to the Berean MCP Server (27 tools, 26 commentaries) and confirms workspace configuration. |
 
 ---
 
@@ -37,7 +48,7 @@ When you execute `/berean`, `/berean-plus`, or ask free-form study questions, th
 
 ## 📖 18 Specialized Single-Engine Berean MCP Tools
 
-For specific queries, the agent can call any of the 24 individual MCP tools:
+For specific queries, the agent can call any of the 18 individual MCP tools:
 
 ### 1. Scripture & Translations
 - **`bible_lookup`**: Retrieve passages from BSB, NET, KJV, or OHGB (Original Hebrew/Greek).
@@ -47,7 +58,7 @@ For specific queries, the agent can call any of the 24 individual MCP tools:
 - **`daily_reading`**: 365-day whole-Bible reading schedules with automatic Scripture embedding.
 
 ### 2. Commentaries (Classical Public Domain Sets in `biblematedata`)
-- **`commentary_lookup`**: Query any commentator (e.g. `Henry`, `JFB`, `Calvin`, `Gill`, `Maclaren`, `Barnes`, `Spurgeon`, `Clarke`, `Wesley`, `Benson`, `Pulpit`, `EGNT`, `CECNT`, `ECER`, `EBC`, `KD`, `Lange`, `Rob`, `Vincent`, `Whedon`, `CBSC`, `Brooks`, `PHC`, `HH`, `BI`, etc.).
+- **`commentary_lookup`**: Query any commentator (e.g. `Henry`, `JFB`, `Calvin`, `Gill`, `MacL`, `Barnes`, `Spur`, `Clarke`, `Wesley`, `Benson`, `Pulpit`, `EGNT`, `CECNT`, `ECER`, `EBC`, `KD`, `Lange`, `Rob`, `Vincent`, `Whedon`, `CBSC`, `Brooks`, `PHC`, `HH`, `BI`).
 
 ### 3. Linguistics & Morphology
 - **`morphology_lookup`**: Word-by-word grammatical tagging, lemma roots, transliterations, and glosses.
@@ -63,4 +74,5 @@ For specific queries, the agent can call any of the 24 individual MCP tools:
 - **`biblical_promises`**: Thematic promises categorized by spiritual need.
 - **`bible_names`**: Etymological meanings and origins of biblical names.
 - **`chronology`**: Biblical timelines, kings chronology, and historical genealogies.
-- **`get_available_resources`**: Real-time listing of active bibles, commentaries, and lexicons.
+- **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, study packs, personas, skills, workflows, and rules.
+

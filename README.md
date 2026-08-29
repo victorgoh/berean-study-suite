@@ -12,7 +12,18 @@
 The **Berean Study Suite** is a unified, local-first research platform featuring:
 
 1. **Berean MCP Server (`berean-mcp`)**: Universal Model Context Protocol server providing **27 exegetical tools** (18 specialized single-engine tools + 9 high-speed composite Study Packs), 26 classical commentary sets, 7 Bible translations/manuscript editions, Greek/Hebrew lexicons, and full REST/OpenAPI/Swagger endpoints for any MCP client (Claude Desktop, Cursor, ChatGPT, Antigravity).
-2. **Berean Agentic Studio (`.agents/`)**: Autonomous AI study orchestration powered by 15 customized theological personas, dynamic multi-phase study pipelines (`/berean`, `/berean-plus`), and automatic local document authoring.
+2. **15 Theological Personas & Autonomous Pipelines**: 15 specialized theological personas, exegesis skills (`berean://skills/...`), universal typography standards (`berean://rules/typography`), and study prompts embedded directly into the MCP server with zero static token overhead.
+
+---
+
+## 💡 Why Berean Study Suite?
+
+The **Berean Study Suite** was developed to provide an open, standardized bridge between historic biblical scholarship and modern AI assistants. By adopting the **Model Context Protocol (MCP)** and high-efficiency composite study pipelines, the suite delivers:
+
+* **⚡ Context & Token Efficiency**: Single-turn composite Study Packs bundle original language morphology, cross-references, and commentaries into concise payloads, drastically reducing token burn and preserving the AI's active reasoning window.
+* **🎯 Hallucination-Free Exegesis**: Queries verified SQLite databases directly, grounding AI responses in authentic biblical manuscripts and centuries of trusted commentary.
+* **🔌 Universal Multi-Client Portability**: Works natively across Google Antigravity, Claude Desktop, Cursor, ChatGPT, and standalone Web Explorers.
+* **🌍 Flexible Edge & Local Deployment**: Runs completely offline on local machines or globally on Cloudflare Workers with sub-50ms latency.
 
 ---
 
@@ -33,19 +44,19 @@ Try out the live public instance hosted globally on Cloudflare Workers:
 ## ⚡ The Signature AI Study Pipelines
 
 ### 1. `/berean` — Phased Autonomous Exegesis & Synthesis
-Backed by [`.agents/skills/berean`](.agents/skills/berean), `/berean` runs a structured 5-phase research pipeline:
+Accessible via `berean://skills/berean` and the `berean-study` prompt, this pipeline runs a structured 5-phase research workflow:
 * **Phase 1: Study Planning & Goal Setting** — Generates a master study plan tailored to the user's passage, topic, or sermon seed.
-* **Phase 2: Local Scripture & Exegetical Data Retrieval** — Queries verified SQLite databases via `berean-mcp` tools, completely eliminating AI scripture hallucinations.
+* **Phase 2: Scripture & Exegetical Data Retrieval** — Queries verified SQLite databases via `berean-mcp` tools, completely eliminating AI scripture hallucinations.
 * **Phase 3: Exegesis & Contextual Analysis** — Engages OT/NT biblical scholars to analyze original Greek/Hebrew syntax, morphology, and historical backgrounds.
 * **Phase 4: Systematic & Redemptive-Historical Synthesis** — Evaluates covenantal themes and redemptive trajectories.
 * **Phase 5: Pastoral & Practical Application** — Crafts gospel-centered applications, first-person prayers, and small-group questions.
-* **Iterative Final Manuscript** — Runs an iterative draft-audit-revision loop (minimum 2 cycles) adopting the *Master Biblical Writer* persona to produce a publication-quality manuscript.
+* **Iterative Final Manuscript** — Runs an iterative draft-audit-revision loop adopting the *Master Biblical Writer* persona to produce a publication-quality manuscript.
 
 ### 2. `/berean-plus` — Dynamic & Goal-Oriented Research
-Backed by [`.agents/skills/berean-plus`](.agents/skills/berean-plus), `/berean-plus` is designed for complex, specialized, or non-standard research requests:
+Accessible via `berean://skills/berean-plus` and the `berean-plus-study` prompt, this pipeline is designed for complex or specialized research requests:
 * 🗺️ **Dynamic Phased Planning**: Formulates custom phases aligned directly with user research requirements.
 * 🎭 **Dynamic Persona Matching**: Dynamically assigns the most suitable theological persona to each sub-task.
-* 🎯 **Goal-Oriented Checkpoint Audits**: After each phase, the *Study Plan & Phase Quality Auditor* audits the findings, identifies gaps, injects follow-up steps, and re-audits before proceeding.
+* 🎯 **Goal-Oriented Checkpoint Audits**: After each phase, the *Study Quality Auditor* audits the findings, identifies gaps, injects follow-up steps, and re-audits before proceeding.
 
 ---
 
@@ -70,7 +81,7 @@ The **Berean MCP Server** delivers **27 total tools** (18 specialized single-eng
 - **Linguistics & Morphology**: `lexicon_lookup` (Strong's, Thayer, BDB, LSJ), `morphology_lookup` (Greek & Hebrew word-by-word syntax)
 - **Topical & Reference**: `topic_study`, `character_lookup` (with ancestry and relationship trees), `location_lookup` (with GPS coordinates and map links), `theological_dictionary` (Easton's, ISBE Encyclopedia, Smith's), `biblical_promises`
 - **Context & Structure**: `parallel_passages` (Gospel harmonies and OT parallels), `book_analysis`, `chapter_summary`, `bible_names`, `chronology`, `cross_references`
-- **Discovery**: `get_available_resources` (Real-time listing of active bibles, commentaries, lexicons, study packs, and personas)
+- **Discovery**: `get_available_resources` (Real-time listing of active bibles, commentaries, lexicons, study packs, personas, skills, workflows, and rules)
 
 ---
 
@@ -90,13 +101,12 @@ All classical commentary databases, lexicons, and biblical reference datasets ar
 > Installation and configuration are best and most effortlessly handled directly by your AI coding assistant (**Google Antigravity IDE**, **Claude Code**, **Cursor**, or **Windsurf**).
 > 
 > Simply clone the repository, open the workspace folder in your AI agent, and prompt:
-> > *"Please set up the Berean Study Suite for me. Inspect my Python and Node environment, install the dependencies from requirements.txt, download the local scripture databases via biblematedata, build the MCP server, and run the test suite to verify everything works."*
+> > *"Please set up the Berean Study Suite for me. Inspect my Node environment, install dependencies in berean-mcp, and run the test suite to verify all 27 tools work."*
 > 
 > Your agent will automatically inspect your environment, execute the setup steps, and ensure all tools and personas are ready for study.
 
 ### 1. Prerequisites
-- **Python 3.10+**
-- **Node.js 18+** (for the MCP server)
+- **Node.js 18+**
 - **Google Antigravity IDE**, **Claude Code**, or **Cursor**
 - **Pandoc** (optional, for Word document exports: `brew install pandoc`)
 - **Cloudflare Account (Optional)**: For zero-cost serverless edge deployment with Cloudflare Workers, D1, and R2 (not required for 100% local use).
@@ -109,19 +119,13 @@ All classical commentary databases, lexicons, and biblical reference datasets ar
    cd berean-study-suite
    ```
 
-2. **Install Python dependencies & Scripture Database**:
-   ```bash
-   pip install -r requirements.txt
-   biblematedata
-   ```
-
-3. **Install Node Dependencies for the MCP Server**:
+2. **Install MCP Server Dependencies**:
    ```bash
    cd berean-mcp
    npm install
    cd ..
    ```
-   *(No `npm run build` required — `tsx` runs TypeScript directly)*
+   *(No build step required — `tsx` runs TypeScript directly)*
 
 ### 3. Running 100% Locally & Offline
 
@@ -129,9 +133,9 @@ You can run the entire Berean Study Suite completely offline on your computer—
 
 #### A. In Google Antigravity IDE
 1. Open this repository folder in **Google Antigravity IDE**.
-2. The `.agents/` configuration is auto-discovered, giving you immediate local access to the **15 theological personas**, slash workflows (`/berean`, `/berean-plus`, `/docx`, `/image`), and all MCP tools.
-3. Start studying immediately by typing in the chat:
-   > `/berean-plus Give me a comprehensive study of Ephesians 2:1-10`
+2. Connect the **Berean MCP Server** in your `mcp_config.json`.
+3. Start studying immediately by prompting in the chat:
+   > *"Run a Berean-Plus study on Ephesians 2:1-10"* *(or type `berean init` to install the `/berean-plus` UI shortcut)*.
 
 #### B. In Claude Desktop / Cursor / VS Code (Local Stdio Mode)
 To run the local Berean MCP server via standard input/output (`stdio`) directly from your machine:
@@ -178,17 +182,24 @@ npm test
 ```
 *(You should see all 27 automated tests pass with 0 failures.)*
 
+### 4. Using Berean in Any Project Workspace (`berean init` & `berean check`)
+
+Once the **Berean MCP Server** is connected (either globally in `~/.gemini/config/mcp_config.json` or via edge endpoint `https://berean-mcp.victorgoh.workers.dev/mcp`), you can use Berean across **any project or workspace**:
+
+* **⚡ Instant Setup (`berean init`)**: Type `"berean init"` in the AI chat. The assistant will automatically create `.agents/workflows/` and install the 4 lean slash shortcuts (`/berean`, `/berean-plus`, `/docx`, `/image`) in **1 second**.
+* **🔍 Diagnose & Verify (`berean check`)**: Type `"berean check"` in the AI chat to verify MCP connection health, registered commentary databases, and workspace workflow status.
+
 ---
 
 ### 🤖 Troubleshooting & Effortless Setup with AI Coding Assistants
-If you encounter any issues getting the suite to run (e.g., Python interpreter paths, Node dependencies, database setup, or MCP server endpoints), **let an AI agentic assistant troubleshoot and configure it for you**:
+If you encounter any issues getting the suite to run (e.g., Node dependencies, MCP server endpoints, or client configuration), **let an AI agentic assistant troubleshoot and configure it for you**:
 
 * **Google Antigravity IDE**: Open this workspace and ask the chat agent:
   > *"I'm having trouble getting the Berean Study Suite running. Please inspect my environment, fix any issues, and get everything working for me."*
 * **Claude Code / Claude Desktop**: Run `claude` in this directory or connect via MCP (see [docs/mcp_client_integration.md](docs/mcp_client_integration.md)) and prompt:
-  > *"Diagnose my Berean Study Suite setup, build the MCP server, and ensure all local dependencies and databases are ready."*
+  > *"Diagnose my Berean Study Suite setup, ensure all Node dependencies are installed, and test that all 27 MCP tools are live."*
 * **Cursor / Windsurf**: Open this project in Agent mode and prompt:
-  > *"Help me set up Berean Study Suite. Check my Python/Node environment and ensure the MCP server builds cleanly."*
+  > *"Help me set up Berean Study Suite. Check my Node environment and ensure the MCP server tests pass."*
 
 Any modern agentic coding assistant can autonomously inspect your local environment, install missing packages, resolve path issues, and verify that the tools are live.
 
@@ -208,9 +219,9 @@ Prompt your AI assistant to convert and index custom resources:
 * **Personal Archives**: Index personal sermon transcripts and study papers so the AI can reference them alongside classical commentators.
 
 ### 2. 👥 Creating New AI Theological Personas & Workflows
-Expand the team of 15 personas or create specialized study workflows:
-> *"Add a new 'Early Church Patristics Scholar' persona to `.agents/agents.md` that analyzes passages from the perspective of the Ante-Nicene and Post-Nicene Church Fathers."*
-> *"Create a new `/youth-lesson` workflow in `.agents/workflows/` that transforms deep passage exegesis into high-engagement teen discussion outlines with object lessons."*
+Expand the team of 15 personas or create specialized study workflows directly in `berean-mcp`:
+> *"Add a new 'Early Church Patristics Scholar' persona to `src/mcp/prompts.ts` that analyzes passages from the perspective of the Ante-Nicene and Post-Nicene Church Fathers."*
+> *"Register a new `/youth-lesson` workflow in `src/mcp/prompts.ts` and `src/mcp/resources.ts` that transforms deep passage exegesis into high-engagement teen discussion outlines with object lessons."*
 
 ### 3. 🔍 Semantic Vector Search & Concept RAG
 Enhance keyword search with semantic understanding:
@@ -234,20 +245,16 @@ Connect your studies directly to your personal notes:
 ## 📁 Repository Structure
 
 ```
-├── .agents/              # Agentic studio config (personas, plugin, workflows)
-│   ├── agents.md         # 15 customized theological AI personas
-│   ├── plugins/berean/   # Self-contained Berean agent plugin & MCP config
-│   ├── skills/           # Autonomous orchestrator skills (berean, berean-plus)
-│   └── workflows/        # Core slash commands (/berean, /berean-plus, /image, /docx)
 ├── berean-mcp/           # Cloudflare Edge & Stdio MCP Server (TypeScript)
-│   ├── src/              # Server implementation, tools, and services
-│   ├── scripts/          # Test scripts and database sync utilities
+│   ├── src/              # Server implementation, 27 tools, prompts & resources
+│   │   ├── mcp/          # Tool schemas, prompts, and resource definitions
+│   │   ├── services/     # Bible, commentary, study pack & catalog engines
+│   │   └── ui/           # Bible Study Explorer, Scalar & Swagger Web UIs
+│   ├── scripts/          # Test scripts and Cloudflare database sync utilities
 │   └── wrangler.jsonc    # Cloudflare Worker deployment configuration
-├── berean/               # Saved study outputs, manuscripts, and reports
-├── images/               # Generated biblical illustrations and visual aids
-├── notes/                # User research notes and custom documents
-├── export/               # Exported Word documents (.docx) and bundles
-└── docs/                 # Detailed architecture and user documentation
+├── docs/                 # Detailed architecture and user documentation
+├── LICENSE               # GNU General Public License v3
+└── README.md             # Project overview, quickstart & API links
 ```
 
 ---

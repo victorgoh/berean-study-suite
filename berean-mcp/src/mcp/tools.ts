@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const GetAvailableResourcesSchema = {
-  category: z.enum(["all", "bibles", "commentaries", "lexicons", "study_packs", "personas"]).default("all").describe("Filter resources by category: 'all', 'bibles', 'commentaries', 'lexicons', 'study_packs', 'personas'")
+  category: z.enum(["all", "bibles", "commentaries", "lexicons", "study_packs", "personas", "skills", "workflows", "rules"]).default("all").describe("Filter resources by category: 'all', 'bibles', 'commentaries', 'lexicons', 'study_packs', 'personas', 'skills', 'workflows', 'rules'")
 };
 
 export const BibleLookupSchema = {

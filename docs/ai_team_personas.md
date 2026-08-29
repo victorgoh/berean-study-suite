@@ -1,18 +1,19 @@
 ## The AI Team Personas
 
-The ecosystem configures a team of 15 specialized personas defined in [agents.md](../.agents/agents.md):
-- **Passionate Evangelist**: Warm, earnest, direct evangelistic speaker.
-- **Context Analyst David**: Specializes in historical-emotional analysis of the Psalms and David's life.
-- **Biblical Content Interpreter**: Evaluates contemporary culture and articles from a Gospel-focused worldview.
-- **Compassionate Pastor**: Focuses on pastoral advice, study questions, and intercessory prayers in the first person.
-- **Verse Scripter**: Specializes in compiling and referencing lists of Bible verses and promises.
-- **OT Bible Scholar**: Rigorous historical-grammatical, literary, and archaeological analysis of Old Testament texts and backgrounds.
-- **NT Bible Scholar**: Rigorous historical-grammatical, literary, and textual-critical analysis of New Testament texts and Greek morphology.
-- **Biblical Theologian**: Tracing theological themes and covenants across redemptive history and canonical structure.
-- **Systematic Theologian**: Synthesizing biblical texts topically into classical doctrinal categories and logical frameworks.
-- **Biblical Translator**: Focuses on literal contextual translation, morphology mapping, and biblical dialect.
-- **Biblical Linguistic Analyst**: Specializes in original language grammar, syntax, and word studies.
-- **Bible Textual Critic**: Analyzes manuscript traditions, textual variants, translations, versions, and databases.
-- **Master Biblical Writer**: Integrates all study outputs into a single, publication-quality final document.
-- **AI Agent Creator**: Meta-agent designed to construct new, safe Bible study agent descriptions.
-- **Study Plan & Phase Quality Auditor**: Formulates dynamic multi-phase study plans, sets phase goals, audits outputs, and adapts plans dynamically to resolve quality gaps.
+The Berean ecosystem includes a team of 15 specialized theological personas embedded directly into the **Berean MCP Server** (accessible via `berean://personas/all` or MCP Prompts):
+
+- **OT Bible Scholar (`ot-bible-scholar`)**: Rigorous historical-grammatical, literary, and archaeological exegesis of Old Testament Hebrew texts and Ancient Near East (ANE) backgrounds.
+- **NT Bible Scholar (`nt-bible-scholar`)**: Rigorous historical-grammatical, literary, and textual analysis of New Testament Koine Greek texts, epistolary rhetoric, and Second Temple Jewish context.
+- **Biblical Linguistic Analyst (`biblical-linguistic-analyst`)**: Analyzes morphology, syntax, and semantic ranges without etymological fallacies or illegitimate totality transfer.
+- **Biblical Theologian (`biblical-theologian`)**: Traces theological themes, covenants, and typology across the redemptive-historical storyline from Genesis to Revelation culminating in Christ.
+- **Systematic Theologian (`systematic-theologian`)**: Synthesizes biblical truths across the whole canon into unified, logically structured doctrinal categories (Theology Proper, Christology, Pneumatology, Soteriology, Eschatology).
+- **Passionate Evangelist (`passionate-evangelist`)**: Warm, earnest, direct gospel-centered speaker focusing on salvation, repentance, and evangelistic appeal.
+- **Compassionate Pastor (`compassionate-pastor`)**: Focuses on gentle pastoral care, practical personal applications, small-group reflection questions, and 1st-person ACTS prayers.
+- **Context Analyst David (`context-analyst-david`)**: Specializes in historical-emotional contextualization of the Psalms in David's life stages throughout 1 & 2 Samuel.
+- **Master Biblical Writer (`master-biblical-writer`)**: Synthesizes multi-phase research (exegesis, keywords, theology, devotions, applications) into a single, cohesive, publication-quality manuscript.
+- **Study Quality Auditor (`study-quality-auditor`)**: Reviews and audits studies against hermeneutical standards, scripture citation accuracy, and linguistic precision.
+- **Biblical Translator (`biblical-translator`)**: Provides word-by-word original language mapping, transliterations, and elegant literal translations.
+- **Bible Textual Critic (`bible-textual-critic`)**: Studies manuscript lineages (MT, LXX, NA28, Textus Receptus), translation comparison (formal vs dynamic), and textual variants.
+- **Verse Scripter (`verse-scripter`)**: Specializes in quoting, selecting, and organizing relevant Bible passages and promises with explicit translation tagging.
+- **Biblical Content Interpreter (`biblical-content-interpreter`)**: Evaluates contemporary news, culture, and secular ideas through a biblical and gospel worldview.
+- **Berean-Plus Orchestrator (`berean-plus-orchestrator`)**: Orchestrates dynamic multi-phase biblical research with phase quality audit checkpoints.

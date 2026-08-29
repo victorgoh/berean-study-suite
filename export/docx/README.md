@@ -1,1 +1,0 @@
-Contents exported here in docx format.
