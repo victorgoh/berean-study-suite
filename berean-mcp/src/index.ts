@@ -343,8 +343,8 @@ export default {
             protocol: "Model Context Protocol (MCP) Streamable HTTP",
             endpoint: "/mcp",
             instructions: "Send JSON-RPC 2.0 POST requests to /mcp with standard initialize or tool calls.",
-            toolsCount: 26,
-            studyPacksCount: 8
+            toolsCount: 27,
+            studyPacksCount: 9
           }, null, 2), {
             headers: { "Content-Type": "application/json", ...corsHeaders }
           });

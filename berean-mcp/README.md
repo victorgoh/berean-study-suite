@@ -12,7 +12,7 @@ Try out the live public instance hosted on Cloudflare Workers:
 
 | Resource | URL | Description |
 | :--- | :--- | :--- |
-| **📖 Bible Study Explorer** | [https://berean-mcp.victorgoh.workers.dev/](https://berean-mcp.victorgoh.workers.dev/) | Reader-friendly UI to explore all 26 tools, scripture texts, and classical commentaries |
+| **📖 Bible Study Explorer** | [https://berean-mcp.victorgoh.workers.dev/](https://berean-mcp.victorgoh.workers.dev/) | Reader-friendly UI to explore all 27 tools, scripture texts, and classical commentaries |
 | **⚡ Scalar API Reference** | [https://berean-mcp.victorgoh.workers.dev/docs](https://berean-mcp.victorgoh.workers.dev/docs) | Interactive API documentation with built-in request runner & multi-language snippets |
 | **📜 Swagger UI** | [https://berean-mcp.victorgoh.workers.dev/swagger](https://berean-mcp.victorgoh.workers.dev/swagger) | Classic OpenAPI schema visualizer & tester |
 | **📋 OpenAPI Spec** | [https://berean-mcp.victorgoh.workers.dev/openapi.json](https://berean-mcp.victorgoh.workers.dev/openapi.json) | Complete OpenAPI 3.1.0 JSON schema |
@@ -26,7 +26,7 @@ Try out the live public instance hosted on Cloudflare Workers:
 - **Edge Cloudflare Execution**: Sub-50ms cold start, multi-tier LRU caching, and streaming JSON-RPC / Streamable HTTP transports.
 - **Hybrid Storage**:
   - **Cloudflare D1 (Serverless SQLite)**: Ultra-fast indexing for Strong's Hebrew Lexicon (BDB), ISBE/Easton's Encyclopedias, and OT/NT Morphological datasets.
-  - **Cloudflare R2 (Object Storage)**: High-capacity storage for 27 classical commentary sets, BSB/NET/KJV/OHGB Bible databases, and cross-reference collections.
+  - **Cloudflare R2 (Object Storage)**: High-capacity storage for 26 classical commentary sets, BSB/NET/KJV/OHGB Bible databases, and cross-reference collections.
 - **Token Optimization**: Reclaims **33,000+ tokens of context window** on every turn.
 
 ---

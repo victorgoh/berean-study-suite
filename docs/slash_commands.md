@@ -1,6 +1,6 @@
 # Slash Commands & Workflows Reference Guide
 
-The **Berean Study Suite** uses a lean, high-leverage set of **4 core slash commands** in the Antigravity IDE, backed by **8 high-speed composite Study Packs** and **24 granular MCP tools** from the Berean MCP Server.
+The **Berean Study Suite** uses a lean, high-leverage set of **4 core slash commands** in the Antigravity IDE, backed by **9 high-speed composite Study Packs** and **18 specialized single-engine MCP tools** (27 MCP tools total) from the Berean MCP Server.
 
 ---
 
@@ -17,7 +17,7 @@ These 4 workflows provide fast, dedicated access to the primary study engines an
 
 ---
 
-## 📦 8 High-Speed Composite Study Packs
+## 📦 9 High-Speed Composite Study Packs
 
 When you execute `/berean`, `/berean-plus`, or ask free-form study questions, the AI directly invokes these single-turn study pack tools from the **Berean MCP Server**:
 
@@ -35,7 +35,7 @@ When you execute `/berean`, `/berean-plus`, or ask free-form study questions, th
 
 ---
 
-## 📖 24 Granular Berean MCP Tools
+## 📖 18 Specialized Single-Engine Berean MCP Tools
 
 For specific queries, the agent can call any of the 24 individual MCP tools:
 

@@ -11,8 +11,22 @@
 
 The **Berean Study Suite** is a unified, local-first research platform featuring:
 
-1. **Berean MCP Server (`berean-mcp`)**: Universal Model Context Protocol server providing **24 exegetical tools**, 26 classical commentaries, Greek/Hebrew lexicons, and 8 high-speed composite Study Packs for any MCP client (Claude Desktop, Cursor, ChatGPT, Antigravity).
+1. **Berean MCP Server (`berean-mcp`)**: Universal Model Context Protocol server providing **27 exegetical tools** (18 specialized single-engine tools + 9 high-speed composite Study Packs), 26 classical commentary sets, 7 Bible translations/manuscript editions, Greek/Hebrew lexicons, and full REST/OpenAPI/Swagger endpoints for any MCP client (Claude Desktop, Cursor, ChatGPT, Antigravity).
 2. **Berean Agentic Studio (`.agents/`)**: Autonomous AI study orchestration powered by 15 customized theological personas, dynamic multi-phase study pipelines (`/berean`, `/berean-plus`), and automatic local document authoring.
+
+---
+
+## 🌐 Live Demo & Interactive Explorers
+
+Try out the live public instance hosted globally on Cloudflare Workers:
+
+| Resource | URL | Description |
+| :--- | :--- | :--- |
+| **📖 Bible Study Explorer** | [https://berean-mcp.victorgoh.workers.dev/](https://berean-mcp.victorgoh.workers.dev/) | Reader-friendly Web UI to explore all 27 tools, scripture texts, and classical commentaries |
+| **⚡ Scalar API Reference** | [https://berean-mcp.victorgoh.workers.dev/docs](https://berean-mcp.victorgoh.workers.dev/docs) | Interactive API documentation with built-in request runner & multi-language snippets |
+| **📜 Swagger UI** | [https://berean-mcp.victorgoh.workers.dev/swagger](https://berean-mcp.victorgoh.workers.dev/swagger) | Classic OpenAPI schema visualizer & API playground |
+| **📋 OpenAPI Spec** | [https://berean-mcp.victorgoh.workers.dev/openapi.json](https://berean-mcp.victorgoh.workers.dev/openapi.json) | Complete OpenAPI 3.1.0 JSON schema |
+| **📡 MCP Gateway** | `https://berean-mcp.victorgoh.workers.dev/mcp` | Streamable HTTP endpoint for AI Assistants (Antigravity, Claude, Cursor) |
 
 ---
 
@@ -37,23 +51,59 @@ Backed by [`.agents/skills/berean-plus`](.agents/skills/berean-plus), `/berean-p
 
 ## 🛠️ Berean MCP Server (`berean-mcp`)
 
-The **Berean MCP Server** delivers 24 granular tools and 8 high-performance composite study packs:
+The **Berean MCP Server** delivers **27 total tools** (18 specialized single-engine tools and 9 high-performance composite study packs):
 
-### Core Tool Categories
-- **Scripture & Texts**: `bible_lookup`, `bible_search`, `original_language_lookup`, `interlinear_lookup`
-- **Commentaries & Classics**: `commentary_lookup`, `classic_commentary_search`, `classic_text_lookup`
-- **Linguistics & Morphology**: `lexicon_lookup`, `morphology_lookup`, `original_language_study`
-- **Topical & Reference**: `topic_study`, `character_lookup`, `location_lookup`, `theological_dictionary`, `biblical_promises`
-- **Context & Structure**: `parallel_passages`, `book_analysis`, `chapter_summary`, `cross_references`
+### 1. High-Speed Composite Study Packs (Single-Turn Endpoints)
+- **`sermon_study_pack`** — Aggregates Scripture (BSB), Alexander Maclaren homiletics, Charles Simeon outlines (*Horae Homileticae*), The Biblical Illustrator, Matthew Henry, and TSK cross-references.
+- **`devotional_study_pack`** — Gathers Scripture, Charles Spurgeon (*Treasury of David*), Alexander Maclaren, Albert Barnes, Matthew Henry, and Biblical Promises.
+- **`passage_exegesis_pack`** — Combines primary translation, OHGB original Hebrew/Greek, Keil & Delitzsch (OT) / H.A.W. Meyer (NT), Expositor's Greek NT, The Pulpit Commentary, and JFB.
+- **`word_study_pack`** — Combines Strong's numbers, Thayer Greek / BDB Hebrew lexicons, in-context morphology, and A.T. Robertson / Marvin Vincent word studies.
+- **`topic_study_pack`** — Combines Nave's Topical Concordance, Torrey's New Topical Textbook, Easton's Bible Dictionary, and cross-references.
+- **`commentary_study_pack`** — Dynamic multi-commentary bundler allowing side-by-side comparative retrieval across any subset of the 26 available commentators.
+- **`lesson_creator_study_pack`** — Produces structured lesson outlines, discussion questions, Albert Barnes' practical remarks, and Charles Ellicott's historical context for teachers.
+- **`prayer_guide_study_pack`** — Bundles Scripture, Spurgeon/Benson adoration, Wesley self-examination, and promises for first-person ACTS prayer.
+- **`covenant_theology_pack`** — Traces redemptive covenants throughout Scripture with John Calvin, John Gill, and ISBE Encyclopedia insights.
 
-### High-Speed Composite Study Packs
-- `passage_exegesis_pack` — Aggregates Scripture translations, commentaries, original language morphology, and cross-references in one call.
-- `word_study_pack` — Combines Strong's definitions, lexicon entries, grammatical occurrences, and theological significance.
-- `topic_study_pack` — Combines topical outlines, key scriptures, theological dictionary entries, and promises.
-- `sermon_study_pack` — Fetches text, commentaries, themes, outlines, and pastoral application insights.
-- `devotional_study_pack` — Gathers scripture, devotional commentaries, and prayer guides.
-- `lesson_creator_study_pack` — Produces structured lesson outlines, discussion questions, and background context.
-- `covenant_theology_pack` — Traces redemptive covenants throughout Scripture.
+### 2. Specialized Single-Engine Tools
+- **Scripture & Texts**: `bible_lookup`, `bible_search`, `daily_reading`
+- **Commentaries**: `commentary_lookup` (26 classical commentary sets with intelligent alias resolution)
+- **Linguistics & Morphology**: `lexicon_lookup` (Strong's, Thayer, BDB, LSJ), `morphology_lookup` (Greek & Hebrew word-by-word syntax)
+- **Topical & Reference**: `topic_study`, `character_lookup` (with ancestry and relationship trees), `location_lookup` (with GPS coordinates and map links), `theological_dictionary` (Easton's, ISBE Encyclopedia, Smith's), `biblical_promises`
+- **Context & Structure**: `parallel_passages` (Gospel harmonies and OT parallels), `book_analysis`, `chapter_summary`, `bible_names`, `chronology`, `cross_references`
+- **Discovery**: `get_available_resources` (Real-time listing of active bibles, commentaries, lexicons, study packs, and personas)
+
+---
+
+## 📚 Available Classical Commentary Sets
+
+| Commentary / Author | Key Alias | Scope | Focus & Distinctive |
+| :--- | :--- | :--- | :--- |
+| **Matthew Henry** | `Henry` | Whole Bible | Classic Puritan practical aphorisms & devotional depth |
+| **Jamieson-Fausset-Brown** | `JFB` | Whole Bible | Concise, balanced grammatical & historical synthesis |
+| **John Calvin** | `Calvin` | Whole Bible | Reformational exegesis with Christocentric covenant focus |
+| **John Gill** | `Gill` | Whole Bible | Exhaustive exposition with Second Temple rabbinic context |
+| **Albert Barnes** | `Barnes` | Whole Bible | Verse-by-verse notes highlighting practical teaching lessons |
+| **Alexander Maclaren** | `MacL` | Whole Bible | Vivid homiletical gems & structural preaching insights |
+| **Charles Simeon** | `HH` | Whole Bible | 2,536 Homiletical preaching outlines (*Horae Homileticae*) |
+| **The Biblical Illustrator** | `BI` | Whole Bible | Multi-volume sermon illustrations, anecdotes & expository notes |
+| **Charles Spurgeon** | `Spur` | Whole Bible | *Treasury of David* on Psalms & devotional expositions |
+| **Keil & Delitzsch** | `KD` | Old Testament | Gold standard academic Hebrew grammar & Ancient Near East history |
+| **H. A. W. Meyer** | `CECNT` | New Testament | Authoritative academic Greek grammatical exegesis |
+| **Expositor's Greek NT** | `EGNT` | New Testament | Critical & grammatical Greek Testament exegesis |
+| **Adam Clarke** | `Clarke` | Whole Bible | Semitic customs, philology, and biblical archaeology |
+| **Joseph Benson** | `Benson` | Whole Bible | Methodist notes on holy living & pastoral examination |
+| **John Wesley** | `Wesley` | Whole Bible | Pithy notes on heart holiness, grace, and obedience |
+| **The Pulpit Commentary** | `Pulpit` | Whole Bible | Multi-volume historical introductions & homiletic outlines |
+| **The Expositor's Bible** | `EBC` | Whole Bible | Thematic essay lectures & in-depth chapter expositions |
+| **Charles Ellicott** | `ECER` | Whole Bible | Lay-accessible commentary synthesizing critical scholarship |
+| **A. T. Robertson** | `Rob` | New Testament | World-renowned Koine Greek syntax & word pictures |
+| **Marvin Vincent** | `Vincent` | New Testament | Greek lexical etymology & cultural imagery |
+| **Daniel Whedon** | `Whedon` | Whole Bible | Wesleyan-Arminian biblical commentary with logical rigor |
+| **John Peter Lange** | `Lange` | Whole Bible | Tri-fold Exegetical, Doctrinal, and Homiletical analysis |
+| **Thomas Brooks** | `Brooks` | Whole Bible | Puritan classic rich in spiritual remedies & pastoral application |
+| **Cambridge Bible** | `CBSC` | Whole Bible | Grammatical and historical notes by Cambridge scholars |
+| **Preacher's Homiletical** | `PHC` | Whole Bible | Exhaustive homiletic outlines on every paragraph |
+| **Intl Critical Commentary**| `ICCNT`| New Testament | Rigorous scholarly textual and linguistic commentary |
 
 ---
 
@@ -138,14 +188,17 @@ You can also start the MCP server directly from your terminal in either **Stdio*
   cd berean-mcp
   npm run start:http
   ```
-  * Endpoint: `http://localhost:7860/mcp`
+  * Web Study Explorer: `http://localhost:7860/`
+  * Scalar API Docs: `http://localhost:7860/docs`
+  * Swagger UI: `http://localhost:7860/swagger`
+  * MCP Endpoint: `http://localhost:7860/mcp`
   * Health Check: `http://localhost:7860/health`
 
 #### D. Testing Your Local Setup
-Verify that all 18 granular tools, 8 composite study packs, and local SQLite databases are working:
+Verify that all 18 specialized single-engine tools, 9 composite study packs, and local SQLite databases are working:
 ```bash
 cd berean-mcp
-npx tsx scripts/test_all_services.ts
+npm test
 ```
 *(You should see all 27 automated tests pass with 0 failures.)*
 
@@ -227,7 +280,7 @@ Connect your studies directly to your personal notes:
 
 - **[docs/mcp_client_integration.md](docs/mcp_client_integration.md)**: Multi-client setup guide for Antigravity IDE, Claude Desktop, Cursor, and VS Code.
 - **[docs/ai_team_personas.md](docs/ai_team_personas.md)**: Profiles and guidelines for the 15 AI study personas.
-- **[docs/slash_commands.md](docs/slash_commands.md)**: Reference guide for workflow commands and the 24 MCP tools.
+- **[docs/slash_commands.md](docs/slash_commands.md)**: Reference guide for workflow commands and the 27 MCP tools.
 - **[docs/study_outputs.md](docs/study_outputs.md)**: Guide to study output formats, folder layouts, and document export.
 
 ---

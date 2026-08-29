@@ -6,7 +6,7 @@ This guide explains how to connect and use the **Berean Model Context Protocol (
 
 ## ⚡ Overview & Endpoints
 
-The Berean MCP Server provides access to **25 verified classical public domain commentary sets**, original language Hebrew/Greek morphology, Strong's lexicons, and 8 composite Study Packs.
+The Berean MCP Server provides access to **26 verified classical public domain commentary sets**, original language Hebrew/Greek morphology, Strong's lexicons, and 9 composite Study Packs (27 MCP tools total).
 
 ### Available Production Endpoints
 
