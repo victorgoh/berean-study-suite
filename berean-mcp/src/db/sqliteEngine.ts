@@ -50,12 +50,13 @@ export async function getDatabase(env: Env, r2Key: string): Promise<{ db: Databa
       return { db: cached.db };
     }
 
-    if (!env.BIBLEMATE_DATA) {
-      return { db: null, error: "BIBLEMATE_DATA R2 binding is undefined in Worker environment." };
+    const r2Bucket = env.BIBLEMATE_DATA || env.BEREAN_DATA;
+    if (!r2Bucket) {
+      return { db: null, error: "R2 bucket binding (BIBLEMATE_DATA / BEREAN_DATA) is undefined in Worker environment." };
     }
 
     // Fetch SQLite binary from Cloudflare R2
-    const object = await env.BIBLEMATE_DATA.get(r2Key);
+    const object = await r2Bucket.get(r2Key);
     if (!object) {
       return { db: null, error: `R2 Object key '${r2Key}' returned null from bucket.` };
     }
@@ -107,9 +108,10 @@ export async function getJsonFromR2<T>(env: Env, r2Key: string): Promise<T | nul
       return cached.data as T;
     }
 
-    if (!env.BIBLEMATE_DATA) return null;
+    const r2Bucket = env.BIBLEMATE_DATA || env.BEREAN_DATA;
+    if (!r2Bucket) return null;
 
-    const object = await env.BIBLEMATE_DATA.get(r2Key);
+    const object = await r2Bucket.get(r2Key);
     if (!object) return null;
 
     const text = await object.text();

@@ -1,5 +1,6 @@
 export interface Env {
-  BIBLEMATE_DATA: R2Bucket;
+  BIBLEMATE_DATA?: R2Bucket;
+  BEREAN_DATA?: R2Bucket;
   MORPHOLOGY_DB?: D1Database;
   REFERENCE_DB?: D1Database;
   API_KEY?: string;
