@@ -113,7 +113,7 @@ All classical commentary databases, lexicons, and biblical reference datasets ar
 24. **`bible_names`**: Etymological meanings and origins of biblical names.
 25. **`chronology`**: Biblical timelines and historical genealogies.
 26. **`daily_reading`**: 365-day whole-Bible reading schedules with automatic Scripture embedding.
-27. **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, and study packs.
+27. **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, study packs, personas, skills, workflows, and rules.
 
 ---
 
@@ -157,7 +157,7 @@ npm run typecheck
 cp wrangler.jsonc.example wrangler.jsonc
 
 # 3. Setup Cloudflare R2 Bucket & Upload Commentary/Bible Files
-# (Ensures local data is downloaded: pip install -r ../requirements.txt && biblematedata)
+# (Ensures local data is downloaded: pip install biblematedata && biblematedata)
 npx wrangler r2 bucket create biblemate-data
 python3 scripts/sync_data_to_r2.py --bucket biblemate-data
 
