@@ -9,9 +9,30 @@ export async function searchBible(
   bookFilter?: string,
   limit: number = 50
 ): Promise<{ error?: string; totalCount?: number; matches?: BibleVerse[]; formattedText?: string }> {
-  const ver = version.toUpperCase();
-  const r2Key = `bibles/${ver}.bible`;
-  const { db, error: dbError } = await getDatabase(env, r2Key);
+  let ver = version.toUpperCase();
+  if (ver === "OHGBI" || ver === "OHGB-I" || ver === "INTERLINEAR") {
+    ver = "OHGB";
+  }
+  let r2Key = `bibles/${ver}.bible`;
+  let { db, error: dbError } = await getDatabase(env, r2Key);
+
+  if (!db) {
+    const fallbackKeys = [
+      `bibles/${ver}.sqlite`,
+      `bibles/${ver}.db`,
+      `bibles/${version.toLowerCase()}.bible`,
+      `bibles/${version.toLowerCase()}.sqlite`
+    ];
+    for (const altKey of fallbackKeys) {
+      const res = await getDatabase(env, altKey);
+      if (res.db) {
+        db = res.db;
+        dbError = undefined;
+        r2Key = altKey;
+        break;
+      }
+    }
+  }
 
   if (!db) {
     return { error: dbError || `Bible database for '${ver}' not found in R2.` };

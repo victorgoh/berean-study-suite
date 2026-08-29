@@ -3,11 +3,19 @@ node_modules/
 dist/
 .wrangler/
 
+# Cloudflare Wrangler Configuration (Keep production IDs local)
+wrangler.jsonc
+wrangler.json
+wrangler.toml
+!wrangler.jsonc.example
+!wrangler.toml.example
+
 # Custom overrides (Private / Non-Public Domain datasets)
 src/config/customConfig.ts
 src/config/*.custom.ts
 *.local.ts
 *.local.json
+*.local.jsonc
 
 # Environment secrets
 .env

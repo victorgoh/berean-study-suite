@@ -91,7 +91,10 @@ export async function lookupBiblePassage(
     return { error: `Could not parse passage reference: "${reference}"` };
   }
 
-  const ver = version.toUpperCase();
+  let ver = version.toUpperCase();
+  if (ver === "OHGBI" || ver === "OHGB-I" || ver === "INTERLINEAR") {
+    ver = "OHGB";
+  }
   let r2Key = `bibles/${ver}.bible`;
   let { db, error: dbError } = await getDatabase(env, r2Key);
 

@@ -20,13 +20,13 @@
   "d1_databases": [
     {
       "binding": "MORPHOLOGY_DB",
-      "database_name": "berean-morphology",
-      "database_id": "<YOUR_MORPHOLOGY_DB_ID>"
+      "database_name": "biblemate-morphology",
+      "database_id": "YOUR_D1_MORPHOLOGY_DATABASE_ID"
     },
     {
       "binding": "REFERENCE_DB",
-      "database_name": "berean-reference",
-      "database_id": "<YOUR_REFERENCE_DB_ID>"
+      "database_name": "biblemate-reference",
+      "database_id": "YOUR_D1_REFERENCE_DATABASE_ID"
     }
   ],
   "observability": {

@@ -7,6 +7,8 @@ if (typeof (globalThis as any).self === "undefined") {
 }
 
 import initSqlJs, { Database, SqlJsStatic } from "sql.js";
+// @ts-ignore
+import sqlWasm from "sql.js/dist/sql-wasm.wasm";
 import { Env } from "../types.js";
 
 let SQL: SqlJsStatic | null = null;
@@ -15,31 +17,20 @@ const dbCache = new Map<string, { db: Database; lastUsed: number }>();
 async function getSqlJs(): Promise<SqlJsStatic> {
   if (!SQL) {
     try {
-      const isNode = typeof process !== "undefined" && Boolean(process.versions?.node);
-      if (!isNode) {
-        let sqlWasm: any;
-        try {
-          // @ts-ignore
-          sqlWasm = await import("sql.js/dist/sql-wasm.wasm").then(m => m.default || m).catch(() => undefined);
-        } catch (_) {
-          sqlWasm = undefined;
-        }
-
-        if (sqlWasm && (sqlWasm as any) instanceof WebAssembly.Module) {
-          SQL = await initSqlJs({
-            instantiateWasm(imports, successCallback) {
-              try {
-                const instance = new WebAssembly.Instance(sqlWasm as any, imports);
-                (successCallback as any)(instance, sqlWasm);
-                return instance.exports;
-              } catch (err: any) {
-                console.error("WASM instantiate error:", err);
-                throw err;
-              }
+      if (sqlWasm) {
+        SQL = await initSqlJs({
+          instantiateWasm(imports, successCallback) {
+            try {
+              const instance = new WebAssembly.Instance(sqlWasm as any, imports);
+              (successCallback as any)(instance, sqlWasm);
+              return instance.exports;
+            } catch (err: any) {
+              console.error("WASM instantiate error:", err);
+              throw err;
             }
-          });
-          return SQL;
-        }
+          }
+        });
+        return SQL;
       }
       SQL = await initSqlJs();
     } catch (e: any) {
@@ -69,11 +60,7 @@ export async function getDatabase(env: Env, r2Key: string): Promise<{ db: Databa
       return { db: null, error: `R2 Object key '${r2Key}' returned null from bucket.` };
     }
 
-    const arrayBuffer = await object.arrayBuffer();
-    const sql = await getSqlJs();
-    const db = new sql.Database(new Uint8Array(arrayBuffer));
-
-    // For commentary databases (which are large ~25-58 MB), keep only 1 active commentary in cache
+    // Evict existing commentaries or oldest DB before allocating new WASM memory
     if (r2Key.startsWith("commentaries/")) {
       for (const [key, val] of dbCache.entries()) {
         if (key.startsWith("commentaries/")) {
@@ -83,8 +70,7 @@ export async function getDatabase(env: Env, r2Key: string): Promise<{ db: Databa
       }
     }
 
-    // Maintain overall cache size (limit to 3 active DBs in memory per isolate)
-    if (dbCache.size >= 3) {
+    if (dbCache.size >= 2) {
       let oldestKey: string | null = null;
       let oldestTime = Infinity;
       for (const [key, val] of dbCache.entries()) {
@@ -99,6 +85,10 @@ export async function getDatabase(env: Env, r2Key: string): Promise<{ db: Databa
         dbCache.delete(oldestKey);
       }
     }
+
+    const arrayBuffer = await object.arrayBuffer();
+    const sql = await getSqlJs();
+    const db = new sql.Database(new Uint8Array(arrayBuffer));
 
     dbCache.set(r2Key, { db, lastUsed: Date.now() });
     return { db };

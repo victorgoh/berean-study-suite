@@ -160,23 +160,31 @@ cd berean-mcp
 npm install
 npm run typecheck
 
-# 2. Setup Cloudflare R2 Bucket & Upload Commentary/Bible Files
+# 2. Initialize Wrangler Configuration from Template
+# (wrangler.jsonc is in .gitignore to keep your private D1 Database IDs safe)
+cp wrangler.jsonc.example wrangler.jsonc
+
+# 3. Setup Cloudflare R2 Bucket & Upload Commentary/Bible Files
 # (Ensures local data is downloaded: pip install -r ../requirements.txt && biblematedata)
 npx wrangler r2 bucket create biblemate-data
 python3 scripts/sync_data_to_r2.py --bucket biblemate-data
 
-# 3. Setup Cloudflare D1 Databases & Import Morphology/Reference Indexes
+# 4. Setup Cloudflare D1 Databases & Import Morphology/Reference Indexes
 npx wrangler d1 create berean-morphology
 npx wrangler d1 create berean-reference
-# (The agent automatically updates database_id values in wrangler.jsonc)
+# Paste the resulting database_id UUIDs into your local wrangler.jsonc
 python3 scripts/import_to_d1.py
 
-# 4. Deploy Worker to Cloudflare Global Edge
+# 5. Deploy Worker to Cloudflare Global Edge
 npm run deploy
 
-# 5. Set Private API Key Secret for Authentication
+# 6. Set Private API Key Secret for Authentication
 npx wrangler secret put API_KEY
 ```
+
+> [!NOTE]
+> **Database ID & Secret Privacy**:
+> `wrangler.jsonc` and `wrangler.toml` are explicitly ignored in `.gitignore`. Production Cloudflare D1 Database IDs and R2 bucket configurations stay strictly on your local machine / CI environment and are never pushed to public Git repositories. The repository tracks the sanitized template `wrangler.jsonc.example`.
 
 ---
 
