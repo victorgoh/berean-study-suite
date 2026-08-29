@@ -1,0 +1,66 @@
+# Slash Commands & Workflows Reference Guide
+
+The **Berean Study Suite** uses a lean, high-leverage set of **4 core slash commands** in the Antigravity IDE, backed by **8 high-speed composite Study Packs** and **24 granular MCP tools** from the Berean MCP Server.
+
+---
+
+## ⚡ Core Antigravity Slash Commands
+
+These 4 workflows provide fast, dedicated access to the primary study engines and document utilities:
+
+| Command | Purpose | Assigned Persona | Example Usage |
+| :--- | :--- | :--- | :--- |
+| **`/berean`** | Runs a complete, structured 7-phase expository study pipeline. | *Biblical Content Interpreter* / *Master Biblical Writer* | `/berean Romans 8:28-39` |
+| **`/berean-plus`** | Advanced dynamically audited study with dynamic quality gates and persona rotation. | *Study Plan & Phase Quality Auditor* | `/berean-plus Exegesis of Isaiah 53` |
+| **`/image`** | Generates high-resolution biblical illustrations and sermon slide backgrounds. | *Verse Scripter* | `/image Moses and the parting of the Red Sea` |
+| **`/docx`** | Converts any markdown study manuscript into a styled Microsoft Word (`.docx`) file in `export/docx/`. | *Verse Scripter* | `/docx berean/berean_2026-08-28_romans_8.md` |
+
+---
+
+## 📦 8 High-Speed Composite Study Packs
+
+When you execute `/berean`, `/berean-plus`, or ask free-form study questions, the AI directly invokes these single-turn study pack tools from the **Berean MCP Server**:
+
+| Study Pack | Description & Included Datasets |
+| :--- | :--- |
+| **`passage_exegesis_pack`** | Detailed academic exegesis: Greek/Hebrew text, morphology, Keil & Delitzsch (`KD`), H. A. W. Meyer (`CECNT`), Expositor's Greek NT (`EGNT`), Clarke, The Pulpit Commentary, and JFB. |
+| **`sermon_study_pack`** | Preaching & homiletics: Full Scripture text, Alexander Maclaren, Charles Simeon (Horae Homileticae), The Biblical Illustrator, Matthew Henry, and TSK cross-references. |
+| **`covenant_theology_pack`** | Redemptive-historical covenant progression: John Calvin, John Gill prophecy, ISBE Encyclopedia, and 12 TSK cross-references. |
+| **`lesson_creator_study_pack`** | Bible teaching & small groups: Scripture text, chapter summaries, Charles Ellicott, The Expositor's Bible, and Albert Barnes. |
+| **`devotional_study_pack`** | Pastoral meditation: Scripture text, Charles Spurgeon, Alexander Maclaren, Albert Barnes, and Matthew Henry. |
+| **`prayer_guide_study_pack`** | Scriptural intercession: Scripture text, Charles Spurgeon adoration, Joseph Benson, John Wesley examination, and promises. |
+| **`word_study_pack`** | Deep word study: Strong's Concordance, Brown-Driver-Briggs (BDB), Thayer's Greek Lexicon, A. T. Robertson, and Marvin Vincent. |
+| **`topic_study_pack`** | Systematic topical study: Easton's Bible Dictionary, Nave's Topical definitions, and biblical promises. |
+| **`commentary_study_pack`** | Multi-commentator comparison: Synthesizes custom commentators side-by-side on any passage. |
+
+---
+
+## 📖 24 Granular Berean MCP Tools
+
+For specific queries, the agent can call any of the 24 individual MCP tools:
+
+### 1. Scripture & Translations
+- **`bible_lookup`**: Retrieve passages from BSB, NET, KJV, or OHGB (Original Hebrew/Greek).
+- **`bible_search`**: Search for keywords across the Old and New Testaments.
+- **`cross_references`**: Retrieve Treasury of Scripture Knowledge (TSK) ranked references.
+- **`parallel_passages`**: Side-by-side Gospel parallels, OT parallels, and prophecy fulfillments.
+- **`daily_reading`**: 365-day whole-Bible reading schedules with automatic Scripture embedding.
+
+### 2. Commentaries (Classical Public Domain Sets in `biblematedata`)
+- **`commentary_lookup`**: Query any commentator (e.g. `Henry`, `JFB`, `Calvin`, `Gill`, `Maclaren`, `Barnes`, `Spurgeon`, `Clarke`, `Wesley`, `Benson`, `Pulpit`, `EGNT`, `CECNT`, `ECER`, `EBC`, `KD`, `Lange`, `Rob`, `Vincent`, `Whedon`, `CBSC`, `Brooks`, `PHC`, `HH`, `BI`, etc.).
+
+### 3. Linguistics & Morphology
+- **`morphology_lookup`**: Word-by-word grammatical tagging, lemma roots, transliterations, and glosses.
+- **`lexicon_lookup`**: Comprehensive definitions from Strong's, Brown-Driver-Briggs (BDB), and Thayer.
+
+### 4. Topical, Historical & Contextual Reference
+- **`topic_study`**: Search Nave's Topical Bible and Torrey's New Topical Textbook.
+- **`character_lookup`**: Biographical details, family lineage, and biblical milestones.
+- **`location_lookup`**: Geographical coordinates, ancient names, and archaeological significance.
+- **`theological_dictionary`**: Query Easton's Bible Dictionary or International Standard Bible Encyclopedia (ISBE).
+- **`book_analysis`**: Historical background, authorial occasion, and structural outlines.
+- **`chapter_summary`**: Section-by-section chapter breakdown.
+- **`biblical_promises`**: Thematic promises categorized by spiritual need.
+- **`bible_names`**: Etymological meanings and origins of biblical names.
+- **`chronology`**: Biblical timelines, kings chronology, and historical genealogies.
+- **`get_available_resources`**: Real-time listing of active bibles, commentaries, and lexicons.

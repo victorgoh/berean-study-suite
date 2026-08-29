@@ -1,0 +1,10 @@
+{
+  "name": "berean",
+  "version": "1.0.0",
+  "description": "Berean AI Study Suite — Deep biblical exegesis, original languages, and multi-commentary synthesis for Antigravity.",
+  "author": "Berean Community",
+  "skills": [
+    "berean",
+    "berean-plus"
+  ]
+}

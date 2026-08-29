@@ -1,0 +1,88 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Berean MCP API",
+    "description": "API for scripture retrieval, cross references, Strong's lexicons, morphology, and theological dictionaries.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://berean-mcp.<your-subdomain>.workers.dev"
+    }
+  ],
+  "paths": {
+    "/tools/bible_lookup": {
+      "post": {
+        "summary": "Look up scripture verses",
+        "operationId": "bibleLookup",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "version": {
+                    "type": "string",
+                    "default": "NET",
+                    "description": "Bible translation abbreviation (e.g. NET, KJV, ASV, WEB, OHGB)"
+                  },
+                  "reference": {
+                    "type": "string",
+                    "description": "Passage reference (e.g. 'John 3:16', 'Romans 8:28-30')"
+                  }
+                },
+                "required": ["reference"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Scripture content retrieved successfully"
+          }
+        }
+      }
+    },
+    "/tools/bible_search": {
+      "post": {
+        "summary": "Search words or phrases across Bible translations",
+        "operationId": "bibleSearch",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Keyword or phrase to search"
+                  },
+                  "version": {
+                    "type": "string",
+                    "default": "NET"
+                  },
+                  "book_filter": {
+                    "type": "string",
+                    "description": "Optional book name filter (e.g. 'Romans')"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "default": 50
+                  }
+                },
+                "required": ["query"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Matching verses list"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+# Core biblical database generator and query tool
+biblematedata>=0.0.3
+
+# Microsoft Word document export utility
+python-docx>=1.1.0

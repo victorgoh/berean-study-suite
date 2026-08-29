@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "berean": {
+      "command": "npx",
+      "args": ["-y", "tsx", "berean-mcp/scripts/run_local_stdio.ts"]
+    }
+  }
+}
+

@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "berean": {
+      "url": "https://berean-mcp.<your-subdomain>.workers.dev/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_SECRET_KEY"
+      }
+    }
+  }
+}

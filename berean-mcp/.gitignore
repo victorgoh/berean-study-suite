@@ -1,0 +1,19 @@
+# Node modules & build artifacts
+node_modules/
+dist/
+.wrangler/
+
+# Custom overrides (Private / Non-Public Domain datasets)
+src/config/customConfig.ts
+src/config/*.custom.ts
+*.local.ts
+*.local.json
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db

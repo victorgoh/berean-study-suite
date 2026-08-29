@@ -1,0 +1,500 @@
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import {
+  GetAvailableResourcesSchema,
+  BibleLookupSchema,
+  BibleSearchSchema,
+  CommentaryLookupSchema,
+  CrossReferenceSchema,
+  LexiconLookupSchema,
+  MorphologyLookupSchema,
+  TopicStudySchema,
+  CharacterLookupSchema,
+  LocationLookupSchema,
+  TheologicalDictionarySchema,
+  ParallelPassagesSchema,
+  BiblicalPromisesSchema,
+  BookAnalysisSchema,
+  ChapterSummarySchema,
+  BibleNamesSchema,
+  ChronologySchema,
+  DailyReadingSchema,
+  SermonStudyPackSchema,
+  DevotionalStudyPackSchema,
+  PassageExegesisPackSchema,
+  WordStudyPackSchema,
+  TopicStudyPackSchema,
+  CommentaryStudyPackSchema,
+  LessonCreatorStudyPackSchema,
+  PrayerGuideStudyPackSchema,
+  CovenantTheologyPackSchema
+} from "./tools.js";
+import { getAvailableResources } from "../services/catalogService.js";
+import { BEREAN_PERSONAS, WORKFLOW_PROMPTS } from "./prompts.js";
+import { RESOURCE_DEFINITIONS, getResourceContent } from "./resources.js";
+import { lookupBiblePassage } from "../services/bibleService.js";
+import { searchBible } from "../services/searchService.js";
+import { lookupCrossReferences } from "../services/xrefService.js";
+import { lookupLexiconEntry } from "../services/lexiconService.js";
+import { lookupMorphology } from "../services/morphologyService.js";
+import { lookupCommentary } from "../services/commentaryService.js";
+import { lookupTopic } from "../services/topicsService.js";
+import { lookupCharacter } from "../services/charactersService.js";
+import { lookupLocation } from "../services/locationsService.js";
+import { lookupDictionary } from "../services/dictionaryService.js";
+import { lookupEncyclopedia } from "../services/encyclopediaService.js";
+import { lookupParallels } from "../services/parallelsService.js";
+import { lookupPromises } from "../services/promisesService.js";
+import { lookupBookAnalysis } from "../services/bookAnalysisService.js";
+import { lookupChapterSummary } from "../services/chapterSummaryService.js";
+import { lookupBibleNames } from "../services/namesService.js";
+import { lookupChronology } from "../services/chronologyService.js";
+import { getDailyReading } from "../services/dailyReadService.js";
+import {
+  getSermonStudyPack,
+  getDevotionalStudyPack,
+  getPassageExegesisPack,
+  getWordStudyPack,
+  getTopicStudyPack,
+  getCommentaryStudyPack,
+  getLessonCreatorStudyPack,
+  getPrayerGuideStudyPack,
+  getCovenantTheologyPack
+} from "../services/studyPackService.js";
+import { Env } from "../types.js";
+import { z } from "zod";
+
+export function createMcpServer(env: Env) {
+  const server = new McpServer({
+    name: "berean-mcp",
+    version: "1.0.0"
+  });
+
+  // --- Register Tools ---
+
+  // 0. Resource Catalog Discovery
+  server.tool(
+    "get_available_resources",
+    "List all available Bible translations, classical commentary sets, original language lexicons, study packs, and personas in this Berean MCP instance.",
+    GetAvailableResourcesSchema,
+    async ({ category }) => {
+      const res = await getAvailableResources(env, { category });
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 1. Bible Lookup
+  server.tool(
+    "bible_lookup",
+    "Retrieve Bible verses from verified biblical translations (e.g. NET, KJV, ASV, WEB, BBE, OHGB).",
+    BibleLookupSchema,
+    async ({ version, reference }) => {
+      const res = await lookupBiblePassage(env, version, reference);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 2. Bible Search
+  server.tool(
+    "bible_search",
+    "Search for words or phrases in one or all books across Bible translations with wildcard and boolean support.",
+    BibleSearchSchema,
+    async ({ query, version, book_filter, limit }) => {
+      const res = await searchBible(env, query, version, book_filter, limit);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 3. Commentary Lookup
+  server.tool(
+    "commentary_lookup",
+    "Retrieve historical and expository biblical commentaries (Matthew Henry, Jamieson-Fausset-Brown, John Calvin) for passages.",
+    CommentaryLookupSchema,
+    async ({ version, reference }) => {
+      const res = await lookupCommentary(env, version, reference);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 4. Cross References
+  server.tool(
+    "cross_references",
+    "Retrieve rich inter-biblical cross references linking OT and NT scriptures (Treasury of Scripture Knowledge).",
+    CrossReferenceSchema,
+    async ({ reference, limit }) => {
+      const res = await lookupCrossReferences(env, reference, limit);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 5. Lexicon Lookup
+  server.tool(
+    "lexicon_lookup",
+    "Look up definitions, Strong's concordance data, and lexical domains for Greek and Hebrew words (Thayer, BDB, LSJ).",
+    LexiconLookupSchema,
+    async ({ strongs_number, lexicon }) => {
+      const res = await lookupLexiconEntry(env, strongs_number, lexicon);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 6. Morphology Lookup
+  server.tool(
+    "morphology_lookup",
+    "Parse original Hebrew / Greek morphology, grammar, verb tenses, syntactical cases, and transliterations for a verse.",
+    MorphologyLookupSchema,
+    async ({ reference }) => {
+      const res = await lookupMorphology(env, reference);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 7. Topic Study
+  server.tool(
+    "topic_study",
+    "Topical Bible study retrieving comprehensive scripture outlines and doctrinal subtopics (Nave's / Torrey Topical datasets).",
+    TopicStudySchema,
+    async ({ query }) => {
+      const res = await lookupTopic(env, query);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 8. Character Lookup
+  server.tool(
+    "character_lookup",
+    "Retrieve rich biographical data, parental ancestry, KJV occurrences, and visual ASCII family & relationship trees for Bible figures.",
+    CharacterLookupSchema,
+    async ({ name }) => {
+      const res = await lookupCharacter(env, name);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 9. Location Lookup
+  server.tool(
+    "location_lookup",
+    "Retrieve geographical coordinates, live Google Map links, and historical-archaeological descriptions of Bible places.",
+    LocationLookupSchema,
+    async ({ location }) => {
+      const res = await lookupLocation(env, location);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 10. Theological Dictionary & Encyclopedia
+  server.tool(
+    "theological_dictionary",
+    "Look up encyclopedic articles and definitions for theological terms (ISBE Encyclopedia, Easton's Bible Dictionary, Smith's).",
+    TheologicalDictionarySchema,
+    async ({ term, source }) => {
+      let res;
+      if (source === "isbe") {
+        res = await lookupEncyclopedia(env, term, source);
+      } else {
+        res = await lookupDictionary(env, term, source);
+      }
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 11. Parallel Passages
+  server.tool(
+    "parallel_passages",
+    "Retrieve and compare Gospel harmonies and Old/New Testament parallel passages and pericopes.",
+    ParallelPassagesSchema,
+    async ({ query, include_text, version }) => {
+      const res = await lookupParallels(env, query, include_text, version);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 12. Biblical Promises
+  server.tool(
+    "biblical_promises",
+    "Retrieve categorized biblical promises and scriptures for specific life situations and spiritual needs.",
+    BiblicalPromisesSchema,
+    async ({ topic, include_text, version }) => {
+      const res = await lookupPromises(env, topic, include_text, version);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 13. Book Analysis
+  server.tool(
+    "book_analysis",
+    "Retrieve comprehensive introductory overviews of a Bible book (Authorship, Date, Background, Recipients, Themes, Outline).",
+    BookAnalysisSchema,
+    async ({ book, section }) => {
+      const res = await lookupBookAnalysis(env, book, section);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 14. Chapter Summary
+  server.tool(
+    "chapter_summary",
+    "Retrieve structural outlines and theological summaries for any chapter in the Bible.",
+    ChapterSummarySchema,
+    async ({ book, chapter }) => {
+      const res = await lookupChapterSummary(env, book, chapter);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 15. Bible Names
+  server.tool(
+    "bible_names",
+    "Look up meanings, linguistic origins, and occurrences of biblical names.",
+    BibleNamesSchema,
+    async ({ query }) => {
+      const res = await lookupBibleNames(env, query);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 16. Chronology
+  server.tool(
+    "chronology",
+    "Search biblical chronology, timelines, date spans, and sequencing of historical events (Kings of Israel/Judah, Paul).",
+    ChronologySchema,
+    async ({ query }) => {
+      const res = await lookupChronology(env, query);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 17. Daily Reading
+  server.tool(
+    "daily_reading",
+    "Retrieve scheduled daily Bible readings for today or any specified date, complete with full scripture passages.",
+    DailyReadingSchema,
+    async ({ date, include_text, version }) => {
+      const res = await getDailyReading(env, date, include_text, version);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // --- Composite Study Pack Tools (High-Efficiency One-Shot Endpoints) ---
+
+  // 18. Sermon Study Pack
+  server.tool(
+    "sermon_study_pack",
+    "High-speed composite tool that bundles scripture text, historical commentaries, and cross-references for sermon preparation in a single one-shot response.",
+    SermonStudyPackSchema,
+    async ({ reference, version, include_xrefs }) => {
+      const res = await getSermonStudyPack(env, reference, version, include_xrefs);
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 19. Devotional Study Pack
+  server.tool(
+    "devotional_study_pack",
+    "High-speed composite tool that bundles scripture text, meditation cross-references, and biblical promises for devotional reflections in a single one-shot response.",
+    DevotionalStudyPackSchema,
+    async ({ reference, version }) => {
+      const res = await getDevotionalStudyPack(env, reference, version);
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 20. Passage Exegesis Pack
+  server.tool(
+    "passage_exegesis_pack",
+    "High-speed composite tool that bundles primary translation, original Hebrew/Greek text (OHGB), morphological parsing, and historical commentaries for scholarly exegesis.",
+    PassageExegesisPackSchema,
+    async ({ reference, version, include_original }) => {
+      const res = await getPassageExegesisPack(env, reference, version, include_original);
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 21. Word Study Pack
+  server.tool(
+    "word_study_pack",
+    "High-speed composite tool that bundles Strong's lexicon definition, in-context morphological parsing, and linguistic guardrails against totality transfer.",
+    WordStudyPackSchema,
+    async ({ strongs_number, reference, lexicon }) => {
+      const res = await getWordStudyPack(env, strongs_number, reference, lexicon);
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 22. Topic Study Pack
+  server.tool(
+    "topic_study_pack",
+    "High-speed composite tool that bundles theological dictionary definitions and scriptural promises for topical and doctrinal studies.",
+    TopicStudyPackSchema,
+    async ({ topic, version }) => {
+      const res = await getTopicStudyPack(env, topic, version);
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 23. Commentary Study Pack (Multi-Commentary Bundler)
+  server.tool(
+    "commentary_study_pack",
+    "High-speed composite tool that retrieves multiple biblical commentaries (e.g. Matthew Henry, JFB, Calvin, Maclaren, Barnes, Spurgeon) for a passage in a single request.",
+    CommentaryStudyPackSchema,
+    async ({ reference, commentators }) => {
+      const res = await getCommentaryStudyPack(env, reference, commentators);
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 24. Lesson Creator Study Pack (Sunday School & Small Groups)
+  server.tool(
+    "lesson_creator_study_pack",
+    "High-speed composite tool that bundles scripture text, Barnes' practical remarks, Ellicott's historical context, Expositor's Bible notes, and chapter summaries for teachers.",
+    LessonCreatorStudyPackSchema,
+    async ({ reference, version }) => {
+      const res = await getLessonCreatorStudyPack(env, reference, version);
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 25. Prayer Guide Study Pack (Scriptural Intercession)
+  server.tool(
+    "prayer_guide_study_pack",
+    "High-speed composite tool that bundles scripture text, Spurgeon/Benson adoration, Wesley examination, and biblical promises for 1st-person ACTS prayer.",
+    PrayerGuideStudyPackSchema,
+    async ({ reference, version }) => {
+      const res = await getPrayerGuideStudyPack(env, reference, version);
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 26. Covenant Theology Pack (Redemptive-Historical Synthesis)
+  server.tool(
+    "covenant_theology_pack",
+    "High-speed composite tool that bundles scripture text, John Calvin's Christocentric exposition, John Gill's rabbinic/prophetic insights, ISBE articles, and canonical cross-references.",
+    CovenantTheologyPackSchema,
+    async ({ reference, version }) => {
+      const res = await getCovenantTheologyPack(env, reference, version);
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // --- Register Prompts (15 Personas & Workflows) ---
+
+  for (const [key, persona] of Object.entries(BEREAN_PERSONAS)) {
+    server.prompt(
+      persona.name,
+      persona.description,
+      {
+        topic: z.string().optional().describe("Specific passage or topic to address")
+      },
+      async ({ topic }) => {
+        return {
+          messages: [
+            {
+              role: "user" as const,
+              content: {
+                type: "text" as const,
+                text: `${persona.instructions}\n\nUser request regarding: ${topic || "general biblical inquiry"}`
+              }
+            }
+          ]
+        };
+      }
+    );
+  }
+
+  for (const [key, workflow] of Object.entries(WORKFLOW_PROMPTS)) {
+    server.prompt(
+      workflow.name,
+      workflow.description,
+      workflow.argsSchema,
+      async (args: any) => {
+        return {
+          messages: [
+            {
+              role: "user" as const,
+              content: {
+                type: "text" as const,
+                text: `Execute workflow: ${workflow.name} for passage: ${args.passage}`
+              }
+            }
+          ]
+        };
+      }
+    );
+  }
+
+  // --- Register Resources ---
+
+  for (const res of RESOURCE_DEFINITIONS) {
+    server.resource(
+      res.name,
+      res.uri,
+      async (uri) => {
+        const text = getResourceContent(uri.href) || "{}";
+        return {
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: res.mimeType,
+              text
+            }
+          ]
+        };
+      }
+    );
+  }
+
+  return server;
+}

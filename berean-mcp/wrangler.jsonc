@@ -1,0 +1,35 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "berean-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-02-14",
+  "compatibility_flags": ["nodejs_compat"],
+  "rules": [
+    {
+      "type": "CompiledWasm",
+      "globs": ["**/*.wasm"],
+      "fallthrough": false
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "BIBLEMATE_DATA",
+      "bucket_name": "biblemate-data"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "MORPHOLOGY_DB",
+      "database_name": "berean-morphology",
+      "database_id": "<YOUR_MORPHOLOGY_DB_ID>"
+    },
+    {
+      "binding": "REFERENCE_DB",
+      "database_name": "berean-reference",
+      "database_id": "<YOUR_REFERENCE_DB_ID>"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

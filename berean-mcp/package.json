@@ -1,0 +1,28 @@
+{
+  "name": "berean-mcp",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker MCP Server for Berean AI Study Suite",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "tsx scripts/run_http_server.ts",
+    "start:http": "tsx scripts/run_http_server.ts",
+    "start:stdio": "tsx scripts/run_local_stdio.ts",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "sql.js": "^1.14.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260826.1",
+    "@types/sql.js": "^1.4.11",
+    "tsx": "^4.23.12",
+    "typescript": "^5.7.3",
+    "wrangler": "^4.126.0"
+  }
+}
