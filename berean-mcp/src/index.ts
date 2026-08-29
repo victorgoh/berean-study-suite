@@ -76,9 +76,11 @@ export default {
       });
     }
 
+    const analyticsSnippet = env.ANALYTICS_SNIPPET || (env.CF_BEACON_TOKEN ? `<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "${env.CF_BEACON_TOKEN}"}'></script><!-- End Cloudflare Web Analytics -->` : "");
+
     // Swagger UI Explorer (/swagger)
     if (url.pathname === "/swagger") {
-      return new Response(renderSwaggerHtml(), {
+      return new Response(renderSwaggerHtml(analyticsSnippet), {
         headers: {
           "Content-Type": "text/html; charset=utf-8",
           ...corsHeaders
@@ -88,7 +90,7 @@ export default {
 
     // Technical Scalar API Playground (/docs, /scalar, /playground)
     if (url.pathname === "/docs" || url.pathname === "/scalar" || url.pathname === "/playground") {
-      return new Response(renderScalarHtml(), {
+      return new Response(renderScalarHtml(analyticsSnippet), {
         headers: {
           "Content-Type": "text/html; charset=utf-8",
           ...corsHeaders
@@ -100,7 +102,7 @@ export default {
     const acceptHeader = request.headers.get("Accept") || "";
     const isBrowserHtmlRequest = acceptHeader.includes("text/html") || acceptHeader.includes("*/*");
     if (url.pathname === "/study" || url.pathname === "/app" || (url.pathname === "/" && isBrowserHtmlRequest && !acceptHeader.startsWith("application/json"))) {
-      return new Response(renderExplorerHtml(), {
+      return new Response(renderExplorerHtml(analyticsSnippet), {
         headers: {
           "Content-Type": "text/html; charset=utf-8",
           ...corsHeaders

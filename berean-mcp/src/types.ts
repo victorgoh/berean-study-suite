@@ -5,6 +5,8 @@ export interface Env {
   REFERENCE_DB?: D1Database;
   API_KEY?: string;
   ENVIRONMENT?: string;
+  ANALYTICS_SNIPPET?: string;
+  CF_BEACON_TOKEN?: string;
 }
 
 export interface BibleVerse {

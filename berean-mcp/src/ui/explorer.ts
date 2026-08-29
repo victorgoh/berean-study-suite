@@ -3,7 +3,7 @@
  * Global Preferred Bible Translation setting, clean unified search bar, and mode-specific presets.
  */
 
-export function renderExplorerHtml(): string {
+export function renderExplorerHtml(analyticsSnippet: string = ""): string {
   const bt = String.fromCharCode(96);
   const bt3 = bt + bt + bt;
 
@@ -17,6 +17,7 @@ export function renderExplorerHtml(): string {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
+  ${analyticsSnippet ? `\n  ${analyticsSnippet}\n` : ""}
   <style>
     :root {
       --bg: #090c14;
