@@ -73,41 +73,12 @@ npx wrangler secret put API_KEY
 
 ---
 
-## 📚 Available Classical Commentary Sets (in `biblematedata`)
+## 📚 Classical Commentaries & Reference Data
 
-| Commentary / Author | MCP Key Alias | Scope | Focus |
-| :--- | :--- | :--- | :--- |
-| **Matthew Henry** | `Henry` | Whole Bible | Classic Puritan practical aphorisms & devotional depth |
-| **Jamieson-Fausset-Brown** | `JFB` | Whole Bible | Concise, balanced grammatical & historical synthesis |
-| **John Calvin** | `Calvin` | Whole Bible | Reformational exegesis with Christocentric covenant focus |
-| **John Gill** | `Gill` | Whole Bible | Exhaustive exposition with Second Temple rabbinic context |
-| **Albert Barnes** | `Barnes` | Whole Bible | Verse-by-verse notes highlighting practical teaching lessons |
-| **Alexander Maclaren** | `MacL` | Whole Bible | Vivid homiletical gems & structural preaching insights |
-| **Charles Simeon** | `HH` | Whole Bible | 2,536 Homiletical preaching outlines (*Horae Homileticae*) |
-| **The Biblical Illustrator** | `BI` | Whole Bible | 57 volumes of sermon illustrations & historical anecdotes |
-| **Charles Spurgeon** | `Spur` | Whole Bible | *Treasury of David* on Psalms & devotional expositions |
-| **Keil & Delitzsch** | `KD` | Old Testament | Gold standard academic Hebrew grammar & Ancient Near East |
-| **H. A. W. Meyer** | `CECNT` | New Testament | Authoritative academic Greek grammatical exegesis |
-| **Expositor's Greek NT** | `EGNT` | New Testament | Critical & grammatical Greek Testament exegesis |
-| **Adam Clarke** | `Clarke` | Whole Bible | Semitic customs, philology, and biblical archaeology |
-| **Joseph Benson** | `Benson` | Whole Bible | Methodist notes on holy living & pastoral examination |
-| **John Wesley** | `Wesley` | Whole Bible | Pithy notes on heart holiness, grace, and obedience |
-| **The Pulpit Commentary** | `Pulpit` | Whole Bible | Multi-volume historical introductions & homiletic outlines |
-| **The Expositor's Bible** | `EBC` | Whole Bible | Thematic essay lectures & in-depth chapter expositions |
-| **Charles Ellicott** | `ECER` | Whole Bible | Lay-accessible commentary synthesizing critical scholarship |
-| **A. T. Robertson** | `Rob` | New Testament | World-renowned Koine Greek syntax & word pictures |
-| **Marvin Vincent** | `Vincent` | New Testament | Greek lexical etymology & cultural imagery |
-| **Daniel Whedon** | `Whedon` | Whole Bible | Wesleyan-Arminian biblical commentary with logical rigor |
-| **John Peter Lange** | `Lange` | Whole Bible | Tri-fold Exegetical, Doctrinal, and Homiletical analysis |
-| **J. C. Ryle** | `Ryle` | Gospels | Evangelical pastoral reflections on the Gospels |
-| **John Trapp** | `Trapp` | Whole Bible | Puritan classic famous for pithy epigrams & spiritual wit |
-| **E. W. Bullinger** | `Bullinger` | Whole Bible | Figures of speech, chiasms, and Hebrew structural idioms |
-| **Henry Alford** | `Alford` | New Testament | Critical Greek Testament & manuscript lineages |
-| **Bob Utley** | `Utley` | Selected Books | Verse-by-verse historical-grammatical exegesis |
-| **David Guzik** | `Guzik` | Whole Bible | Accessible, verse-by-verse expository commentary |
-| **H. A. Ironside** | `Ironside` | Selected Books | Christ-centered expository notes |
-| **G. Campbell Morgan** | `Morgan` | Whole Bible | Structural exposition & overarching biblical motifs |
-| **Gary Everett** | `Everett` | Whole Bible | Comprehensive thematic study notes & original language exegesis |
+All classical commentary databases, lexicons, and biblical reference datasets are powered by the upstream [`biblematedata`](https://pypi.org/project/biblematedata/) library:
+
+- **Classical Exegesis & Homiletics**: Access extensive whole-Bible and testament-specific works by **Matthew Henry, John Calvin, John Gill, Jamieson-Fausset-Brown, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, Albert Barnes, Charles Ellicott**, and many others.
+- **Dynamic Resource Discovery**: Use the `get_available_resources` MCP tool at any time to query all active translations, commentary aliases, and lexicons installed in your environment.
 
 ---
 

@@ -74,36 +74,12 @@ The **Berean MCP Server** delivers **27 total tools** (18 specialized single-eng
 
 ---
 
-## 📚 Available Classical Commentary Sets
+## 📚 Classical Commentaries & Reference Data
 
-| Commentary / Author | Key Alias | Scope | Focus & Distinctive |
-| :--- | :--- | :--- | :--- |
-| **Matthew Henry** | `Henry` | Whole Bible | Classic Puritan practical aphorisms & devotional depth |
-| **Jamieson-Fausset-Brown** | `JFB` | Whole Bible | Concise, balanced grammatical & historical synthesis |
-| **John Calvin** | `Calvin` | Whole Bible | Reformational exegesis with Christocentric covenant focus |
-| **John Gill** | `Gill` | Whole Bible | Exhaustive exposition with Second Temple rabbinic context |
-| **Albert Barnes** | `Barnes` | Whole Bible | Verse-by-verse notes highlighting practical teaching lessons |
-| **Alexander Maclaren** | `MacL` | Whole Bible | Vivid homiletical gems & structural preaching insights |
-| **Charles Simeon** | `HH` | Whole Bible | 2,536 Homiletical preaching outlines (*Horae Homileticae*) |
-| **The Biblical Illustrator** | `BI` | Whole Bible | Multi-volume sermon illustrations, anecdotes & expository notes |
-| **Charles Spurgeon** | `Spur` | Whole Bible | *Treasury of David* on Psalms & devotional expositions |
-| **Keil & Delitzsch** | `KD` | Old Testament | Gold standard academic Hebrew grammar & Ancient Near East history |
-| **H. A. W. Meyer** | `CECNT` | New Testament | Authoritative academic Greek grammatical exegesis |
-| **Expositor's Greek NT** | `EGNT` | New Testament | Critical & grammatical Greek Testament exegesis |
-| **Adam Clarke** | `Clarke` | Whole Bible | Semitic customs, philology, and biblical archaeology |
-| **Joseph Benson** | `Benson` | Whole Bible | Methodist notes on holy living & pastoral examination |
-| **John Wesley** | `Wesley` | Whole Bible | Pithy notes on heart holiness, grace, and obedience |
-| **The Pulpit Commentary** | `Pulpit` | Whole Bible | Multi-volume historical introductions & homiletic outlines |
-| **The Expositor's Bible** | `EBC` | Whole Bible | Thematic essay lectures & in-depth chapter expositions |
-| **Charles Ellicott** | `ECER` | Whole Bible | Lay-accessible commentary synthesizing critical scholarship |
-| **A. T. Robertson** | `Rob` | New Testament | World-renowned Koine Greek syntax & word pictures |
-| **Marvin Vincent** | `Vincent` | New Testament | Greek lexical etymology & cultural imagery |
-| **Daniel Whedon** | `Whedon` | Whole Bible | Wesleyan-Arminian biblical commentary with logical rigor |
-| **John Peter Lange** | `Lange` | Whole Bible | Tri-fold Exegetical, Doctrinal, and Homiletical analysis |
-| **Thomas Brooks** | `Brooks` | Whole Bible | Puritan classic rich in spiritual remedies & pastoral application |
-| **Cambridge Bible** | `CBSC` | Whole Bible | Grammatical and historical notes by Cambridge scholars |
-| **Preacher's Homiletical** | `PHC` | Whole Bible | Exhaustive homiletic outlines on every paragraph |
-| **Intl Critical Commentary**| `ICCNT`| New Testament | Rigorous scholarly textual and linguistic commentary |
+All classical commentary databases, lexicons, and biblical reference datasets are powered by the upstream [`biblematedata`](https://pypi.org/project/biblematedata/) library:
+
+- **Classical Exegesis & Homiletics**: Access extensive whole-Bible and testament-specific works by **Matthew Henry, John Calvin, John Gill, Jamieson-Fausset-Brown, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, Albert Barnes, Charles Ellicott**, and many others.
+- **Dynamic Resource Discovery**: Use the `get_available_resources` MCP tool at any time to list all active translations, commentary aliases, and lexicons available in your current environment.
 
 ---
 
