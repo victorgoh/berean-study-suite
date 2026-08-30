@@ -37,7 +37,7 @@ Try out the live public instance hosted globally on Cloudflare Workers:
 | **⚡ Scalar API Reference** | [https://berean-mcp.victorgoh.workers.dev/docs](https://berean-mcp.victorgoh.workers.dev/docs) | Interactive API documentation with built-in request runner & multi-language snippets |
 | **📜 Swagger UI** | [https://berean-mcp.victorgoh.workers.dev/swagger](https://berean-mcp.victorgoh.workers.dev/swagger) | Classic OpenAPI schema visualizer & API playground |
 | **📋 OpenAPI Spec** | [https://berean-mcp.victorgoh.workers.dev/openapi.json](https://berean-mcp.victorgoh.workers.dev/openapi.json) | Complete OpenAPI 3.1.0 JSON schema |
-| **📡 MCP Gateway** | `https://berean-mcp.victorgoh.workers.dev/mcp` | Streamable HTTP endpoint for AI Assistants (Antigravity, Claude, Cursor) |
+| **📡 MCP Gateway** | [https://berean-mcp.victorgoh.workers.dev/mcp](https://berean-mcp.victorgoh.workers.dev/mcp) | Streamable HTTP endpoint for AI Assistants (Antigravity, Claude, Cursor) |
 
 ---
 
@@ -266,7 +266,7 @@ npx tsx scripts/test_composite_packs.ts
 
 ### 4. Using Berean in Any Project Workspace (`berean init` & `berean check`)
 
-Once the **Berean MCP Server** is connected (either globally in `~/.gemini/config/mcp_config.json` or via edge endpoint `https://berean-mcp.victorgoh.workers.dev/mcp`), you can use Berean across **any project or workspace**:
+Once the **Berean MCP Server** is connected (either globally in `~/.gemini/config/mcp_config.json` or via edge endpoint [https://berean-mcp.victorgoh.workers.dev/mcp](https://berean-mcp.victorgoh.workers.dev/mcp)), you can use Berean across **any project or workspace**:
 
 * **⚡ Instant Setup (`berean init`)**: Type `"berean init"` in the AI chat. The assistant will automatically create `.agents/workflows/` and install the 4 lean slash shortcuts (`/berean`, `/berean-plus`, `/docx`, `/image`) in **1 second**.
 * **🔍 Diagnose & Verify (`berean check`)**: Type `"berean check"` in the AI chat to verify MCP connection health, registered commentary databases, and workspace workflow status.
