@@ -346,8 +346,8 @@ export function createMcpServer(env: Env) {
     "devotional_study_pack",
     "High-speed composite tool that bundles scripture text, meditation cross-references, and biblical promises for devotional reflections in a single one-shot response.",
     DevotionalStudyPackSchema,
-    async ({ reference, version }) => {
-      const res = await getDevotionalStudyPack(env, reference, version);
+    async ({ reference, version, topic }) => {
+      const res = await getDevotionalStudyPack(env, reference, version, topic);
       return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
     }
   );
@@ -412,8 +412,8 @@ export function createMcpServer(env: Env) {
     "prayer_guide_study_pack",
     "High-speed composite tool that bundles scripture text, Spurgeon/Benson adoration, Wesley examination, and biblical promises for 1st-person ACTS prayer.",
     PrayerGuideStudyPackSchema,
-    async ({ reference, version }) => {
-      const res = await getPrayerGuideStudyPack(env, reference, version);
+    async ({ reference, version, topic }) => {
+      const res = await getPrayerGuideStudyPack(env, reference, version, topic);
       return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
     }
   );

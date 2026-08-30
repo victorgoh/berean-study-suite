@@ -102,3 +102,20 @@ export interface DailyReadingPlan {
   readings: string[];
   scriptures?: { reference: string; text: string }[];
 }
+
+export interface StudyPackMetadata {
+  title: string;
+  reference?: string;
+  topic?: string;
+  version?: string;
+  commentators?: string[];
+  [key: string]: any;
+}
+
+export interface StudyPackResponse {
+  formattedText: string;
+  sections?: Record<string, string>;
+  metadata?: StudyPackMetadata;
+  error?: string;
+}
+

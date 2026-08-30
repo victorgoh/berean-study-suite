@@ -287,7 +287,7 @@ export default {
 
     if (url.pathname === "/tools/devotional_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getDevotionalStudyPack(env, body.reference || body.passage || "Psalm 23", body.version || "BSB");
+      const res = await getDevotionalStudyPack(env, body.reference || body.passage || "Psalm 23", body.version || "BSB", body.topic);
       return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
     }
 
@@ -323,7 +323,7 @@ export default {
 
     if (url.pathname === "/tools/prayer_guide_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getPrayerGuideStudyPack(env, body.reference || body.passage || "Psalm 23", body.version || "BSB");
+      const res = await getPrayerGuideStudyPack(env, body.reference || body.passage || "Psalm 23", body.version || "BSB", body.topic);
       return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
     }
 

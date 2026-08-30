@@ -96,7 +96,8 @@ export const SermonStudyPackSchema = {
 
 export const DevotionalStudyPackSchema = {
   reference: z.string().describe("Scripture passage reference for devotional reflection, e.g. 'Psalm 23', 'John 15:1-8'"),
-  version: z.string().default("BSB").describe("Bible translation version (default: BSB)")
+  version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
+  topic: z.string().optional().describe("Optional devotional theme or promise topic (e.g. 'Comfort', 'Peace', 'Grace')")
 };
 
 export const PassageExegesisPackSchema = {
@@ -128,7 +129,8 @@ export const LessonCreatorStudyPackSchema = {
 
 export const PrayerGuideStudyPackSchema = {
   reference: z.string().describe("Scripture passage reference for prayer and intercession, e.g. 'Psalm 51', 'Ephesians 3:14-21'"),
-  version: z.string().default("BSB").describe("Bible translation version (default: BSB)")
+  version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
+  topic: z.string().optional().describe("Optional prayer theme or promise topic (e.g. 'Healing', 'Forgiveness', 'Guidance')")
 };
 
 export const CovenantTheologyPackSchema = {

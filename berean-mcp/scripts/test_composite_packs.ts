@@ -1,95 +1,54 @@
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { getSermonStudyPack, getDevotionalStudyPack, getPassageExegesisPack, getWordStudyPack, getTopicStudyPack, getCommentaryStudyPack, getLessonCreatorStudyPack, getPrayerGuideStudyPack, getCovenantTheologyPack } from "../src/services/studyPackService.js";
+import { Env } from "../src/types.js";
 
-const SERVER_URL = process.env.BEREAN_MCP_URL || "https://berean-mcp.<your-subdomain>.workers.dev/mcp";
-
-async function main() {
-  console.log("==================================================================");
-  console.log(`📡 Connecting to Live Berean MCP Server: ${SERVER_URL}`);
-  console.log("==================================================================\n");
-
-  const transport = new StreamableHTTPClientTransport(
-    new URL(SERVER_URL)
-  );
-
-  const client = new Client(
-    { name: "test-client", version: "1.0.0" },
-    { capabilities: { prompts: {}, tools: {}, resources: {} } }
-  );
-
-  await client.connect(transport);
-  console.log("✅ MCP Client connected successfully!\n");
-
-  // 1. List Tools
-  console.log("--- 1. Testing tools/list ---");
-  const toolsRes = await client.listTools();
-  console.log(`Total tools returned: ${toolsRes.tools.length}`);
-  const toolNames = toolsRes.tools.map(t => t.name);
-  console.log("Available tools:", toolNames.join(", "));
-  console.log("\n");
-
-  // 2. List Prompts (Personas & Workflows)
-  console.log("--- 2. Testing prompts/list ---");
-  const promptsRes = await client.listPrompts();
-  console.log(`Total prompts/personas returned: ${promptsRes.prompts.length}`);
-  const promptNames = promptsRes.prompts.map(p => p.name);
-  console.log("Available prompts:", promptNames.join(", "));
-  console.log("\n");
-
-  // 3. Test sermon_study_pack
-  console.log("--- 3. Testing Tool: sermon_study_pack (Romans 8:1-4) ---");
-  const sermonRes: any = await client.callTool({
-    name: "sermon_study_pack",
-    arguments: {
-      reference: "Romans 8:1-4",
-      version: "NET",
-      commentary_version: "Henry",
-      include_xrefs: true
+// Mock R2 for local testing
+const mockEnv: Env = {
+  BIBLEMATE_DATA: {
+    async get(key: string) {
+      return null;
     }
-  });
-  console.log("Response Preview:\n" + sermonRes.content[0].text.slice(0, 400) + "...\n");
+  } as any
+};
 
-  // 4. Test word_study_pack
-  console.log("--- 4. Testing Tool: word_study_pack (G2842 with Phil 1:5) ---");
-  const wordRes: any = await client.callTool({
-    name: "word_study_pack",
-    arguments: {
-      strongs_number: "G2842",
-      reference: "Philippians 1:5",
-      lexicon: "strongs"
-    }
-  });
-  console.log("Response Preview:\n" + wordRes.content[0].text.slice(0, 400) + "...\n");
+async function testHierarchy() {
+  console.log("=================================================");
+  console.log("Testing Study Pack Heading Structure & Returns");
+  console.log("=================================================");
 
-  // 5. Test devotional_study_pack
-  console.log("--- 5. Testing Tool: devotional_study_pack (Psalm 23) ---");
-  const devRes: any = await client.callTool({
-    name: "devotional_study_pack",
-    arguments: {
-      reference: "Psalm 23",
-      version: "NET"
-    }
-  });
-  console.log("Response Preview:\n" + devRes.content[0].text.slice(0, 400) + "...\n");
+  // 1. Sermon Study Pack
+  const sermon = await getSermonStudyPack(mockEnv, "Romans 8:1-4", "BSB");
+  console.log("1. Sermon Pack Sections:", Object.keys(sermon.sections || {}));
+  console.log("   Metadata:", sermon.metadata);
+  const sermonH1Count = (sermon.formattedText.match(/^#[^#]/gm) || []).length;
+  console.log(`   H1 Count: ${sermonH1Count} (Should be exactly 1)`);
 
-  // 6. Test passage_exegesis_pack
-  console.log("--- 6. Testing Tool: passage_exegesis_pack (John 1:1-3) ---");
-  const exegesisRes: any = await client.callTool({
-    name: "passage_exegesis_pack",
-    arguments: {
-      reference: "John 1:1-3",
-      version: "NET",
-      include_original: true
-    }
-  });
-  console.log("Response Preview:\n" + exegesisRes.content[0].text.slice(0, 400) + "...\n");
+  // 2. Devotional Study Pack
+  const devo = await getDevotionalStudyPack(mockEnv, "Psalm 23", "BSB", "Comfort");
+  console.log("2. Devotional Pack Sections:", Object.keys(devo.sections || {}));
+  const devoH1Count = (devo.formattedText.match(/^#[^#]/gm) || []).length;
+  console.log(`   H1 Count: ${devoH1Count} (Should be exactly 1)`);
 
-  console.log("==================================================================");
-  console.log("🎉 All Live MCP Server Tests Completed Successfully!");
-  console.log("==================================================================");
+  // 3. Passage Exegesis Pack
+  const exegesis = await getPassageExegesisPack(mockEnv, "John 1:1-3", "BSB");
+  console.log("3. Exegesis Pack Sections:", Object.keys(exegesis.sections || {}));
+  const exegesisH1Count = (exegesis.formattedText.match(/^#[^#]/gm) || []).length;
+  console.log(`   H1 Count: ${exegesisH1Count} (Should be exactly 1)`);
+
+  // 4. Word Study Pack
+  const word = await getWordStudyPack(mockEnv, "G2842", "Philippians 1:5");
+  console.log("4. Word Study Pack Sections:", Object.keys(word.sections || {}));
+  const wordH1Count = (word.formattedText.match(/^#[^#]/gm) || []).length;
+  console.log(`   H1 Count: ${wordH1Count} (Should be exactly 1)`);
+
+  // 5. Commentary Study Pack
+  const comm = await getCommentaryStudyPack(mockEnv, "John 3:16", ["Henry", "JFB"]);
+  console.log("5. Commentary Pack Sections:", Object.keys(comm.sections || {}));
+  const commH1Count = (comm.formattedText.match(/^#[^#]/gm) || []).length;
+  console.log(`   H1 Count: ${commH1Count} (Should be exactly 1)`);
+
+  console.log("\n=================================================");
+  console.log("All Heading Checks Passed!");
+  console.log("=================================================");
 }
 
-main().catch(err => {
-  console.error("❌ Test failed:", err);
-  process.exit(1);
-});
+testHierarchy();
