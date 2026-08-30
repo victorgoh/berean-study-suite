@@ -1521,25 +1521,26 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     function formatMarkdown(md) {
       if (!md) return "";
       let html = md;
+      const B = String.fromCharCode(92);
 
       // Convert any HTML formatting to Markdown before escaping
-      html = html.replace(/<b\b[^>]*>(.*?)<\/b>/gi, "**$1**");
-      html = html.replace(/<strong\b[^>]*>(.*?)<\/strong>/gi, "**$1**");
-      html = html.replace(/<i\b[^>]*>(.*?)<\/i>/gi, "*$1*");
-      html = html.replace(/<em\b[^>]*>(.*?)<\/em>/gi, "*$1*");
-      html = html.replace(/<br\s*\/?>/gi, "\n");
-      html = html.replace(/<p\b[^>]*>(.*?)<\/p>/gi, "$1\n\n");
+      html = html.replace(new RegExp("<b" + B + "b[^>]*>(.*?)<" + B + "/b>", "gi"), "**$1**");
+      html = html.replace(new RegExp("<strong" + B + "b[^>]*>(.*?)<" + B + "/strong>", "gi"), "**$1**");
+      html = html.replace(new RegExp("<i" + B + "b[^>]*>(.*?)<" + B + "/i>", "gi"), "*$1*");
+      html = html.replace(new RegExp("<em" + B + "b[^>]*>(.*?)<" + B + "/em>", "gi"), "*$1*");
+      html = html.replace(new RegExp("<br" + B + "s*" + B + "/?>", "gi"), "\\n");
+      html = html.replace(new RegExp("<p" + B + "b[^>]*>(.*?)<" + B + "/p>", "gi"), "$1\\n\\n");
       html = html.replace(/<[^>]+>/g, ""); // Strip any unhandled tags
 
       // Escape HTML
       html = html.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
       // Scripture Tag Highlighting [Romans 8:28 (BSB)]
-      html = html.replace(/\\[([0-9a-zA-Z\\s]+ \\d+:\\d+(?:-\\d+)?(?:\\s*\\([A-Za-z0-9]+\\))?)\\]/g, '<span class="verse-badge">[$1]</span>');
+      html = html.replace(new RegExp(B + "[([0-9a-zA-Z" + B + "s]+ " + B + "d+:" + B + "d+(?:-" + B + "d+)?(?:" + B + "s*" + B + "([A-Za-z0-9]+" + B + "))?)]", "g"), '<span class="verse-badge">[$1]</span>');
 
       // Alerts
-      html = html.replace(/&gt; \\[!(TIP|NOTE|IMPORTANT|WARNING|CAUTION)\\]\\s*\\n&gt; (.*?)(?=\\n\\n|\\n$|$)/gs, (m, type, content) => {
-        return '<blockquote class="alert alert-' + type.toLowerCase() + '"><strong>' + type + ':</strong> ' + content.replace(/\\n&gt; /g, ' ') + '</blockquote>';
+      html = html.replace(new RegExp("&gt; " + B + "[!(TIP|NOTE|IMPORTANT|WARNING|CAUTION)" + B + "]" + B + "s*" + B + "n&gt; (.*?)(?=" + B + "n" + B + "n|" + B + "n$|$)", "gs"), (m, type, content) => {
+        return '<blockquote class="alert alert-' + type.toLowerCase() + '"><strong>' + type + ':</strong> ' + content.replace(new RegExp(B + "n&gt; ", "g"), ' ') + '</blockquote>';
       });
 
       // Headers
@@ -1548,9 +1549,9 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
 
       // Bold & Italic
-      html = html.replace(/\\*\\*\\*(.*?)\\*\\*\\*/gim, '<strong><em>$1</em></strong>');
-      html = html.replace(/\\*\\*(.*?)\\*\\*/gim, '<strong>$1</strong>');
-      html = html.replace(/\\*(.*?)\\*/gim, '<em>$1</em>');
+      html = html.replace(new RegExp(B + "\\\\*\\\\*\\\\*(.*?)\\\\*\\\\*\\\\*", "gim"), '<strong><em>$1</em></strong>');
+      html = html.replace(new RegExp(B + "\\\\*\\\\*(.*?)\\\\*\\\\*", "gim"), '<strong>$1</strong>');
+      html = html.replace(new RegExp(B + "\\\\*(.*?)\\\\*", "gim"), '<em>$1</em>');
 
       // Lists
       html = html.replace(/^• (.*$)/gim, '<li>$1</li>');
