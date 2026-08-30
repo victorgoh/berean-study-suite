@@ -39,7 +39,12 @@ export async function lookupLocation(
     let desc = "";
     if (stmt.step()) {
       const row = stmt.getAsObject() as { content: string };
-      desc = cleanHtmlToMarkdown(row.content || "", { removeH2Title: true });
+      desc = cleanHtmlToMarkdown(row.content || "", { removeH2Title: true })
+        // The canonical map link is rendered below from the authoritative coordinates.
+        // Remove legacy links embedded in imported location descriptions to avoid duplicates.
+        .replace(/\[Click HERE for a Live Google Map\](?:\([^)]*\))?/gi, "")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
     } else {
       desc = "*(No detailed historical database entry found)*";
     }
