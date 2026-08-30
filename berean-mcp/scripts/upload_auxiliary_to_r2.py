@@ -55,12 +55,9 @@ files_to_sync = [
     "commentaries/cLange.commentary",
     "commentaries/cRyle.commentary",
     "commentaries/cTrapp.commentary",
-    "commentaries/cMorgan.commentary",
     "commentaries/cBullinger.commentary",
-    "commentaries/cIronside.commentary",
     "commentaries/cAlford.commentary",
-    "commentaries/cFBMeyer.commentary",
-    "commentaries/cUtley.commentary"
+    "commentaries/cFBMeyer.commentary"
 ]
 
 def main():
