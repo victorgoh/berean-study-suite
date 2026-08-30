@@ -43,7 +43,7 @@ export async function getDailyReading(
   const scriptures: { reference: string; text: string }[] = [];
 
   const lines: string[] = [];
-  lines.push(`# 📖 Daily Scripture Reading: Day ${day} (${dateFormatted})\n`);
+  lines.push(`# Daily Scripture Reading: Day ${day} (${dateFormatted})\n`);
   lines.push(`**Assigned Readings for Today**:`);
   for (const p of passages) {
     lines.push(`• **${p}**`);

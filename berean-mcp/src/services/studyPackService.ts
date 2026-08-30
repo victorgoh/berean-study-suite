@@ -63,7 +63,7 @@ export async function getSermonStudyPack(
   const xrefRes = includeXrefs ? await lookupCrossReferences(env, reference, 10) : null;
 
   const sections: Record<string, string> = {};
-  let text = `# 🎙️ Sermon Study Pack: ${reference}\n\n`;
+  let text = `# Sermon Study Pack: ${reference}\n\n`;
 
   const scriptureText = bibleRes.formattedText || bibleRes.error || "No passage retrieved";
   sections["scripture"] = scriptureText;
@@ -130,7 +130,7 @@ export async function getDevotionalStudyPack(
   const xrefRes = await lookupCrossReferences(env, reference, 8);
 
   const sections: Record<string, string> = {};
-  let text = `# 💖 Comprehensive Devotional Study Pack: ${reference}\n\n`;
+  let text = `# Devotional Study Pack: ${reference}\n\n`;
 
   const scriptureText = bibleRes.formattedText || bibleRes.error || "No passage retrieved";
   sections["scripture"] = scriptureText;
@@ -212,7 +212,7 @@ export async function getPassageExegesisPack(
   const xrefRes = await lookupCrossReferences(env, reference, 10);
 
   const sections: Record<string, string> = {};
-  let text = `# 🔬 Academic Exegesis Study Pack: ${reference}\n\n`;
+  let text = `# Passage Exegesis Study Pack: ${reference}\n\n`;
 
   const scriptureText = bibleRes.formattedText || bibleRes.error || "No passage retrieved";
   sections["primary_translation"] = scriptureText;
@@ -291,7 +291,7 @@ export async function getLessonCreatorStudyPack(
   const xrefRes = await lookupCrossReferences(env, reference, 8);
 
   const sections: Record<string, string> = {};
-  let text = `# 🏫 Bible Lesson Creator Study Pack: ${reference}\n\n`;
+  let text = `# Lesson Creator Study Pack: ${reference}\n\n`;
 
   const scriptureText = bibleRes.formattedText || bibleRes.error || "No passage retrieved";
   sections["lesson_scripture"] = scriptureText;
@@ -359,7 +359,7 @@ export async function getPrayerGuideStudyPack(
   const promisesRes = topic ? await lookupPromises(env, topic, true, version) : null;
 
   const sections: Record<string, string> = {};
-  let text = `# 🙏 Scriptural Prayer Guide Study Pack: ${reference}\n\n`;
+  let text = `# Prayer Guide Study Pack: ${reference}\n\n`;
 
   const scriptureText = bibleRes.formattedText || bibleRes.error || "No passage retrieved";
   sections["prayer_scripture"] = scriptureText;
@@ -414,7 +414,7 @@ export async function getCovenantTheologyPack(
   const xrefRes = await lookupCrossReferences(env, reference, 12);
 
   const sections: Record<string, string> = {};
-  let text = `# 👑 Covenant & Redemptive-Historical Theology Pack: ${reference}\n\n`;
+  let text = `# Covenant Theology Pack: ${reference}\n\n`;
 
   const scriptureText = bibleRes.formattedText || bibleRes.error || "No passage retrieved";
   sections["scripture"] = scriptureText;
@@ -475,7 +475,7 @@ export async function getWordStudyPack(
   const vincentRes = reference && isNT ? await lookupCommentary(env, "Vincent", reference) : null;
 
   const sections: Record<string, string> = {};
-  let text = `# 🔤 Original Language Word Study Pack: ${strongsNumber}\n\n`;
+  let text = `# Word Study Pack: ${strongsNumber}\n\n`;
 
   const lexDef = lexiconRes.formattedText || lexiconRes.error || "No lexicon entry found";
   sections["lexical_definition"] = lexDef;
@@ -526,7 +526,7 @@ export async function getTopicStudyPack(
   const promisesRes = await lookupPromises(env, topic, true, version);
 
   const sections: Record<string, string> = {};
-  let text = `# 📚 Topical & Doctrinal Study Pack: ${topic}\n\n`;
+  let text = `# Topical Study Pack: ${topic}\n\n`;
 
   const dictText = dictRes.formattedText || dictRes.error || "No dictionary entry found";
   sections["theological_definition"] = dictText;
@@ -565,7 +565,7 @@ export async function getCommentaryStudyPack(
     : ["Henry", "JFB", "Calvin"];
 
   const sections: Record<string, string> = {};
-  let text = `# 📖 Commentary Study Pack: ${reference}\n\n`;
+  let text = `# Commentary Study Pack: ${reference}\n\n`;
   const commentaryMap: Record<string, any> = {};
 
   let sectionIdx = 1;
