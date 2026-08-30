@@ -170,15 +170,6 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     getStoragePath: () => "commentaries/cSpur.commentary"
   },
   {
-    key: "Pulpit",
-    name: "The Pulpit Commentary",
-    author: "H. D. M. Spence, Joseph S. Exell",
-    scope: "Whole Bible",
-    description: "Massive multi-volume work providing historical introductions, exegesis, and homiletic outlines.",
-    aliases: ["pulpit", "cpulpit"],
-    getStoragePath: () => "commentaries/cPulpit.commentary"
-  },
-  {
     key: "Rob",
     name: "A. T. Robertson's Word Pictures in the New Testament",
     author: "A. T. Robertson",
@@ -263,42 +254,6 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
       if (bookNumber <= 44) return "commentaries/cBI_3.commentary";
       return "commentaries/cBI_4.commentary";
     }
-  },
-  {
-    key: "Brooks",
-    name: "Thomas Brooks' Precious Remedies & Expositions",
-    author: "Thomas Brooks",
-    scope: "Whole Bible",
-    description: "Classic Puritan treatise rich in spiritual aphorisms and pastoral application.",
-    aliases: ["brooks", "cbrooks", "thomas brooks"],
-    getStoragePath: () => "commentaries/cBrooks.commentary"
-  },
-  {
-    key: "CBSC",
-    name: "Cambridge Bible for Schools and Colleges",
-    author: "A. F. Kirkpatrick",
-    scope: "Whole Bible",
-    description: "Careful grammatical and historical notes prepared by Cambridge scholars.",
-    aliases: ["cbsc", "ccbsc", "cambridge bible"],
-    getStoragePath: () => "commentaries/cCBSC.commentary"
-  },
-  {
-    key: "PHC",
-    name: "The Preacher's Complete Homiletical Commentary",
-    author: "Joseph S. Exell",
-    scope: "Whole Bible",
-    description: "Exhaustive homiletic outlines, critical notes, and main sermon points on every paragraph.",
-    aliases: ["phc", "cphc", "homiletical commentary"],
-    getStoragePath: () => "commentaries/cPHC.commentary"
-  },
-  {
-    key: "ICCNT",
-    name: "International Critical Commentary",
-    author: "Various Scholars",
-    scope: "New Testament",
-    description: "Rigorous scholarly textual and linguistic commentary on the New Testament.",
-    aliases: ["iccnt", "ciccnt", "icc"],
-    getStoragePath: () => "commentaries/cICCNT.commentary"
   }
 ];
 

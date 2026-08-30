@@ -26,7 +26,7 @@ Try out the live public instance hosted on Cloudflare Workers:
 - **Edge Cloudflare Execution**: Sub-50ms cold start, multi-tier LRU caching, and streaming JSON-RPC / Streamable HTTP transports.
 - **Hybrid Storage**:
   - **Cloudflare D1 (Serverless SQLite)**: Ultra-fast indexing for Strong's Hebrew Lexicon (BDB), ISBE/Easton's Encyclopedias, and OT/NT Morphological datasets.
-  - **Cloudflare R2 (Object Storage)**: High-capacity storage for 26 classical commentary sets, BSB/NET/KJV/OHGB Bible databases, and cross-reference collections.
+  - **Cloudflare R2 (Object Storage)**: High-capacity storage for 22 classical & modern commentary sets, BSB/NET/KJV/OHGB Bible databases, and cross-reference collections.
 - **Token Optimization**: Reclaims **33,000+ tokens of context window** on every turn.
 
 ---
@@ -77,7 +77,7 @@ npx wrangler secret put API_KEY
 
 The Berean Study Suite is strictly built on **100% Public Domain** classical historical works and **Open-Access (CC BY-SA 4.0)** academic datasets:
 
-* **27 Classical & Modern Commentary Sets**: Expository, grammatical, homiletical, and historical commentaries by Matthew Henry, John Calvin, John Gill, Albert Barnes, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, and the Tyndale Open Study Notes.
+* **22 Deployed Commentary Sets (Cloudflare R2)**: Expository, grammatical, homiletical, and historical commentaries by Matthew Henry, John Calvin, John Gill, Albert Barnes, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, and the Tyndale Open Study Notes.
 * **8 Bible Translations & Manuscript Editions**: BSB, NET, KJV, ASV, WEB, Open Hebrew & Greek Bible (OHGB), Septuagint (LXX), and OHGB Word-by-Word Interlinear.
 * **7 Original Language Lexicons**: STEPBible TBESG/TBESH, Thayer Greek, BDB Hebrew, LSJ, and morphological concordances.
 * **Academic Reference & Dictionaries**: Tyndale Open Bible Dictionary (6,010 articles), ISBE Encyclopedia, Easton's, Smith's, Nave's Topical, and TSK Cross-References.

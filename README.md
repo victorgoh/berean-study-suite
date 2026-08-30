@@ -11,7 +11,7 @@
 
 The **Berean Study Suite** is a unified, local-first research platform featuring:
 
-1. **Berean MCP Server (`berean-mcp`)**: Universal Model Context Protocol server providing **35 exegetical tools** (23 specialized single-engine tools + 12 high-speed composite Study Packs), 26 classical commentary sets, 8 Bible translations/manuscript editions, Greek/Hebrew lexicons, and full REST/OpenAPI/Swagger endpoints for any MCP client (Claude Desktop, Cursor, ChatGPT, Antigravity).
+1. **Berean MCP Server (`berean-mcp`)**: Universal Model Context Protocol server providing **35 exegetical tools** (23 specialized single-engine tools + 12 high-speed composite Study Packs), 22 classical & modern commentary sets deployed on Cloudflare R2, 8 Bible translations/manuscript editions, Greek/Hebrew lexicons, and full REST/OpenAPI/Swagger endpoints for any MCP client (Claude Desktop, Cursor, ChatGPT, Antigravity).
 2. **15 Theological Personas & Autonomous Pipelines**: 15 specialized theological personas, exegesis skills (`berean://skills/...`), universal typography standards (`berean://rules/typography`), and study prompts embedded directly into the MCP server with zero static token overhead.
 
 ---
@@ -80,7 +80,7 @@ The **Berean MCP Server** delivers **35 total tools** (23 specialized single-eng
 
 ### 2. Specialized Single-Engine Tools
 - **Scripture & Texts**: `bible_lookup`, `bible_search`, `daily_reading`
-- **Commentaries**: `commentary_lookup` (26 classical commentary sets with intelligent alias resolution)
+- **Commentaries**: `commentary_lookup` (22 deployed commentary sets with intelligent alias resolution)
 - **Linguistics & Morphology**: `lexicon_lookup` (Strong's, Thayer, BDB, LSJ), `morphology_lookup` (Greek & Hebrew word-by-word syntax)
 - **Topical & Reference**: `topic_study`, `character_lookup` (with ancestry and relationship trees), `location_lookup` (with GPS coordinates and map links), `theological_dictionary` (Easton's, ISBE Encyclopedia, Smith's), `biblical_promises`
 - **Context & Structure**: `parallel_passages` (Gospel harmonies and OT parallels), `book_analysis`, `chapter_summary`, `bible_names`, `chronology`, `cross_references`
@@ -93,7 +93,7 @@ The **Berean MCP Server** delivers **35 total tools** (23 specialized single-eng
 
 The Berean Study Suite is strictly built on **100% Public Domain** classical historical works and **Open-Access (CC BY-SA 4.0)** academic datasets:
 
-* **27 Classical & Modern Commentary Sets**: Expository, grammatical, homiletical, and historical commentaries by Matthew Henry, John Calvin, John Gill, Albert Barnes, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, and the Tyndale Open Study Notes.
+* **22 Deployed Commentary Sets (Cloudflare R2)**: Expository, grammatical, homiletical, and historical commentaries by Matthew Henry, John Calvin, John Gill, Albert Barnes, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, and the Tyndale Open Study Notes.
 * **8 Bible Translations & Manuscript Editions**: BSB, NET, KJV, ASV, WEB, Open Hebrew & Greek Bible (OHGB), Septuagint (LXX), and OHGB Word-by-Word Interlinear.
 * **7 Original Language Lexicons**: STEPBible TBESG/TBESH, Thayer Greek, BDB Hebrew, LSJ, and morphological concordances.
 * **Academic Reference & Dictionaries**: Tyndale Open Bible Dictionary (6,010 articles), ISBE Encyclopedia, Easton's, Smith's, Nave's Topical, and TSK Cross-References.

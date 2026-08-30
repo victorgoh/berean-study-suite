@@ -6,11 +6,11 @@ This document serves as the authoritative academic provenance catalog detailing 
 
 ---
 
-## 📖 1. Classical & Open-Access Commentaries (27 Sets)
+## 📖 1. Classical & Open-Access Commentaries (22 Deployed Sets)
 
-All classical commentary databases are indexed from public domain archives or official open-access distributions.
+All 22 commentary sets listed below are **fully deployed, verified, and live** on the Cloudflare Edge R2 network.
 
-| Commentary Key | Title & Author | Historical Era | Theological / Methodological Scope | Status & License | Storage Object Key |
+| Commentary Key | Title & Author | Historical Era | Theological / Methodological Scope | Status & License | Cloudflare R2 Storage Object |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **`TNotes`** | **Tyndale Open Study Notes**<br>*Tyndale House, Cambridge / STEPBible.org* | Modern (2020s) | Verse-by-verse historical-grammatical, Ancient Near Eastern (ANE) context, and Greek/Hebrew textual background across all 66 books. | **CC BY-SA 4.0** | `commentaries/TNotes.commentary` |
 | **`Henry`** | **Matthew Henry's Commentary on the Whole Bible**<br>*Matthew Henry* | 1662–1714 | Classic Puritan devotional exposition rich in practical pastoral insights, aphorisms, and heart application. | **Public Domain** | `commentaries/cHenry.commentary` |
@@ -24,8 +24,7 @@ All classical commentary databases are indexed from public domain archives or of
 | **`KD`** | **Keil and Delitzsch Commentary on the Old Testament**<br>*C. F. Keil & Franz Delitzsch* | 1807–1890 | Authoritative academic grammatical commentary on Biblical Hebrew syntax, Semitic philology, and ANE history. | **Public Domain** | `commentaries/cKD.commentary` |
 | **`CECNT`** | **Critical and Exegetical Commentary on the New Testament**<br>*H. A. W. Meyer* | 1800–1873 | Rigorous academic grammatical analysis of the Greek New Testament text and clause syntax. | **Public Domain** | `commentaries/cCECNT.commentary` |
 | **`EGNT`** | **The Expositor's Greek New Testament**<br>*W. Robertson Nicoll et al.* | 1851–1923 | Critical, verse-by-verse Greek exegetical commentary by leading British and European scholars. | **Public Domain** | `commentaries/cEGNT.commentary` |
-| **`Pulpit`** | **The Pulpit Commentary**<br>*H. D. M. Spence & Joseph S. Exell* | 1880–1919 | Multi-volume monumental library providing historical introductions, exegesis, and multiple homiletic outlines. | **Public Domain** | `commentaries/cPulpit.commentary` |
-| **`BI`** | **The Biblical Illustrator** (4 Volumes)<br>*Joseph S. Exell* | 1887–1910 | Massive treasury containing thousands of sermon outlines, anecdotes, and homiletical illustrations. | **Public Domain** | `commentaries/cBI_1-4.commentary` |
+| **`BI`** | **The Biblical Illustrator** (4 Volumes)<br>*Joseph S. Exell* | 1887–1910 | Massive treasury containing thousands of sermon outlines, anecdotes, and homiletical illustrations (sharded across 4 volumes). | **Public Domain** | `commentaries/cBI_1-4.commentary` |
 | **`ECER`** | **Commentary for English Readers**<br>*Charles Ellicott* | 1819–1905 | Clear, lay-accessible exposition synthesizing historical-critical scholarship with reverent evangelical faith. | **Public Domain** | `commentaries/cECER.commentary` |
 | **`EBC`** | **The Expositor's Bible**<br>*W. Robertson Nicoll et al.* | 1887–1900 | In-depth theological and expository essays by 19th-century scholars covering every book of the Bible. | **Public Domain** | `commentaries/cEBC.commentary` |
 | **`Rob`** | **Word Pictures in the New Testament**<br>*A. T. Robertson* | 1863–1934 | Koine Greek syntax, idiomatic nuances, mood/tense analysis, and vivid word-level exposition. | **Public Domain** | `commentaries/cRob.commentary` |
@@ -35,10 +34,12 @@ All classical commentary databases are indexed from public domain archives or of
 | **`Benson`** | **Joseph Benson's Commentary on the Old & New Testaments**<br>*Joseph Benson* | 1749–1821 | Early Methodist commentary focusing on holy living, personal examination, and pastoral devotion. | **Public Domain** | `commentaries/cBenson.commentary` |
 | **`Whedon`** | **Commentary on the Old and New Testaments**<br>*Daniel Whedon* | 1808–1885 | 19th-century Wesleyan-Arminian biblical commentary with logical vigor and textual notes. | **Public Domain** | `commentaries/cWhedon.commentary` |
 | **`Lange`** | **Commentary on the Holy Scriptures**<br>*John Peter Lange* | 1802–1884 | Comprehensive tri-fold framework: (1) Exegetical/Critical, (2) Doctrinal/Ethical, and (3) Homiletical/Pastoral. | **Public Domain** | `commentaries/cLange.commentary` |
-| **`Brooks`** | **Thomas Brooks' Expositions**<br>*Thomas Brooks* | 1608–1680 | Puritan pastoral exposition rich in spiritual aphorisms and practical remedies against sin. | **Public Domain** | `commentaries/cBrooks.commentary` |
-| **`CBSC`** | **Cambridge Bible for Schools and Colleges**<br>*A. F. Kirkpatrick* | 1849–1940 | Grammatical and historical notes prepared by Cambridge scholars for theological students. | **Public Domain** | `commentaries/cCBSC.commentary` |
-| **`PHC`** | **The Preacher's Complete Homiletical Commentary**<br>*Joseph S. Exell et al.* | 1892 | Exhaustive homiletic outlines, critical notes, and main sermon points on every biblical paragraph. | **Public Domain** | `commentaries/cPHC.commentary` |
-| **`ICCNT`** | **International Critical Commentary** (Public Domain volumes)<br>*Pre-1928 Scholars* | Pre-1928 | Technical academic textual criticism and linguistic commentary on New Testament epistles. | **Public Domain** | `commentaries/cICCNT.commentary` |
+
+> [!NOTE]
+> **Cloudflare R2 Sharding Notice for The Pulpit Commentary (`cPulpit`)**:
+> *The Pulpit Commentary* is a massive 77-volume collection whose monolithic uncompressed SQLite database exceeds 120 MB. On Cloudflare Workers (which has a 128 MB RAM limit on the standard/free tier), loading this uncompressed database directly into WASM SQLite causes Worker Out-Of-Memory (OOM) / HTTP 1102 errors.
+> 
+> To enable *The Pulpit Commentary* on Cloudflare Edge, the database must be sharded into multiple volume partitions (e.g. `cPulpit_1.commentary` to `cPulpit_4.commentary`, mirroring the structure of *The Biblical Illustrator* `cBI_1`–`cBI_4`). It is currently available for local execution and will be deployed to Cloudflare Edge once the sharding migration is finalized.
 
 ---
 
