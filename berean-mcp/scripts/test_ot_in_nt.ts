@@ -50,7 +50,7 @@ async function runTests() {
   console.log("Title in formatted text:", packRes.formattedText.split("\n")[0]);
   console.log("Sections present:", Object.keys(packRes.sections || {}));
 
-  if (!packRes.formattedText.includes("# 📜 Apostolic Hermeneutics & OT-in-NT Fulfillment Pack: Hebrews 8:8-12")) {
+  if (!packRes.formattedText.includes("# Apostolic Hermeneutics & OT-in-NT Fulfillment Pack: Hebrews 8:8-12")) {
     console.error("❌ Title header mismatch in ot_in_nt_study_pack");
     process.exit(1);
   }

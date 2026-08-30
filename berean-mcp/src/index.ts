@@ -347,13 +347,13 @@ export default {
 
     if (url.pathname === "/tools/interlinear_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getInterlinearStudyPack(env, body.reference || body.passage || "Philippians 4:4-8", body.glossary_filter, body.gloss_color);
+      const res = await getInterlinearStudyPack(env, body.reference || body.passage || "Philippians 4:4-8", body.glossary_filter, body.gloss_color, body.display_mode || body.displayMode);
       return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
     }
 
     if (url.pathname === "/tools/interlinear_lookup" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupInterlinear(env, body.reference || body.passage || "Philippians 4:4-8", body.glossary_filter, body.gloss_color);
+      const res = await lookupInterlinear(env, body.reference || body.passage || "Philippians 4:4-8", body.glossary_filter, body.gloss_color, body.display_mode || body.displayMode);
       return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
     }
 

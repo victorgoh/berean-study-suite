@@ -270,9 +270,13 @@ def import_dictionary(is_remote=True, skip_schema=False, batch_size=100, offset=
         is_remote=is_remote,
         skip_schema=skip_schema,
         col_names=("path", "content"),
+        offset=offset
+    )
+
 def import_step_lexicon(is_remote=True, skip_schema=False, batch_size=100, offset=0, db_name="biblemate-reference"):
-    src = os.path.join(DATA_DIR, "lexicons", "step_lexicon.sqlite")
+    src = os.path.join(os.path.dirname(__file__), "..", "data", "lexicons", "step_lexicon.sqlite")
     if not os.path.exists(src):
+        src = os.path.join(DATA_DIR, "lexicons", "step_lexicon.sqlite")
         src = os.path.join(os.path.dirname(__file__), "..", "data", "lexicons", "step_lexicon.sqlite")
     
     create_sql = """

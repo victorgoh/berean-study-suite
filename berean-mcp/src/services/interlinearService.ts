@@ -15,16 +15,40 @@ const HEBREW_COMMON_LEMMAS = new Set([
   "אֲנִי", "אָנֹכִי", "אַתָּה", "זֶה", "זֹאת", "עִם", "לֹא", "אַל", "גַּם", "עַד", "כֹּה", "כַּאֲשֶׁר"
 ]);
 
+/**
+ * Converts a 1-based index into an alphabetical label:
+ * 1 -> a, 2 -> b, ..., 26 -> z, 27 -> aa, 28 -> ab, etc.
+ */
+export function getAlphaLabel(index: number): string {
+  let label = "";
+  let n = index - 1;
+  while (n >= 0) {
+    label = String.fromCharCode(97 + (n % 26)) + label;
+    n = Math.floor(n / 26) - 1;
+  }
+  return label || "a";
+}
+
 export interface GlossaryEntry {
   index: number;
+  alphaLabel: string;
   wordInText: string;
   lemma: string;
   transliteration: string;
   strongs: string;
   datasetTag: string;
   morphology: string;
+  stepMorphology?: string;
   gloss: string;
   definition: string;
+  subEntries?: {
+    strongs: string;
+    lemma: string;
+    transliteration: string;
+    morphology: string;
+    gloss: string;
+    definition: string;
+  }[];
 }
 
 export interface InterlinearVerse {
@@ -38,6 +62,7 @@ export interface InterlinearVerse {
     lemma: string;
     strongs?: string;
     glossaryIndex?: number;
+    alphaLabel?: string;
   }[];
 }
 
@@ -45,6 +70,7 @@ export interface InterlinearResult {
   reference: string;
   bookName: string;
   isOT: boolean;
+  displayMode: "inline" | "ruby" | "table";
   verses: InterlinearVerse[];
   glossary: GlossaryEntry[];
 }
@@ -59,111 +85,102 @@ function extractCanonicalStrongs(raw: string | undefined, isOT: boolean): string
   return `${prefix}0000`;
 }
 
+/**
+ * Enhanced Interlinear Study Pack Service
+ * Utilizes STEPBible TBESG & TBESH lexicons for original language parsing,
+ * contextual glosses, disambiguated roots, and customizable display modes (inline, ruby, table).
+ */
 export async function lookupInterlinear(
   env: Env,
   reference: string,
-  glossaryFilter: "rare_and_notable" | "all_words" | "none" = "rare_and_notable",
-  glossColor: string = "#888888"
+  glossaryFilter: "rare_and_notable" | "all" | "none" = "rare_and_notable",
+  glossColor: string = "#777777",
+  displayMode: "inline" | "ruby" | "table" = "inline"
 ): Promise<StudyPackResponse & { result?: InterlinearResult }> {
   const parsed = parseReferenceString(reference);
   if (!parsed) {
-    const errorMsg = `Invalid passage reference for interlinear lookup: '${reference}'`;
     return {
-      error: errorMsg,
-      formattedText: `# Inline Interlinear Study Pack: ${reference}\n\n*Error: ${errorMsg}*\n`,
-      sections: { error: errorMsg },
-      metadata: {
-        title: `Inline Interlinear Study Pack: ${reference}`,
-        reference,
-        timestamp: new Date().toISOString()
-      }
+      formattedText: `# Inline Interlinear Study Pack: ${reference}\n\n*Error: Could not parse reference '${reference}'.*`,
+      sections: { error: `Invalid biblical reference '${reference}'` }
     };
   }
 
   const isOT = parsed.bookNumber <= 39;
-  let rawWords: MorphologyWord[] = [];
+  const dbFile = isOT ? "morphology/OTMorph.sqlite" : "morphology/NTMorph.sqlite";
 
-  // 1. Query Cloudflare D1 (biblemate-morphology)
-  if (env.MORPHOLOGY_DB) {
+  // 1. First attempt D1 morphology query
+  let rawWords: MorphologyWord[] = [];
+  let d1Success = false;
+
+  if (env && env.MORPHOLOGY_DB) {
     try {
-      const stmt = env.MORPHOLOGY_DB.prepare(
-        `SELECT WordID, Book, Chapter, Verse, Word, LexicalEntry, Morphology, Lexeme, Transliteration, Gloss, Translation 
-         FROM morphology 
-         WHERE Book = ? AND Chapter = ? AND Verse >= ? AND Verse <= ? 
-         ORDER BY Chapter ASC, Verse ASC, WordID ASC`
-      ).bind(parsed.bookNumber, parsed.chapterStart, parsed.verseStart, parsed.verseEnd);
-      const res = await stmt.all<MorphologyWord>();
-      rawWords = res.results || [];
+      let d1Sql = "";
+      let d1Params: (number | string)[] = [];
+
+      if (parsed.chapterStart === parsed.chapterEnd) {
+        d1Sql = `SELECT * FROM morphology WHERE Book = ? AND Chapter = ? AND Verse >= ? AND Verse <= ? ORDER BY WordID ASC, Chapter ASC, Verse ASC`;
+        d1Params = [parsed.bookNumber, parsed.chapterStart, parsed.verseStart, parsed.verseEnd];
+      } else {
+        d1Sql = `SELECT * FROM morphology WHERE Book = ? AND ((Chapter = ? AND Verse >= ?) OR (Chapter > ? AND Chapter < ?) OR (Chapter = ? AND Verse <= ?)) ORDER BY WordID ASC, Chapter ASC, Verse ASC`;
+        d1Params = [parsed.bookNumber, parsed.chapterStart, parsed.verseStart, parsed.chapterStart, parsed.chapterEnd, parsed.chapterEnd, parsed.verseEnd];
+      }
+
+      const stmt = env.MORPHOLOGY_DB.prepare(d1Sql).bind(...d1Params);
+      const d1Result = await stmt.all<MorphologyWord>();
+      if (d1Result.results && d1Result.results.length > 0) {
+        rawWords = d1Result.results;
+        d1Success = true;
+      }
     } catch (d1Err: any) {
-      console.warn("D1 morphology query failed, falling back to SQLite:", d1Err.message);
+      console.warn("D1 morphology query fallback in interlinear service:", d1Err.message);
     }
   }
 
-  // 2. Fallback path (R2 / SQLite)
-  if (rawWords.length === 0 && env.BEREAN_DATA) {
-    const { db, error: dbError } = await getDatabase(env, "morphology.sqlite");
-    if (db) {
-      try {
-        const stmt = db.prepare(
-          `SELECT WordID, Book, Chapter, Verse, Word, LexicalEntry, Morphology, Lexeme, Transliteration, Gloss, Translation 
-           FROM morphology 
-           WHERE Book = ? AND Chapter = ? AND Verse >= ? AND Verse <= ? 
-           ORDER BY Chapter ASC, Verse ASC, WordID ASC`
-        );
-        stmt.bind([parsed.bookNumber, parsed.chapterStart, parsed.verseStart, parsed.verseEnd]);
-        while (stmt.step()) {
-          rawWords.push(stmt.getAsObject() as any);
-        }
-        stmt.free();
-      } catch (sqlErr: any) {
-        const errorMsg = `Morphology query error: ${sqlErr.message}`;
-        return {
-          error: errorMsg,
-          formattedText: `# Inline Interlinear Study Pack: ${reference}\n\n*Error: ${errorMsg}*\n`,
-          sections: { error: errorMsg },
-          metadata: {
-            title: `Inline Interlinear Study Pack: ${reference}`,
-            reference,
-            language: isOT ? "Hebrew/Aramaic" : "Greek",
-            isOT,
-            timestamp: new Date().toISOString()
-          }
-        };
-      }
-    } else if (!env.MORPHOLOGY_DB) {
-      const errorMsg = dbError || "Morphology database not available.";
+  // 2. Fallback to R2/SQLite if D1 didn't return rows
+  if (!d1Success) {
+    const { db, error: dbError } = await getDatabase(env, dbFile);
+    if (!db) {
       return {
-        error: errorMsg,
-        formattedText: `# Inline Interlinear Study Pack: ${reference}\n\n*Error: ${errorMsg}*\n`,
-        sections: { error: errorMsg },
-        metadata: {
-          title: `Inline Interlinear Study Pack: ${reference}`,
-          reference,
-          language: isOT ? "Hebrew/Aramaic" : "Greek",
-          isOT,
-          timestamp: new Date().toISOString()
-        }
+        formattedText: `# Inline Interlinear Study Pack: ${reference}\n\n*Error: Morphology database unavailable (${dbError || dbFile}).*`,
+        sections: { error: dbError || "Morphology database unavailable" }
+      };
+    }
+
+    try {
+      let sql: string;
+      let params: (number | string)[];
+
+      if (parsed.chapterStart === parsed.chapterEnd) {
+        sql = `SELECT * FROM Words WHERE Book = ? AND Chapter = ? AND Verse >= ? AND Verse <= ? ORDER BY Chapter ASC, Verse ASC, ID ASC`;
+        params = [parsed.bookNumber, parsed.chapterStart, parsed.verseStart, parsed.verseEnd];
+      } else {
+        sql = `SELECT * FROM Words WHERE Book = ? AND ((Chapter = ? AND Verse >= ?) OR (Chapter > ? AND Chapter < ?) OR (Chapter = ? AND Verse <= ?)) ORDER BY Chapter ASC, Verse ASC, ID ASC`;
+        params = [parsed.bookNumber, parsed.chapterStart, parsed.verseStart, parsed.chapterStart, parsed.chapterEnd, parsed.chapterEnd, parsed.verseEnd];
+      }
+
+      const stmt = db.prepare(sql);
+      stmt.bind(params);
+
+      while (stmt.step()) {
+        rawWords.push(stmt.getAsObject() as unknown as MorphologyWord);
+      }
+      stmt.free();
+    } catch (err: any) {
+      return {
+        formattedText: `# Inline Interlinear Study Pack: ${reference}\n\n*Error executing interlinear query: ${err.message}*`,
+        sections: { error: err.message }
       };
     }
   }
 
   if (rawWords.length === 0) {
-    const errorMsg = `No morphology records found for ${parsed.bookName} ${reference}.`;
     return {
-      error: errorMsg,
-      formattedText: `# Inline Interlinear Study Pack: ${reference}\n\n*Error: ${errorMsg}*\n`,
-      sections: { error: errorMsg },
-      metadata: {
-        title: `Inline Interlinear Study Pack: ${reference}`,
-        reference,
-        language: isOT ? "Hebrew/Aramaic" : "Greek",
-        isOT,
-        timestamp: new Date().toISOString()
-      }
+      formattedText: `# Inline Interlinear Study Pack: ${reference}\n\n*No original language interlinear records found for ${reference}.*`,
+      sections: { error: "No interlinear records found" }
     };
   }
 
-  // 3. Group words by verse
+  // 3. Group words by Verse (Chapter:Verse)
   const versesMap = new Map<string, MorphologyWord[]>();
   for (const w of rawWords) {
     const key = `${w.Chapter}:${w.Verse}`;
@@ -193,9 +210,11 @@ export async function lookupInterlinear(
 
         const standardizedStrongs = extractCanonicalStrongs(w.LexicalEntry, isOT);
         const datasetTag = isOT ? `[${standardizedStrongs} • TBESH]` : `[${standardizedStrongs} • TBESG]`;
+        const alphaLabel = getAlphaLabel(entryCounter);
 
         glossaryEntries.push({
           index: entryCounter,
+          alphaLabel,
           wordInText: w.Word,
           lemma,
           transliteration: w.Transliteration || "",
@@ -210,14 +229,27 @@ export async function lookupInterlinear(
       }
     }
 
-    // Fetch lexicon definitions for glossary entries using modern TBESG / TBESH
+    // Fetch rich lexicon definitions for glossary entries using modern TBESG / TBESH
     for (const entry of glossaryEntries) {
       if (entry.strongs && entry.strongs !== "G0000" && entry.strongs !== "H0000") {
         try {
           const lexRes = await lookupLexiconEntry(env, entry.strongs, "step");
-          if (lexRes.definition && !lexRes.error) {
-            const firstPara = lexRes.definition.split("\n\n")[0].replace(/^###.*?\n/, "").trim();
-            entry.definition = firstPara.length > 250 ? firstPara.slice(0, 247) + "..." : firstPara;
+          if (lexRes.stepEntries && lexRes.stepEntries.length > 0) {
+            const primary = lexRes.stepEntries[0];
+            if (primary.gloss) entry.gloss = primary.gloss;
+            if (primary.transliteration) entry.transliteration = primary.transliteration;
+            if (primary.morphology) entry.stepMorphology = primary.morphology;
+            entry.subEntries = lexRes.stepEntries;
+
+            if (lexRes.stepEntries.length === 1) {
+              entry.definition = primary.definition.trim();
+            } else {
+              entry.definition = lexRes.stepEntries.map(sub => 
+                `* **${sub.strongs}** (${sub.lemma} • *${sub.transliteration}* — \`${sub.morphology}\`): **${sub.gloss}**\n${sub.definition.split("\n").map(l => `  ${l}`).join("\n")}`
+              ).join("\n\n");
+            }
+          } else if (lexRes.definition && !lexRes.error) {
+            entry.definition = lexRes.definition.trim();
           }
         } catch {
           // Keep definition empty if lookup fails
@@ -226,7 +258,7 @@ export async function lookupInterlinear(
     }
   }
 
-  // 5. Build structured result and Markdown formatted text
+  // 5. Build structured result and Markdown formatted text based on displayMode
   const structuredVerses: InterlinearVerse[] = [];
   const verseMarkdownBlocks: string[] = [];
 
@@ -236,25 +268,51 @@ export async function lookupInterlinear(
     const v = parseInt(vStr, 10);
 
     const structuredWords = [];
-    const inlineWordSpans = [];
+    const inlineWordSpans: string[] = [];
+    const tableRows: string[] = [];
 
     for (const w of wordsInVerse) {
       const lemma = (w.Lexeme || w.Word || "").trim();
       const glossIndex = lemmaToEntryMap.get(lemma);
-      const gloss = w.Gloss || w.Translation || "";
+      const alpha = glossIndex ? getAlphaLabel(glossIndex) : undefined;
+      const bsbTranslation = (w.Translation !== undefined && w.Translation !== null && w.Translation.trim() !== "")
+        ? w.Translation.trim()
+        : (w.Gloss || "").trim();
 
       structuredWords.push({
         word: w.Word,
         transliteration: w.Transliteration || "",
-        gloss,
+        gloss: bsbTranslation,
         morphology: w.Morphology || "",
         lemma,
         strongs: w.LexicalEntry,
-        glossaryIndex: glossIndex
+        glossaryIndex: glossIndex,
+        alphaLabel: alpha
       });
 
-      const anchorSup = glossIndex ? `<sup>[${glossIndex}](#entry-${glossIndex})</sup>` : "";
-      inlineWordSpans.push(`**${w.Word}**${anchorSup} <span style="color: ${glossColor};">${gloss}</span>`);
+      const anchorSup = alpha
+        ? `<sup><a href="#entry-${alpha}" style="font-size: 0.68em; color: #888888; text-decoration: none;">${alpha}</a></sup>`
+        : "";
+
+      if (displayMode === "ruby") {
+        // Ruby stacking: English word with increased size and distinct color beneath original language
+        if (bsbTranslation) {
+          inlineWordSpans.push(`<ruby style="margin-right: 0.35em;">**${w.Word}**<rt style="font-size: 0.85em; color: ${glossColor}; font-weight: normal;">${bsbTranslation}</rt></ruby>${anchorSup}`);
+        } else {
+          inlineWordSpans.push(`**${w.Word}**${anchorSup}`);
+        }
+      } else if (displayMode === "table") {
+        // Tabular row
+        const lexTag = alpha ? `[\`${extractCanonicalStrongs(w.LexicalEntry, isOT)}\` (${alpha})](#entry-${alpha})` : `\`${extractCanonicalStrongs(w.LexicalEntry, isOT)}\``;
+        tableRows.push(`| **${w.Word}** | *${w.Transliteration || ""}* | <span style="color: ${glossColor};">${bsbTranslation}</span> | \`${w.Morphology || ""}\` | ${lexTag} |`);
+      } else {
+        // Default "inline" mode: No brackets on english words, color differentiation, small pure alphabetic label
+        if (bsbTranslation) {
+          inlineWordSpans.push(`**${w.Word}**${anchorSup} <span style="color: ${glossColor}; font-size: 0.9em;">${bsbTranslation}</span>`);
+        } else {
+          inlineWordSpans.push(`**${w.Word}**${anchorSup}`);
+        }
+      }
     }
 
     structuredVerses.push({
@@ -263,7 +321,15 @@ export async function lookupInterlinear(
       words: structuredWords
     });
 
-    verseMarkdownBlocks.push(`**[${v}]** ` + inlineWordSpans.join(" "));
+    if (displayMode === "table") {
+      let tBlock = `### Verse ${v}\n\n`;
+      tBlock += `| Original | Transliteration | Translation | Parsing | Lexicon |\n`;
+      tBlock += `| :--- | :--- | :--- | :--- | :--- |\n`;
+      tBlock += tableRows.join("\n");
+      verseMarkdownBlocks.push(tBlock);
+    } else {
+      verseMarkdownBlocks.push(`**[${v}]** ` + inlineWordSpans.join(" "));
+    }
   }
 
   // 6. Build the Complete Formatted Markdown Output conforming to Composite Study Pack standards
@@ -278,14 +344,27 @@ export async function lookupInterlinear(
   if (glossaryEntries.length > 0) {
     let glossaryText = "";
     for (const g of glossaryEntries) {
-      glossaryText += `<a id="entry-${g.index}"></a>\n`;
-      glossaryText += `* <sup>**[${g.index}]**</sup> **${g.lemma}** (*${g.transliteration}*) — \`${g.datasetTag}\` *(in text: **${g.wordInText}**)*  \n`;
-      if (g.morphology) {
-        glossaryText += `  * **Parsing:** ${g.morphology}  \n`;
+      glossaryText += `<a id="entry-${g.alphaLabel}"></a>\n`;
+      glossaryText += `* <sup>**${g.alphaLabel}**</sup> **${g.lemma}** (*${g.transliteration}*) — \`${g.datasetTag}\` *(in text: **${g.wordInText}**)*  \n`;
+      
+      const morphParts: string[] = [];
+      if (g.morphology) morphParts.push(`Parsing: \`${g.morphology}\``);
+      if (g.stepMorphology) morphParts.push(`POS: \`${g.stepMorphology}\``);
+      if (morphParts.length > 0) {
+        glossaryText += `  * **Grammar:** ${morphParts.join(" • ")}  \n`;
       }
-      glossaryText += `  * **Gloss:** *${g.gloss}*  \n`;
-      if (g.definition) {
-        glossaryText += `  * **Lexical Definition:** ${g.definition}  \n`;
+      
+      glossaryText += `  * **Standard Gloss:** **${g.gloss}**  \n`;
+      
+      if (g.subEntries && g.subEntries.length > 1) {
+        glossaryText += `  * **Disambiguated Roots & Contextual Senses (${g.subEntries.length} sub-entries):**  \n`;
+        for (const sub of g.subEntries) {
+          glossaryText += `    * **${sub.strongs}** — *${sub.gloss}*: ${sub.definition.replace(/\n+/g, " ").trim()}  \n`;
+        }
+      } else if (g.definition) {
+        glossaryText += `  * **STEP Contextual Senses & Definition:**\n`;
+        const indentedDef = g.definition.split("\n").map(line => `    ${line}`).join("\n");
+        glossaryText += `${indentedDef}\n`;
       }
       glossaryText += `\n`;
     }
@@ -301,6 +380,7 @@ export async function lookupInterlinear(
     reference,
     bookName: parsed.bookName,
     isOT,
+    displayMode,
     verses: structuredVerses,
     glossary: glossaryEntries
   };
@@ -314,6 +394,7 @@ export async function lookupInterlinear(
       bookName: parsed.bookName,
       language: isOT ? "Hebrew/Aramaic" : "Greek",
       isOT,
+      displayMode,
       glossaryFilter,
       glossColor,
       versesCount: structuredVerses.length,

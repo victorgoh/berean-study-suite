@@ -206,17 +206,17 @@ async function runAllTests() {
 
   // 19. Sermon Study Pack
   await test("19. sermon_study_pack (Romans 8:28)", () =>
-    getSermonStudyPack(mockEnv, "Romans 8:28", "BSB", "Henry", true)
+    getSermonStudyPack(mockEnv, "Romans 8:28", "BSB", true, ["Henry"])
   );
 
   // 20. Devotional Study Pack
   await test("20. devotional_study_pack (Psalm 23:1-3)", () =>
-    getDevotionalStudyPack(mockEnv, "Psalm 23:1-3", "BSB", "Spur", true)
+    getDevotionalStudyPack(mockEnv, "Psalm 23:1-3", "BSB", undefined, "Peace")
   );
 
   // 21. Passage Exegesis Pack
   await test("21. passage_exegesis_pack (John 1:1-3)", () =>
-    getPassageExegesisPack(mockEnv, "John 1:1-3", "BSB", true)
+    getPassageExegesisPack(mockEnv, "John 1:1-3", "BSB")
   );
 
   // 22. Word Study Pack
@@ -236,17 +236,17 @@ async function runAllTests() {
 
   // 25. Lesson Creator Study Pack
   await test("25. lesson_creator_study_pack (James 1:2-5)", () =>
-    getLessonCreatorStudyPack(mockEnv, "James 1:2-5", "BSB", 10)
+    getLessonCreatorStudyPack(mockEnv, "James 1:2-5", "BSB", ["Henry"])
   );
 
   // 26. Prayer Guide Study Pack
   await test("26. prayer_guide_study_pack (Psalm 103:1-5)", () =>
-    getPrayerGuideStudyPack(mockEnv, "Psalm 103:1-5", "BSB", "Spur")
+    getPrayerGuideStudyPack(mockEnv, "Psalm 103:1-5", "BSB", undefined, "Comfort")
   );
 
   // 27. Covenant Theology Pack
   await test("27. covenant_theology_pack (Genesis 15:1-6)", () =>
-    getCovenantTheologyPack(mockEnv, "Genesis 15:1-6", "BSB", true)
+    getCovenantTheologyPack(mockEnv, "Genesis 15:1-6", "BSB", ["Henry"])
   );
 
   console.log("\n" + "=" * 60);

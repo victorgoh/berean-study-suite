@@ -402,9 +402,9 @@ export function getOpenApiSpec(serverUrl: string = "https://berean-mcp.victorgoh
                 schema: {
                   type: "object",
                   properties: {
-                    reference: { type: "string", example: "Philippians 4:4-8", description: "Scripture reference for interlinear study" },
-                    glossary_filter: { type: "string", enum: ["rare_and_notable", "all_words", "none"], default: "rare_and_notable", description: "Glossary filter mode" },
-                    gloss_color: { type: "string", default: "#888888", description: "HTML hex color code for the inline English gloss" }
+                    glossary_filter: { type: "string", enum: ["rare_and_notable", "all", "none"], default: "rare_and_notable", description: "Glossary filter mode" },
+                    gloss_color: { type: "string", default: "#777777", description: "HTML hex color code for the English gloss (default: '#777777')" },
+                    display_mode: { type: "string", enum: ["inline", "ruby", "table"], default: "inline", description: "Interlinear display layout mode: 'inline' (default), 'ruby' (stacked), or 'table' (structured grid)" }
                   },
                   required: ["reference"]
                 }

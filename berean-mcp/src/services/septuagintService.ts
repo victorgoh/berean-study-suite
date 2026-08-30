@@ -86,47 +86,40 @@ export async function lookupSeptuagint(
 
     const markdownLines: string[] = [];
     markdownLines.push(`# Greek Septuagint (LXX) & Brenton English: ${reference}\n`);
-    markdownLines.push(`| Verse | Brenton English Translation | Greek Septuagint (LXX) | Divergence Notes |`);
-    markdownLines.push(`| :--- | :--- | :--- | :--- |`);
+
     for (const v of verses) {
-      const divNote = v.divergence ? `⚠️ *${v.divergence}*` : "—";
-      markdownLines.push(`| **${v.chapter}:${v.verse}** | ${v.english} | ${v.greek} | ${divNote} |`);
+      markdownLines.push(`**[${v.chapter}:${v.verse}]** **${v.greek}**`);
+      markdownLines.push(`*English (Brenton):* *"${v.english}"*`);
+      if (v.divergence) {
+        markdownLines.push(`> 🔍 **MT Divergence:** ${v.divergence}`);
+      }
+      markdownLines.push("");
     }
 
     return {
-      verses,
-      formattedText: markdownLines.join("\n")
+      formattedText: markdownLines.join("\n"),
+      verses
     };
   } catch (err: any) {
-    return { error: `Septuagint query error: ${err.message}` };
+    return { error: `Septuagint lookup error: ${err.message}` };
   }
 }
 
 /**
- * Composite Study Pack: Greek Septuagint (LXX) vs Hebrew Masoretic Text (MT) Exegesis
+ * 12th Composite Study Pack: Greek Septuagint & Hebrew MT Comparative Exegesis Pack
  */
 export async function getSeptuagintStudyPack(
   env: Env,
   reference: string,
   version: string = "BSB"
-): Promise<StudyPackResponse> {
+): Promise<StudyPackResponse & { lxxVerses?: LxxVerse[] }> {
   const parsed = parseReferenceString(reference);
   if (!parsed || parsed.bookNumber > 39) {
     return {
-      error: `The Septuagint (LXX) covers the Old Testament (Books 1-39). '${reference}' is a New Testament passage.`,
       formattedText: `# Septuagint Study Pack: ${reference}\n\n*Error: The Septuagint (LXX) covers the Old Testament (Books 1-39). '${reference}' is a New Testament passage.*`,
-      sections: { error: "Passage is in the New Testament" },
-      metadata: {
-        title: `Septuagint Study Pack: ${reference}`,
-        reference,
-        isOT: false,
-        timestamp: new Date().toISOString()
-      }
+      sections: { error: "Old Testament reference required for Septuagint study pack." }
     };
   }
-
-  const sections: Record<string, string> = {};
-  let formattedText = `# Septuagint & Hebrew MT Comparative Study Pack: ${reference}\n\n`;
 
   // Parallel fetches
   const [bibleRes, hebrewRes, lxxRes, kdRes, clarkeRes, otQuotesRes, xrefRes] = await Promise.all([
@@ -138,6 +131,9 @@ export async function getSeptuagintStudyPack(
     lookupOtQuotations(env, reference),
     lookupCrossReferences(env, reference, 8)
   ]);
+
+  const sections: Record<string, string> = {};
+  let formattedText = `# Septuagint (LXX) & Hebrew MT Comparative Study Pack: ${reference}\n\n`;
 
   let sectionIdx = 1;
 
@@ -210,7 +206,7 @@ export async function getSeptuagintStudyPack(
   return {
     formattedText,
     sections,
-    result: { lxxVerses },
+    lxxVerses,
     metadata: {
       title: `Septuagint & Hebrew MT Comparative Study Pack: ${reference}`,
       reference,

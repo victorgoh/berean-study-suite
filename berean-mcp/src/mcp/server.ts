@@ -452,8 +452,8 @@ export function createMcpServer(env: Env) {
     "interlinear_study_pack",
     "High-speed composite tool that generates an inline Greek/Hebrew to English word-by-word interlinear with continuous verse layout, grammatical parsing, and original language glossary.",
     InterlinearStudyPackSchema,
-    async ({ reference, glossary_filter, gloss_color }) => {
-      const res = await getInterlinearStudyPack(env, reference, glossary_filter, gloss_color);
+    async ({ reference, glossary_filter, gloss_color, display_mode }) => {
+      const res = await getInterlinearStudyPack(env, reference, glossary_filter, gloss_color, display_mode);
       if (res.error) {
         return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
       }
@@ -466,8 +466,8 @@ export function createMcpServer(env: Env) {
     "interlinear_lookup",
     "Generate an inline word-by-word Greek/Hebrew to English interlinear with continuous verse layout and an automated glossary of rare/notable words at the bottom.",
     InterlinearLookupSchema,
-    async ({ reference, glossary_filter, gloss_color }) => {
-      const res = await lookupInterlinear(env, reference, glossary_filter, gloss_color);
+    async ({ reference, glossary_filter, gloss_color, display_mode }) => {
+      const res = await lookupInterlinear(env, reference, glossary_filter, gloss_color, display_mode);
       if (res.error) {
         return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
       }

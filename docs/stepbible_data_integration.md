@@ -24,11 +24,17 @@ This guide explains how to compile, ingest, and deploy **STEPBible.org datasets*
 All compilation scripts are provided in `berean-mcp/scripts/`:
 
 ### A. Compile Greek & Hebrew Lexicons (`prepare_step_lexicon.py`)
-Downloads the raw TBESG and TBESH data files directly from the official STEPBible-Data repository, strips raw markup, normalizes Greek/Hebrew typography, and compiles both a standalone SQLite database and a Cloudflare D1 SQL import file:
+The supported import path starts from the official [STEPBible-Data repository](https://github.com/STEPBible/STEPBible-Data). The script downloads the TBESG and TBESH source files, strips raw markup, normalizes Greek/Hebrew typography, and compiles both a standalone SQLite database and a Cloudflare D1 SQL import file:
 
 ```bash
 cd berean-mcp
 python3 scripts/prepare_step_lexicon.py
+```
+
+To reuse source files already downloaded, place them in `data/lexicons/` and run:
+
+```bash
+python3 scripts/prepare_step_lexicon.py --skip-download
 ```
 
 * **Outputs Generated**:
@@ -93,8 +99,8 @@ npx wrangler deploy
 
 For local execution with Stdio or Local HTTP on `localhost:7860`:
 
-1. Copy the generated `step_lexicon.sqlite` to `~/.biblemate/data/lexicons/step_lexicon.sqlite` (or `berean-mcp/data/lexicons/step_lexicon.sqlite`).
-2. Copy `TNotes.commentary` to `~/.biblemate/data/commentaries/cTNotes.commentary`.
+1. Copy the generated `step_lexicon.sqlite` to `~/.biblemate/data/lexicons/step_lexicon.sqlite` (or keep it at `berean-mcp/data/lexicons/step_lexicon.sqlite`).
+2. If importing Tyndale notes too, copy `TNotes.commentary` to `~/.biblemate/data/commentaries/TNotes.commentary`.
 3. Start the MCP server:
    ```bash
    npm run start:stdio
@@ -122,9 +128,17 @@ npx tsx scripts/test_septuagint.ts
 npx tsx scripts/test_ot_in_nt.ts
 npx tsx scripts/test_entities_and_units.ts
 
-# 4. Run the full 27+ tool test suite
-npm test
+# 4. Typecheck the MCP server
+npm run typecheck
 ```
+
+For a D1 import driven by the SQLite source rather than the generated SQL file, use the resumable importer:
+
+```bash
+python3 scripts/import_to_d1.py --only step
+```
+
+Use `--local` for local D1, `--ref-db <name>` for a non-default reference database, and `--offset <rows> --skip-schema` to resume an interrupted import. Confirm that the `step_lexicon` table is populated before deploying the Worker.
 
 ---
 

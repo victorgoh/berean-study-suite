@@ -11,7 +11,7 @@
 
 The **Berean Study Suite** is a unified, local-first research platform featuring:
 
-1. **Berean MCP Server (`berean-mcp`)**: Universal Model Context Protocol server providing **27 exegetical tools** (18 specialized single-engine tools + 9 high-speed composite Study Packs), 26 classical commentary sets, 7 Bible translations/manuscript editions, Greek/Hebrew lexicons, and full REST/OpenAPI/Swagger endpoints for any MCP client (Claude Desktop, Cursor, ChatGPT, Antigravity).
+1. **Berean MCP Server (`berean-mcp`)**: Universal Model Context Protocol server providing **35 exegetical tools** (23 specialized single-engine tools + 12 high-speed composite Study Packs), 26 classical commentary sets, 8 Bible translations/manuscript editions, Greek/Hebrew lexicons, and full REST/OpenAPI/Swagger endpoints for any MCP client (Claude Desktop, Cursor, ChatGPT, Antigravity).
 2. **15 Theological Personas & Autonomous Pipelines**: 15 specialized theological personas, exegesis skills (`berean://skills/...`), universal typography standards (`berean://rules/typography`), and study prompts embedded directly into the MCP server with zero static token overhead.
 
 ---
@@ -33,7 +33,7 @@ Try out the live public instance hosted globally on Cloudflare Workers:
 
 | Resource | URL | Description |
 | :--- | :--- | :--- |
-| **📖 Bible Study Explorer** | [https://berean-mcp.victorgoh.workers.dev/](https://berean-mcp.victorgoh.workers.dev/) | Reader-friendly Web UI to explore all 27 tools, scripture texts, and classical commentaries |
+| **📖 Bible Study Explorer** | [https://berean-mcp.victorgoh.workers.dev/](https://berean-mcp.victorgoh.workers.dev/) | Reader-friendly Web UI to explore all 35 tools, Scripture texts, and classical commentaries |
 | **⚡ Scalar API Reference** | [https://berean-mcp.victorgoh.workers.dev/docs](https://berean-mcp.victorgoh.workers.dev/docs) | Interactive API documentation with built-in request runner & multi-language snippets |
 | **📜 Swagger UI** | [https://berean-mcp.victorgoh.workers.dev/swagger](https://berean-mcp.victorgoh.workers.dev/swagger) | Classic OpenAPI schema visualizer & API playground |
 | **📋 OpenAPI Spec** | [https://berean-mcp.victorgoh.workers.dev/openapi.json](https://berean-mcp.victorgoh.workers.dev/openapi.json) | Complete OpenAPI 3.1.0 JSON schema |
@@ -62,7 +62,7 @@ Accessible via `berean://skills/berean-plus` and the `berean-plus-study` prompt,
 
 ## 🛠️ Berean MCP Server (`berean-mcp`)
 
-The **Berean MCP Server** delivers **27 total tools** (18 specialized single-engine tools and 9 high-performance composite study packs):
+The **Berean MCP Server** delivers **35 total tools** (23 specialized single-engine tools and 12 high-performance composite study packs):
 
 ### 1. High-Speed Composite Study Packs (Single-Turn Endpoints)
 - **`sermon_study_pack`** — Aggregates Scripture (BSB), Alexander Maclaren homiletics, Charles Simeon outlines (*Horae Homileticae*), The Biblical Illustrator, Matthew Henry, and TSK cross-references.
@@ -74,6 +74,9 @@ The **Berean MCP Server** delivers **27 total tools** (18 specialized single-eng
 - **`lesson_creator_study_pack`** — Produces structured lesson outlines, discussion questions, Albert Barnes' practical remarks, and Charles Ellicott's historical context for teachers.
 - **`prayer_guide_study_pack`** — Bundles Scripture, Spurgeon/Benson adoration, Wesley self-examination, and promises for first-person ACTS prayer.
 - **`covenant_theology_pack`** — Traces redemptive covenants throughout Scripture with John Calvin, John Gill, and ISBE Encyclopedia insights.
+- **`interlinear_study_pack`** — Provides continuous Greek/Hebrew interlinear text, morphology tags, and an original-language glossary.
+- **`ot_in_nt_study_pack`** — Compares Old Testament quotations and allusions across the Hebrew MT, Greek LXX, and Greek New Testament.
+- **`septuagint_study_pack`** — Compares LXX Greek, Brenton English, textual variants, and the Hebrew Masoretic Text.
 
 ### 2. Specialized Single-Engine Tools
 - **Scripture & Texts**: `bible_lookup`, `bible_search`, `daily_reading`
@@ -81,19 +84,70 @@ The **Berean MCP Server** delivers **27 total tools** (18 specialized single-eng
 - **Linguistics & Morphology**: `lexicon_lookup` (Strong's, Thayer, BDB, LSJ), `morphology_lookup` (Greek & Hebrew word-by-word syntax)
 - **Topical & Reference**: `topic_study`, `character_lookup` (with ancestry and relationship trees), `location_lookup` (with GPS coordinates and map links), `theological_dictionary` (Easton's, ISBE Encyclopedia, Smith's), `biblical_promises`
 - **Context & Structure**: `parallel_passages` (Gospel harmonies and OT parallels), `book_analysis`, `chapter_summary`, `bible_names`, `chronology`, `cross_references`
+- **Textual, Entity & Measurement Research**: `interlinear_lookup`, `ot_quotations_lookup`, `septuagint_lookup`, `entity_disambiguation`, `convert_ancient_units`
 - **Discovery**: `get_available_resources` (Real-time listing of active bibles, commentaries, lexicons, study packs, personas, skills, workflows, and rules)
 
 ---
 
-## 📚 Classical Commentaries & Reference Data
+## 📚 Classical Commentaries & Biblical Reference Data
 
-All classical commentary databases, lexicons, and biblical reference datasets are powered by upstream [`biblematedata`](https://pypi.org/project/biblematedata/) and **[STEPBible.org](https://www.stepbible.org/)** (Tyndale House, Cambridge):
+The Berean Study Suite integrates two primary academic research sources:
 
-- **Classical Exegesis & Homiletics**: Access extensive whole-Bible and testament-specific works by **Matthew Henry, John Calvin, John Gill, Jamieson-Fausset-Brown, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, Albert Barnes, Charles Ellicott**, and many others.
-- **STEPBible Original Language Lexicons (TBESG & TBESH)**: Extended Greek and Hebrew Strong's lexicons with disambiguated senses, transliterations, and morphological classifications from Tyndale House, Cambridge (CC BY 4.0).
-- **Tyndale Open Study Notes (TNotes)**: High-density historical-grammatical and exegetical study notes compiled by Tyndale House scholars.
-- **Dynamic Resource Discovery**: Use the `get_available_resources` MCP tool at any time to list all active translations, commentary aliases, and lexicons available in your current environment.
-- **Data Integration Guide**: See [docs/stepbible_data_integration.md](docs/stepbible_data_integration.md) for full compilation and deployment steps.
+1. **Classical Commentaries & Scripture Datasets** (via [`biblematedata`](https://pypi.org/project/biblematedata/)):
+   - **Exegesis & Homiletics**: 26 classical commentary sets across the Old and New Testaments by **Matthew Henry, John Calvin, John Gill, Jamieson-Fausset-Brown, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, Albert Barnes, Charles Ellicott**, and others.
+   - **Translations & Reference**: BSB, NET, KJV, ASV, WEB, and OHGB original language texts, Treasury of Scripture Knowledge (TSK) cross-references, Nave's & Torrey's topical concordances, Easton's Bible Dictionary, and the International Standard Bible Encyclopedia (ISBE).
+
+2. **STEPBible Datasets** (via [STEPBible.org](https://www.stepbible.org/), Tyndale House Cambridge):
+   - **TBESG & TBESH Lexicons**: Extended Strong's Greek and Hebrew lexicons with grammatical tags, glosses, transliterations, and context-disambiguated senses.
+   - **Tyndale Open Study Notes (`TNotes`)**: High-density historical-grammatical notes by Tyndale House scholars.
+   - **Septuagint (LXX) & OT in NT**: Greek Septuagint texts, Brenton English translations, Dead Sea Scrolls variant comparisons, and verbatim Hebrew MT / Greek LXX / Greek NT apostolic citation alignments.
+   - **Biblical Entities & Ancient Units**: Disambiguation profiles for biblical persons/places and conversions for ancient weights, measures, distances, and currencies.
+
+*Tip: Use the `get_available_resources` MCP tool at any time to list all active translations, commentary aliases, and lexicons in your environment.*
+
+---
+
+## 🏛️ STEPBible Data Compilation & Integration
+
+You can compile and import the latest open-access STEPBible datasets for both **local offline use** and **Cloudflare edge deployment**:
+
+### 1. Compile Datasets
+All compilation utilities are located in `berean-mcp/scripts/`:
+
+```bash
+cd berean-mcp
+
+# Greek (TBESG) & Hebrew (TBESH) Lexicons (downloads & generates SQLite + D1 SQL)
+python3 scripts/prepare_step_lexicon.py
+
+# Tyndale Open Study Notes (compiles into standard SQLite commentary format)
+python3 scripts/prepare_tnotes.py
+
+# Septuagint (LXX), OT Quotations in NT, & Biblical Entities / Ancient Units
+python3 scripts/prepare_lxx.py
+python3 scripts/prepare_ot_in_nt.py
+python3 scripts/prepare_entities_and_units.py
+```
+
+### 2. Local vs. Cloudflare Edge Deployment
+* **100% Local Offline**: Compiled SQLite databases in `data/lexicons/step_lexicon.sqlite` and `data/commentaries/TNotes.commentary` (or `~/.biblemate/data/`) are automatically detected and loaded by `npm run start:stdio` and `npm run start:http`.
+* **Cloudflare Edge (Workers + D1 + R2)**:
+  * **Import Lexicon into D1**: `npx wrangler d1 execute biblemate-reference --remote --file=data/lexicons/step_lexicon_d1.sql` (or `python3 scripts/import_to_d1.py --only step`)
+  * **Upload Auxiliaries to R2**: `python3 scripts/upload_auxiliary_to_r2.py` (or `npx wrangler r2 object put biblemate-data/commentaries/cTNotes.commentary --file=data/commentaries/TNotes.commentary --remote`)
+  * **Deploy**: `npx wrangler deploy`
+
+### 3. Verify & Test STEPBible Integration
+Run the focused verification test suite:
+```bash
+cd berean-mcp
+npx tsx scripts/test_step_lexicon.ts        # Test Greek & Hebrew extended Strong's
+npx tsx scripts/test_tnotes.ts              # Test Tyndale study notes lookup
+npx tsx scripts/test_septuagint.ts          # Test Septuagint & variants
+npx tsx scripts/test_ot_in_nt.ts            # Test OT quotations in NT alignment
+npx tsx scripts/test_entities_and_units.ts  # Test entity disambiguation & unit conversion
+```
+
+*(For comprehensive integration details and advanced options, see [docs/stepbible_data_integration.md](docs/stepbible_data_integration.md).)*
 
 ---
 
@@ -104,12 +158,13 @@ All classical commentary databases, lexicons, and biblical reference datasets ar
 > Installation and configuration are best and most effortlessly handled directly by your AI coding assistant (**Google Antigravity IDE**, **Claude Code**, **Cursor**, or **Windsurf**).
 > 
 > Simply clone the repository, open the workspace folder in your AI agent, and prompt:
-> > *"Please set up the Berean Study Suite for me. Inspect my Node environment, install dependencies in berean-mcp, and run the test suite to verify all 27 tools work."*
+> > *"Please set up the Berean Study Suite for me. Inspect my Node environment, install dependencies in berean-mcp, and run the typecheck plus focused service tests to verify all 35 tools work."*
 > 
 > Your agent will automatically inspect your environment, execute the setup steps, and ensure all tools and personas are ready for study.
 
 ### 1. Prerequisites
 - **Node.js 18+**
+- **Python 3.9+** (for dataset compilation and sync scripts)
 - **Google Antigravity IDE**, **Claude Code**, or **Cursor**
 - **Pandoc** (optional, for Word document exports: `brew install pandoc`)
 - **Cloudflare Account (Optional)**: For zero-cost serverless edge deployment with Cloudflare Workers, D1, and R2 (not required for 100% local use).
@@ -178,12 +233,13 @@ You can also start the MCP server directly from your terminal in either **Stdio*
   * Health Check: `http://localhost:7860/health`
 
 #### D. Testing Your Local Setup
-Verify that all 18 specialized single-engine tools, 9 composite study packs, and local SQLite databases are working:
+Verify that all 35 tools, 12 composite study packs, and local SQLite databases are working:
 ```bash
 cd berean-mcp
-npm test
+npm run typecheck
+npx tsx scripts/test_all_services.ts
+npx tsx scripts/test_composite_packs.ts
 ```
-*(You should see all 27 automated tests pass with 0 failures.)*
 
 ### 4. Using Berean in Any Project Workspace (`berean init` & `berean check`)
 
@@ -200,7 +256,7 @@ If you encounter any issues getting the suite to run (e.g., Node dependencies, M
 * **Google Antigravity IDE**: Open this workspace and ask the chat agent:
   > *"I'm having trouble getting the Berean Study Suite running. Please inspect my environment, fix any issues, and get everything working for me."*
 * **Claude Code / Claude Desktop**: Run `claude` in this directory or connect via MCP (see [docs/mcp_client_integration.md](docs/mcp_client_integration.md)) and prompt:
-  > *"Diagnose my Berean Study Suite setup, ensure all Node dependencies are installed, and test that all 27 MCP tools are live."*
+  > *"Diagnose my Berean Study Suite setup, ensure all Node dependencies are installed, run typecheck and the focused service tests, and verify that all 35 MCP tools are live."*
 * **Cursor / Windsurf**: Open this project in Agent mode and prompt:
   > *"Help me set up Berean Study Suite. Check my Node environment and ensure the MCP server tests pass."*
 
@@ -249,7 +305,7 @@ Connect your studies directly to your personal notes:
 
 ```
 ├── berean-mcp/           # Cloudflare Edge & Stdio MCP Server (TypeScript)
-│   ├── src/              # Server implementation, 27 tools, prompts & resources
+│   ├── src/              # Server implementation, 35 tools, prompts & resources
 │   │   ├── mcp/          # Tool schemas, prompts, and resource definitions
 │   │   ├── services/     # Bible, commentary, study pack & catalog engines
 │   │   └── ui/           # Bible Study Explorer, Scalar & Swagger Web UIs
@@ -265,9 +321,9 @@ Connect your studies directly to your personal notes:
 ## 📖 Documentation
 
 - **[docs/mcp_client_integration.md](docs/mcp_client_integration.md)**: Multi-client setup guide for Antigravity IDE, Claude Desktop, Cursor, and VS Code.
-- **[docs/stepbible_data_integration.md](docs/stepbible_data_integration.md)**: Guide on compiling, integrating, and deploying STEPBible datasets (TBESG, TBESH, Tyndale Open Study Notes, Septuagint, and OT in NT).
 - **[docs/ai_team_personas.md](docs/ai_team_personas.md)**: Profiles and guidelines for the 15 AI study personas.
-- **[docs/slash_commands.md](docs/slash_commands.md)**: Reference guide for workflow commands and the 27 MCP tools.
+- **[docs/slash_commands.md](docs/slash_commands.md)**: Reference guide for workflow commands and the 35 MCP tools.
+- **[docs/stepbible_data_integration.md](docs/stepbible_data_integration.md)**: Compile, import, verify, and deploy STEPBible lexicons and related study datasets.
 - **[docs/study_outputs.md](docs/study_outputs.md)**: Guide to study output formats, folder layouts, and document export.
 
 ---
@@ -292,6 +348,6 @@ However, biblical and theological study is never an end in itself. We earnestly 
 
 Special thanks and deep appreciation to:
 - **[Eliran Wong](https://github.com/eliranwong)** for his pioneering work on [Biblemate-Agentic-workspace](https://github.com/eliranwong/Biblemate-Agentic-workspace) as the foundational architecture on which this suite is built, and for creating and maintaining the indispensable [`biblematedata`](https://pypi.org/project/biblematedata/) package.
-- **[STEPBible.org](https://www.stepbible.org/)** and **Tyndale House, Cambridge** for generously publishing the TBESG Greek Lexicon, TBESH Hebrew Lexicon, and Tyndale Open Study Notes under open-access Creative Commons licenses.
+- **[STEPBible.org](https://www.stepbible.org/)** and **Tyndale House, Cambridge** for generously providing the open-access TBESG/TBESH Lexicons, Tyndale Open Study Notes, Septuagint alignment data, and biblical entity research data under Creative Commons licensing.
 - The **Model Context Protocol (MCP)** community for establishing the open standard bridging language models and structured domain tools.
 - All public domain biblical scholars, commentators, and translators whose lifelong labours continue to enrich students of Scripture worldwide.

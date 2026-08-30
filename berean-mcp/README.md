@@ -12,7 +12,7 @@ Try out the live public instance hosted on Cloudflare Workers:
 
 | Resource | URL | Description |
 | :--- | :--- | :--- |
-| **📖 Bible Study Explorer** | [https://berean-mcp.victorgoh.workers.dev/](https://berean-mcp.victorgoh.workers.dev/) | Reader-friendly UI to explore all 27 tools, scripture texts, and classical commentaries |
+| **📖 Bible Study Explorer** | [https://berean-mcp.victorgoh.workers.dev/](https://berean-mcp.victorgoh.workers.dev/) | Reader-friendly UI to explore all 35 tools, scripture texts, and classical commentaries |
 | **⚡ Scalar API Reference** | [https://berean-mcp.victorgoh.workers.dev/docs](https://berean-mcp.victorgoh.workers.dev/docs) | Interactive API documentation with built-in request runner & multi-language snippets |
 | **📜 Swagger UI** | [https://berean-mcp.victorgoh.workers.dev/swagger](https://berean-mcp.victorgoh.workers.dev/swagger) | Classic OpenAPI schema visualizer & tester |
 | **📋 OpenAPI Spec** | [https://berean-mcp.victorgoh.workers.dev/openapi.json](https://berean-mcp.victorgoh.workers.dev/openapi.json) | Complete OpenAPI 3.1.0 JSON schema |
@@ -22,7 +22,7 @@ Try out the live public instance hosted on Cloudflare Workers:
 
 ## ⚡ Architecture & Performance
 
-- **34 MCP Tools & 12 Composite Study Packs**: Provides granular single-engine tools as well as high-speed composite Study Packs delivering up to 170,000 characters (~30,000 words) of verified biblical analysis in a single round-trip.
+- **35 MCP Tools & 12 Composite Study Packs**: Provides granular single-engine tools as well as high-speed composite Study Packs delivering up to 170,000 characters (~30,000 words) of verified biblical analysis in a single round-trip.
 - **Edge Cloudflare Execution**: Sub-50ms cold start, multi-tier LRU caching, and streaming JSON-RPC / Streamable HTTP transports.
 - **Hybrid Storage**:
   - **Cloudflare D1 (Serverless SQLite)**: Ultra-fast indexing for Strong's Hebrew Lexicon (BDB), ISBE/Easton's Encyclopedias, and OT/NT Morphological datasets.
@@ -75,13 +75,10 @@ npx wrangler secret put API_KEY
 
 ## 📚 Classical Commentaries & Reference Data
 
-All classical commentary databases, lexicons, and biblical reference datasets are powered by upstream [`biblematedata`](https://pypi.org/project/biblematedata/) and **[STEPBible.org](https://www.stepbible.org/)** (Tyndale House, Cambridge):
+All classical commentary databases, lexicons, and biblical reference datasets are powered by the upstream [`biblematedata`](https://pypi.org/project/biblematedata/) library:
 
 - **Classical Exegesis & Homiletics**: Access extensive whole-Bible and testament-specific works by **Matthew Henry, John Calvin, John Gill, Jamieson-Fausset-Brown, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, Albert Barnes, Charles Ellicott**, and many others.
-- **STEPBible Original Language Lexicons (TBESG & TBESH)**: Extended Greek and Hebrew Strong's lexicons with disambiguated senses, transliterations, and morphological classifications (CC BY 4.0).
-- **Tyndale Open Study Notes (TNotes)**: High-density historical-grammatical and exegetical study notes compiled by Tyndale House scholars.
 - **Dynamic Resource Discovery**: Use the `get_available_resources` MCP tool at any time to query all active translations, commentary aliases, and lexicons installed in your environment.
-- **Data Integration Guide**: See [../docs/stepbible_data_integration.md](../docs/stepbible_data_integration.md) for full compilation and deployment steps.
 
 ---
 
@@ -167,27 +164,21 @@ npm run typecheck
 # (wrangler.jsonc is in .gitignore to keep your private D1 Database IDs safe)
 cp wrangler.jsonc.example wrangler.jsonc
 
-# 3. Compile STEPBible Lexicons & Tyndale Study Notes (Optional / Recommended)
-python3 scripts/prepare_step_lexicon.py
-python3 scripts/prepare_tnotes.py
-
-# 4. Setup Cloudflare R2 Bucket & Upload Commentary/Bible/Auxiliary Files
+# 3. Setup Cloudflare R2 Bucket & Upload Commentary/Bible Files
 # (Ensures local data is downloaded: pip install biblematedata && biblematedata)
 npx wrangler r2 bucket create biblemate-data
 python3 scripts/sync_data_to_r2.py --bucket biblemate-data
-python3 scripts/upload_auxiliary_to_r2.py
 
-# 5. Setup Cloudflare D1 Databases & Import Morphology/Reference/STEP Indexes
+# 4. Setup Cloudflare D1 Databases & Import Morphology/Reference Indexes
 npx wrangler d1 create berean-morphology
 npx wrangler d1 create berean-reference
 # Paste the resulting database_id UUIDs into your local wrangler.jsonc
 python3 scripts/import_to_d1.py
-npx wrangler d1 execute berean-reference --remote --file=data/lexicons/step_lexicon_d1.sql
 
-# 6. Deploy Worker to Cloudflare Global Edge
+# 5. Deploy Worker to Cloudflare Global Edge
 npm run deploy
 
-# 7. Set Private API Key Secret for Authentication
+# 6. Set Private API Key Secret for Authentication
 npx wrangler secret put API_KEY
 ```
 

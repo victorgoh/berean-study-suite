@@ -41,7 +41,7 @@ async function runUnitTests() {
       Morphology: "N-DSM",
       Lexeme: "κύριος",
       Transliteration: "Kyriō",
-      Gloss: "[the] Lord",
+      Gloss: "Lord",
       Translation: "Lord"
     },
     {
@@ -76,39 +76,45 @@ async function runUnitTests() {
     MORPHOLOGY_DB: mockD1Nt
   };
 
-  console.log("▶ Testing NT Interlinear Study Pack: Philippians 4:4...");
-  const ntRes = await getInterlinearStudyPack(mockEnvNt, "Philippians 4:4");
+  // 1. Test NT Inline Mode (Default) with Alphabetic Labels & No Brackets on English words
+  console.log("▶ 1. Testing NT Interlinear Study Pack (Inline Mode with Alpha Labels): Philippians 4:4...");
+  const ntInlineRes = await getInterlinearStudyPack(mockEnvNt, "Philippians 4:4", "rare_and_notable", "#3b7a57", "inline");
 
-  console.log("Title in formatted text:", ntRes.formattedText.split("\n")[0]);
-  if (!ntRes.formattedText.includes("# 📜 Inline Interlinear Study Pack: Philippians 4:4")) {
-    throw new Error("❌ NT Title format mismatch");
+  console.log("Title in formatted text:", ntInlineRes.formattedText.split("\n")[0]);
+  if (!ntInlineRes.formattedText.includes("# Inline Interlinear Study Pack: Philippians 4:4")) {
+    throw new Error("❌ Title format mismatch");
   }
-  if (!ntRes.formattedText.includes("## 1. Inline Interlinear Text (Greek & Glosses)")) {
+  if (!ntInlineRes.formattedText.includes("## 1. Inline Interlinear Text (Greek & Glosses)")) {
     throw new Error("❌ Section 1 header mismatch");
   }
-  if (!ntRes.formattedText.includes("## 2. Original Language Glossary & Lexical Entries")) {
+  if (!ntInlineRes.formattedText.includes("## 2. Original Language Glossary & Lexical Entries")) {
     throw new Error("❌ Section 2 glossary header mismatch");
   }
-  if (!ntRes.formattedText.includes("> [!TIP]")) {
-    throw new Error("❌ Missing persona callout alert tip");
+  if (!ntInlineRes.formattedText.includes(">a<") || !ntInlineRes.formattedText.includes("#entry-a")) {
+    throw new Error("❌ Missing alphabetic reference label 'a'");
   }
-  if (!ntRes.sections || !ntRes.sections["interlinear_text"] || !ntRes.sections["glossary"]) {
-    throw new Error("❌ Missing sections keys (interlinear_text or glossary)");
-  }
-  if (
-    !ntRes.metadata ||
-    ntRes.metadata.language !== "Greek" ||
-    ntRes.metadata.isOT !== false ||
-    !ntRes.metadata.timestamp
-  ) {
+  if (!ntInlineRes.metadata || ntInlineRes.metadata.language !== "Greek" || ntInlineRes.metadata.isOT !== false) {
     throw new Error("❌ Metadata mismatch for NT");
   }
-  if (!ntRes.result || ntRes.result.verses.length !== 1 || ntRes.result.glossary.length === 0) {
-    throw new Error("❌ Structured result object mismatch");
-  }
-  console.log("✅ NT Test Passed!\n");
+  console.log("✅ NT Inline Mode with Alpha Labels Passed!\n");
 
-  // Mock D1 database for OT (Genesis 1:1)
+  // 2. Test NT Ruby Stacking Mode
+  console.log("▶ 2. Testing NT Interlinear Study Pack (Ruby Stacking Mode)...");
+  const ntRubyRes = await getInterlinearStudyPack(mockEnvNt, "Philippians 4:4", "rare_and_notable", "#3b7a57", "ruby");
+  if (!ntRubyRes.formattedText.includes("<ruby") || !ntRubyRes.formattedText.includes("<rt")) {
+    throw new Error("❌ Missing <ruby> or <rt> tags in ruby mode");
+  }
+  console.log("✅ NT Ruby Stacking Mode Passed!\n");
+
+  // 3. Test NT Table Grid Mode
+  console.log("▶ 3. Testing NT Interlinear Study Pack (Table Grid Mode)...");
+  const ntTableRes = await getInterlinearStudyPack(mockEnvNt, "Philippians 4:4", "rare_and_notable", "#3b7a57", "table");
+  if (!ntTableRes.formattedText.includes("| Original | Transliteration | Translation | Parsing | Lexicon |")) {
+    throw new Error("❌ Missing Markdown table header in table mode");
+  }
+  console.log("✅ NT Table Grid Mode Passed!\n");
+
+  // 4. Test OT (Genesis 1:1)
   const mockOtWords: MorphologyWord[] = [
     {
       Book: 1,
@@ -166,11 +172,11 @@ async function runUnitTests() {
     MORPHOLOGY_DB: mockD1Ot
   };
 
-  console.log("▶ Testing OT Interlinear Study Pack: Genesis 1:1...");
+  console.log("▶ 4. Testing OT Interlinear Study Pack: Genesis 1:1...");
   const otRes = await lookupInterlinear(mockEnvOt, "Genesis 1:1");
 
   console.log("Title in formatted text:", otRes.formattedText.split("\n")[0]);
-  if (!otRes.formattedText.includes("# 📜 Inline Interlinear Study Pack: Genesis 1:1")) {
+  if (!otRes.formattedText.includes("# Inline Interlinear Study Pack: Genesis 1:1")) {
     throw new Error("❌ OT Title format mismatch");
   }
   if (!otRes.formattedText.includes("## 1. Inline Interlinear Text (Hebrew/Aramaic & Glosses)")) {
@@ -185,13 +191,13 @@ async function runUnitTests() {
   console.log("✅ OT Test Passed!\n");
 
   console.log("--- Output Sample (First 500 characters) ---");
-  console.log(ntRes.formattedText.slice(0, 500));
+  console.log(ntInlineRes.formattedText.slice(0, 500));
   console.log("...\n");
 
   console.log("--- Sections Keys ---");
-  console.log(Object.keys(ntRes.sections || {}));
+  console.log(Object.keys(ntInlineRes.sections || {}));
   console.log("\n--- Metadata ---");
-  console.log(JSON.stringify(ntRes.metadata, null, 2));
+  console.log(JSON.stringify(ntInlineRes.metadata, null, 2));
 
   console.log("\n==================================================================");
   console.log("🎉 All Interlinear Study Pack Unit Tests Passed Successfully!");

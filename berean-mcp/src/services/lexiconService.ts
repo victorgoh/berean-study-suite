@@ -133,7 +133,7 @@ export async function lookupLexiconEntry(
     const primary = stepEntries[0];
     const datasetTag = primary.language.includes("Greek") ? "TBESG (STEPBible.org, CC BY 4.0)" : "TBESH (STEPBible.org, CC BY 4.0)";
 
-    markdownParts.push(`# 🏛️ Original Language Lexicon: ${primary.strongs} (${primary.lemma} • *${primary.transliteration}*)`);
+    markdownParts.push(`# Original Language Lexicon: ${primary.strongs} (${primary.lemma} • *${primary.transliteration}*)`);
     markdownParts.push(`* **Language:** ${primary.language}`);
     markdownParts.push(`* **Part of Speech:** \`${primary.morphology}\``);
     markdownParts.push(`* **Gloss:** **${primary.gloss}**`);
@@ -146,7 +146,7 @@ export async function lookupLexiconEntry(
     } else {
       markdownParts.push(`### Disambiguated Sub-Entries (${stepEntries.length} distinct roots/senses):`);
       for (const entry of stepEntries) {
-        markdownParts.push(`#### 📌 **${entry.strongs}** — ${entry.lemma} (*${entry.transliteration}*) — \`${entry.morphology}\``);
+        markdownParts.push(`#### **${entry.strongs}** — ${entry.lemma} (*${entry.transliteration}*) — \`${entry.morphology}\``);
         markdownParts.push(`* **Contextual Gloss:** **${entry.gloss}**`);
         markdownParts.push(entry.definition);
         markdownParts.push("");
@@ -157,9 +157,9 @@ export async function lookupLexiconEntry(
   if (classicalDef && (includeClassical || stepEntries.length === 0)) {
     if (stepEntries.length > 0) {
       markdownParts.push("\n---");
-      markdownParts.push(`### 📚 Classical Historical Lexicon (${classicalName}):`);
+      markdownParts.push(`### Classical Historical Lexicon (${classicalName}):`);
     } else {
-      markdownParts.push(`# 📚 Classical Historical Lexicon: ${cleanKey} (${classicalName})`);
+      markdownParts.push(`# Classical Historical Lexicon: ${cleanKey} (${classicalName})`);
     }
     markdownParts.push(classicalDef);
   }

@@ -131,6 +131,7 @@ export const CommentaryStudyPackSchema = {
 export const LessonCreatorStudyPackSchema = {
   reference: z.string().describe("Scripture passage reference for Sunday School or small group lesson planning, e.g. 'Luke 15:11-32', 'Acts 2:42-47'"),
   version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
+  include_continuationist: z.boolean().default(false).describe("Dynamically include continuationist / spirit-led modern teaching outlines and application (David Guzik, Gary Everett)"),
   extra_commentators: z.array(z.string()).optional().describe("Optional additional commentators to bundle dynamically")
 };
 
@@ -150,14 +151,16 @@ export const CovenantTheologyPackSchema = {
 
 export const InterlinearLookupSchema = {
   reference: z.string().describe("Passage reference, e.g., 'Philippians 4:4-8', 'John 1:1-5', 'Psalm 23'"),
-  glossary_filter: z.enum(["rare_and_notable", "all_words", "none"]).default("rare_and_notable").describe("Filter mode for glossary entries at the bottom: 'rare_and_notable' (default), 'all_words', or 'none'"),
-  gloss_color: z.string().default("#888888").describe("HTML hex color code for the inline English gloss (default: '#888888')")
+  glossary_filter: z.enum(["rare_and_notable", "all", "none"]).default("rare_and_notable").describe("Filter mode for glossary entries at the bottom: 'rare_and_notable' (default), 'all', or 'none'"),
+  gloss_color: z.string().default("#777777").describe("HTML hex color code for the English gloss (default: '#777777' for dark/light contrast)"),
+  display_mode: z.enum(["inline", "ruby", "table"]).default("inline").describe("Interlinear visual layout mode: 'inline' (default: continuous text with adaptive grey gloss and small alphabetic footnote tags), 'ruby' (stacked text with English underneath original word), or 'table' (word-by-word structured table)")
 };
 
 export const InterlinearStudyPackSchema = {
   reference: z.string().describe("Passage reference for original language interlinear analysis, e.g., 'Philippians 4:4-8', 'John 1:1-5', 'Psalm 23'"),
-  glossary_filter: z.enum(["rare_and_notable", "all_words", "none"]).default("rare_and_notable").describe("Filter mode for glossary entries at the bottom: 'rare_and_notable' (default), 'all_words', or 'none'"),
-  gloss_color: z.string().default("#888888").describe("HTML hex color code for the inline English gloss (default: '#888888')")
+  glossary_filter: z.enum(["rare_and_notable", "all", "none"]).default("rare_and_notable").describe("Filter mode for glossary entries at the bottom: 'rare_and_notable' (default), 'all', or 'none'"),
+  gloss_color: z.string().default("#777777").describe("HTML hex color code for the English gloss (default: '#777777' for dark/light contrast)"),
+  display_mode: z.enum(["inline", "ruby", "table"]).default("inline").describe("Interlinear visual layout mode: 'inline' (default: continuous text with adaptive grey gloss and small alphabetic footnote tags), 'ruby' (stacked text with English underneath original word), or 'table' (word-by-word structured table)")
 };
 
 export const OtQuotationsLookupSchema = {
