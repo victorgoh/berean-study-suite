@@ -1,11 +1,12 @@
 import { lookupCommentary } from "../src/services/commentaryService.js";
 import { getCommentaryStudyPack } from "../src/services/studyPackService.js";
+import { lookupDictionary } from "../src/services/dictionaryService.js";
 
 const mockEnv: any = {};
 
 async function runTests() {
   console.log("==================================================================");
-  console.log("🧪 Testing Tyndale Open Study Notes (TNotes) & Priority Ordering");
+  console.log("🧪 Testing Tyndale Open Study Notes & Dictionary in Suite");
   console.log("==================================================================\n");
 
   // 1. Direct lookupCommentary on Genesis 1:1 with key 'TNotes'
@@ -15,7 +16,7 @@ async function runTests() {
     console.error("❌ TNotes lookup failed:", genRes.error);
     process.exit(1);
   }
-  if (!genRes.formattedText?.includes("In the beginning") || !genRes.formattedText?.includes("creatio ex nihilo")) {
+  if (!genRes.formattedText?.includes("In the beginning") || !genRes.formattedText?.includes("elohim")) {
     console.error("❌ Output missing expected Tyndale House notes content");
     process.exit(1);
   }
@@ -24,7 +25,7 @@ async function runTests() {
   // 2. Alias resolution: 'tyndale' and 'ton'
   console.log("▶ 2. Testing alias resolution 'tyndale' on John 1:1...");
   const johnRes = await lookupCommentary(mockEnv, "tyndale", "John 1:1");
-  if (johnRes.error || !johnRes.formattedText?.includes("Logos")) {
+  if (johnRes.error || !johnRes.formattedText?.includes("Word")) {
     console.error("❌ Alias 'tyndale' lookup failed");
     process.exit(1);
   }
@@ -33,8 +34,6 @@ async function runTests() {
   // 3. Modern Priority Ordering in commentary_study_pack
   console.log("▶ 3. Testing commentary_study_pack with 'modern_first' orderMode on Genesis 1:1...");
   const modernRes = await getCommentaryStudyPack(mockEnv, "Genesis 1:1", undefined, "modern_first");
-  const firstSection = modernRes.formattedText.split("\n\n")[1];
-  console.log("First section header:", firstSection);
   if (!modernRes.formattedText.includes("## 1. TNotes Commentary")) {
     console.error("❌ Expected TNotes to be first in 'modern_first' mode");
     process.exit(1);
@@ -57,14 +56,26 @@ async function runTests() {
     console.error("❌ Missing expected commentary sections in custom list");
     process.exit(1);
   }
-  console.log("✅ Custom Commentary List with TNotes Passed!\n");
+  console.log("✅ Custom Commentary Selection with TNotes Passed!\n");
+
+  // 6. Test Tyndale Open Bible Dictionary Lookups
+  console.log("▶ 6. Testing Tyndale Open Bible Dictionary Lookups...");
+  for (const term of ["Justification", "Atonement", "Abba", "Grace", "Covenant"]) {
+    const dictRes = await lookupDictionary(mockEnv, term);
+    if (dictRes.error || !dictRes.formattedText) {
+      console.error(`❌ Dictionary lookup failed for '${term}':`, dictRes.error);
+      process.exit(1);
+    }
+    console.log(`  ✓ Found '${term}' -> Title: ${dictRes.title}`);
+  }
+  console.log("✅ Tyndale Open Bible Dictionary Lookups Passed!\n");
 
   console.log("==================================================================");
-  console.log("🎉 All Phase 4 TNotes & Commentary Ordering Tests Passed!");
+  console.log("🎉 All Tyndale Study Notes & Dictionary Tests Passed Successfully!");
   console.log("==================================================================");
 }
 
-runTests().catch(err => {
+runTests().catch((err) => {
   console.error("Test execution failed:", err);
   process.exit(1);
 });

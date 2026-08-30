@@ -1,15 +1,15 @@
 /**
  * Complete OpenAPI 3.1.0 Specification for Berean MCP Server
- * Auto-documents all 26 exegesis tools and composite study packs
+ * Auto-documents all 35 biblical study tools and composite study packs
  */
 
 export function getOpenApiSpec(serverUrl: string = "https://berean-mcp.victorgoh.workers.dev"): object {
   return {
     openapi: "3.1.0",
     info: {
-      title: "Berean MCP Server — Universal Bible Exegesis Engine",
+      title: "Berean MCP Server — Biblical Study & Exegesis API",
       version: "1.0.0",
-      description: "Enterprise-grade biblical exegesis API and Model Context Protocol (MCP) server powered by in-memory WASM SQLite, 26 classical public-domain commentary sets, and original Greek/Hebrew datasets.\n\nEcosystem repository: [https://github.com/victorgoh/berean-study-suite](https://github.com/victorgoh/berean-study-suite)",
+      description: "Open-source biblical study API and Model Context Protocol (MCP) server providing access to public-domain translations, 26 classical commentary sets, original Greek and Hebrew lexicons, and cross-reference datasets.\n\nEcosystem repository: [https://github.com/victorgoh/berean-study-suite](https://github.com/victorgoh/berean-study-suite)",
       contact: {
         name: "Berean AI Study Suite",
         url: "https://github.com/victorgoh/berean-study-suite"
@@ -27,862 +27,18 @@ export function getOpenApiSpec(serverUrl: string = "https://berean-mcp.victorgoh
     ],
     tags: [
       { name: "⚡ Composite Study Packs", description: "Multi-database theological analysis and curriculum synthesis" },
-      { name: "📖 Scripture & Exegesis", description: "Multi-version Bible text, keyword search, commentaries, and harmony" },
-      { name: "🏛 Original Languages", description: "Hebrew & Greek lexicons (BDB, Thayer) and morphological syntax parsing" },
-      { name: "📚 Topical & Reference", description: "Theological dictionaries, Nave's Topical Bible, promises, and biographical trees" },
-      { name: "System", description: "MCP and server health endpoints" }
+      { name: "📖 Scripture Texts & Translations", description: "Multi-version Bible text, keyword search, harmony, and daily plans" },
+      { name: "💬 Classical Commentaries & Cross-References", description: "26 classical commentary sets and Treasury of Scripture Knowledge" },
+      { name: "🏛 Original Languages & Textual Alignment", description: "Hebrew & Greek lexicons (BDB, Thayer, STEP), morphology, interlinear, Septuagint, and OT-in-NT alignment" },
+      { name: "🏷️ Theology & Doctrinal Reference", description: "Theological dictionaries, Nave's Topical Bible, and biblical promises" },
+      { name: "📜 Historical & Cultural Context", description: "Biblical people, geography, coins and ancient units, chronology, and book structures" },
+      { name: "System", description: "Catalog discovery, MCP, and server health endpoints" }
     ],
     paths: {
-      "/tools/bible_lookup": {
-        post: {
-          tags: ["📖 Scripture & Exegesis"],
-          summary: "Bible Verse & Passage Lookup",
-          description: "Retrieve verses from public domain Bible translations (BSB, NET, KJV, WEB, ASV, OHGB Hebrew/Greek).",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "John 3:16", description: "Scripture reference (e.g. 'John 3:16', 'Romans 8:28-30')" },
-                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV", "OHGB"], default: "BSB", description: "Bible translation version" }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Passage text and formatted output" }
-          }
-        }
-      },
-      "/tools/bible_search": {
-        post: {
-          tags: ["📖 Scripture & Exegesis"],
-          summary: "Full-Text Scripture Search",
-          description: "Search the Bible for keywords or phrases across OT and NT.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    query: { type: "string", example: "covenant of peace", description: "Search terms or phrase" },
-                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV"], default: "BSB" },
-                    limit: { type: "integer", default: 10, description: "Maximum matches to return" }
-                  },
-                  required: ["query"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Search results with verse citations" }
-          }
-        }
-      },
-      "/tools/commentary_lookup": {
-        post: {
-          tags: ["📖 Scripture & Exegesis"],
-          summary: "Classical Commentary Lookup",
-          description: "Access 26 public-domain classical commentary sets (Matthew Henry, Jamieson-Fausset-Brown, Calvin, Spurgeon, Barnes, McLaren, etc.).",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "Romans 8:28", description: "Scripture reference" },
-                    commentary: { 
-                      type: "string", 
-                      enum: ["Henry", "JFB", "Calvin", "MacL", "Barnes", "Spur", "HH", "Clarke", "Gill", "KD", "CECNT", "Pulpit", "Poole", "Trapp", "Wesley", "Benson", "Geneva", "Scofield", "Ryle", "Darby", "Bullinger", "EBC", "ECER", "Rob", "Vincent", "DBS"], 
-                      default: "Henry",
-                      description: "Commentary abbreviation"
-                    }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Commentary exposition text" }
-          }
-        }
-      },
-      "/tools/cross_references": {
-        post: {
-          tags: ["📖 Scripture & Exegesis"],
-          summary: "Treasury of Scripture Knowledge (TSK) Cross References",
-          description: "Look up verified canonical cross-references from the Treasury of Scripture Knowledge.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "Romans 8:28" },
-                    limit: { type: "integer", default: 12 }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Cross-reference list" }
-          }
-        }
-      },
-      "/tools/parallel_passages": {
-        post: {
-          tags: ["📖 Scripture & Exegesis"],
-          summary: "Gospel Parallels & Historical Harmony",
-          description: "Find parallel events and synoptic Gospel harmonies matching a passage or topic.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "Matthew 4:1-11", description: "Scripture reference or event title (e.g. 'Temptation of Jesus')" }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Identified parallel passages and synoptic columns" }
-          }
-        }
-      },
-      "/tools/sermon_study_pack": {
-        post: {
-          tags: ["⚡ Composite Study Packs"],
-          summary: "Sermon Preparation Study Pack",
-          description: "Comprehensive preaching study pack integrating Scripture, Spurgeon/MacLaren expositions, Nave's topical links, and TSK cross-references.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "Psalm 23:1", description: "Sermon preaching text" }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Complete sermon preparation bundle" }
-          }
-        }
-      },
-      "/tools/devotional_study_pack": {
-        post: {
-          tags: ["⚡ Composite Study Packs"],
-          summary: "Daily Devotional & Quiet Time Study Pack",
-          description: "Generates rich personal quiet time study notes bundling Scripture, Maclaren exposition, Spurgeon adoration, Barnes practical remarks, Henry aphorisms, and Biblical promises.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "Psalm 23:1-3", description: "Scripture passage for quiet time meditation" },
-                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV", "OHGB"], default: "BSB" }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Devotional study pack output" }
-          }
-        }
-      },
-      "/tools/prayer_guide_study_pack": {
-        post: {
-          tags: ["⚡ Composite Study Packs"],
-          summary: "Scriptural Prayer Guide Study Pack",
-          description: "Builds a devotional ACTS prayer guide using Scripture text, Spurgeon/Benson piety reflections, Wesley holiness examination, and covenant promises.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "Psalm 51:1-12", description: "Scripture passage for prayer meditation" },
-                    version: { type: "string", enum: ["BSB", "NET", "KJV", "OHGB"], default: "BSB" }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Scriptural prayer guide output" }
-          }
-        }
-      },
-      "/tools/lesson_creator_study_pack": {
-        post: {
-          tags: ["⚡ Composite Study Packs"],
-          summary: "Bible Lesson & Small Group Curriculum Pack",
-          description: "Generates teaching outlines, discussion questions, background context (Ellicott), and practical applications (Barnes).",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "Luke 15:11-32", description: "Lesson Scripture passage" },
-                    version: { type: "string", enum: ["BSB", "NET", "KJV", "OHGB"], default: "BSB" }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Lesson creator curriculum pack" }
-          }
-        }
-      },
-      "/tools/passage_exegesis_pack": {
-        post: {
-          tags: ["⚡ Composite Study Packs"],
-          summary: "Passage Exegesis Study Pack",
-          description: "Academic exegesis pack integrating original language text, morphological parsing, Meyer (CECNT) / Keil & Delitzsch scholarly commentary, and Pulpit critical backgrounds.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "Romans 8:28" }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Exegesis data pack" }
-          }
-        }
-      },
-      "/tools/covenant_theology_pack": {
-        post: {
-          tags: ["⚡ Composite Study Packs"],
-          summary: "Covenant & Redemptive-Historical Theology Pack",
-          description: "Traces redemptive covenant progression with Calvin and Gill commentary, ISBE Covenant dictionary, and canonical cross references.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "Genesis 15:6" },
-                    version: { type: "string", enum: ["BSB", "NET", "KJV", "OHGB"], default: "BSB" }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Covenant theology study pack" }
-          }
-        }
-      },
-      "/tools/word_study_pack": {
-        post: {
-          tags: ["⚡ Composite Study Packs"],
-          summary: "Original Language Word Study Pack",
-          description: "Lexical definitions (Thayer/BDB), Strong's concordances, and A.T. Robertson Word Pictures.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    strongs: { type: "string", example: "G26", description: "Strong's Concordance Number (e.g. G26, H1254)" },
-                    reference: { type: "string", example: "John 3:16", description: "Optional reference context" }
-                  },
-                  required: ["strongs"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Word study pack" }
-          }
-        }
-      },
-      "/tools/topic_study_pack": {
-        post: {
-          tags: ["⚡ Composite Study Packs"],
-          summary: "Topical & Doctrinal Study Pack",
-          description: "Systematic theological definitions (Easton) and scriptural anchor promises.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    topic: { type: "string", example: "Justification" },
-                    version: { type: "string", enum: ["BSB", "NET", "KJV"], default: "BSB" }
-                  },
-                  required: ["topic"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Topical study pack" }
-          }
-        }
-      },
-      "/tools/commentary_study_pack": {
-        post: {
-          tags: ["⚡ Composite Study Packs"],
-          summary: "Multi-Commentary Comparative Pack",
-          description: "Synthesizes multi-commentary side-by-side analysis for a passage.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "Romans 8:28" },
-                    commentators: {
-                      type: "array",
-                      items: { type: "string" },
-                      default: ["Henry", "JFB", "Calvin", "MacL", "Barnes", "Spur"]
-                    }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Comparative commentary compilation" }
-          }
-        }
-      },
-      "/tools/interlinear_study_pack": {
-        post: {
-          tags: ["⚡ Composite Study Packs", "🏛 Original Languages"],
-          summary: "Original Language Interlinear Study Pack",
-          description: "Generate an inline word-by-word Greek/Hebrew to English interlinear with continuous verse layout, grammatical parsing tags, and an automated lexical glossary.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    glossary_filter: { type: "string", enum: ["rare_and_notable", "all", "none"], default: "rare_and_notable", description: "Glossary filter mode" },
-                    gloss_color: { type: "string", default: "#777777", description: "HTML hex color code for the English gloss (default: '#777777')" },
-                    display_mode: { type: "string", enum: ["inline", "ruby", "table"], default: "inline", description: "Interlinear display layout mode: 'inline' (default), 'ruby' (stacked), or 'table' (structured grid)" }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Standardized interlinear study pack bundle" }
-          }
-        }
-      },
-      "/tools/interlinear_lookup": {
-        post: {
-          tags: ["🏛 Original Languages"],
-          summary: "Inline Interlinear Lookup (Alias)",
-          description: "Word-by-word original language interlinear lookup with in-line glosses.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "Philippians 4:4-8" },
-                    glossary_filter: { type: "string", enum: ["rare_and_notable", "all_words", "none"], default: "rare_and_notable" },
-                    gloss_color: { type: "string", default: "#888888" }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Interlinear output" }
-          }
-        }
-      },
-      "/tools/ot_in_nt_study_pack": {
-        post: {
-          tags: ["⚡ Composite Study Packs", "📜 Exegesis & Theology"],
-          summary: "Apostolic Hermeneutics & OT-in-NT Fulfillment Study Pack",
-          description: "Comprehensive composite study pack analyzing Old Testament quotations and allusions in the New Testament with verbatim Hebrew MT, Greek LXX, and Greek NT comparative alignment.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "Hebrews 8:8-12", description: "Passage reference containing OT citation or allusion" },
-                    version: { type: "string", default: "BSB", description: "Bible translation version for English text" }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Standardized OT-in-NT fulfillment study pack bundle" }
-          }
-        }
-      },
-      "/tools/ot_quotations_lookup": {
-        post: {
-          tags: ["📜 Exegesis & Theology", "🔗 Cross References"],
-          summary: "OT Quotations & Allusions Lookup Engine",
-          description: "Look up Old Testament quotations, citations, allusions, and Septuagint bridge references for any NT or OT passage.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "Hebrews 8:8", description: "Passage reference to check for cross-testament citations" }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "OT/NT quotation records and alignment data" }
-          }
-        }
-      },
-      "/tools/septuagint_study_pack": {
-        post: {
-          tags: ["⚡ Composite Study Packs", "🏛 Original Languages"],
-          summary: "Greek Septuagint & Hebrew MT Comparative Study Pack",
-          description: "Comprehensive composite study pack analyzing the Greek Septuagint (LXX), Brenton English translation, Dead Sea Scrolls textual variants, and Hebrew Masoretic Text comparative exegesis.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "Genesis 1:1-5", description: "Old Testament Scripture reference" },
-                    version: { type: "string", default: "BSB", description: "Bible translation version for standard English text" }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Standardized Septuagint study pack bundle" }
-          }
-        }
-      },
-      "/tools/septuagint_lookup": {
-        post: {
-          tags: ["🏛 Original Languages"],
-          summary: "Septuagint Greek & Brenton English Lookup",
-          description: "Look up Greek Septuagint (LXX) text, Brenton English translation, and textual divergence notes for any Old Testament passage.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "Genesis 1:1", description: "Old Testament passage reference" }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Septuagint Greek and Brenton English verses" }
-          }
-        }
-      },
-      "/tools/entity_disambiguation": {
-        post: {
-          tags: ["👤 Biblical People & Places"],
-          summary: "Biblical Entity Disambiguation Engine",
-          description: "Disambiguate biblical persons or locations sharing identical names (e.g. Mary, James, John, Zechariah, Herod), returning exact identities, lineages, roles, and biblical passages.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    name: { type: "string", example: "Mary", description: "Biblical name to disambiguate" }
-                  },
-                  required: ["name"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Disambiguated entity records" }
-          }
-        }
-      },
-      "/tools/convert_ancient_units": {
-        post: {
-          tags: ["🏛 Original Languages", "⚖️ Biblical Metrology"],
-          summary: "Ancient Biblical Units & Currency Converter",
-          description: "Convert ancient biblical weights (Talent, Shekel, Mina), dry/liquid measurements (Cor, Ephah, Bath, Hin, Omer), distances (Cubit, Span, Stadion), and currencies (Denarius, Drachma, Stater, Talent, Mite) into modern metric, imperial, and labor-wage purchasing power.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    unit: { type: "string", example: "Talent", description: "Biblical unit to convert" },
-                    amount: { type: "number", default: 1, description: "Quantity of the specified unit" }
-                  },
-                  required: ["unit"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Converted metric, imperial, and purchasing power equivalents" }
-          }
-        }
-      },
-      "/tools/lexicon_lookup": {
-        post: {
-          tags: ["🏛 Original Languages"],
-          summary: "Greek (Thayer) & Hebrew (BDB) Lexicon Lookup",
-          description: "Detailed original language definitions and etymological roots.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    strongs: { type: "string", example: "G26", description: "Strong's number (e.g. G26, H1254)" }
-                  },
-                  required: ["strongs"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Lexicon article" }
-          }
-        }
-      },
-      "/tools/morphology_lookup": {
-        post: {
-          tags: ["🏛 Original Languages"],
-          summary: "Grammatical & Morphological Syntax Parsing",
-          description: "Word-by-word grammatical tagging (part of speech, case, tense, voice, mood, gender).",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    reference: { type: "string", example: "John 1:1" }
-                  },
-                  required: ["reference"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Morphological breakdown table" }
-          }
-        }
-      },
-      "/tools/theological_dictionary": {
-        post: {
-          tags: ["🏛 Original Languages"],
-          summary: "Theological Dictionary (TBESH / MCGED)",
-          description: "Expositions from Theological Wordbook and Classic Greek/Hebrew Dictionaries.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    term: { type: "string", example: "Grace" },
-                    dictionary: { type: "string", enum: ["all", "tbesh", "mcged"], default: "all" }
-                  },
-                  required: ["term"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Theological dictionary entry" }
-          }
-        }
-      },
-      "/tools/topic_study": {
-        post: {
-          tags: ["📚 Topical & Reference"],
-          summary: "Nave's Topical Bible Theme Lookup",
-          description: "Categorized biblical themes, topics, and classified Scripture verse lists.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    topic: { type: "string", example: "Love" }
-                  },
-                  required: ["topic"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Nave's Topical Bible entry" }
-          }
-        }
-      },
-      "/tools/biblical_promises": {
-        post: {
-          tags: ["📚 Topical & Reference"],
-          summary: "Categorized Biblical Promises",
-          description: "Find scriptural promises by topic, emotion, or covenant category.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    category: { type: "string", example: "Peace" },
-                    version: { type: "string", enum: ["BSB", "NET", "KJV"], default: "BSB" }
-                  },
-                  required: ["category"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Scriptural promises" }
-          }
-        }
-      },
-      "/tools/character_lookup": {
-        post: {
-          tags: ["📚 Topical & Reference"],
-          summary: "Biblical Character Biographies & Lineages",
-          description: "Look up biographical summaries, family trees, and pivotal life events for biblical figures.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    name: { type: "string", example: "David" }
-                  },
-                  required: ["name"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Biographical summary" }
-          }
-        }
-      },
-      "/tools/location_lookup": {
-        post: {
-          tags: ["📚 Topical & Reference"],
-          summary: "Biblical Geography & Locations",
-          description: "Geographical coordinates, historical significance, and biblical mentions.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    location: { type: "string", example: "Jerusalem" }
-                  },
-                  required: ["location"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Geographical profile" }
-          }
-        }
-      },
-      "/tools/book_analysis": {
-        post: {
-          tags: ["📚 Topical & Reference"],
-          summary: "Book Analysis & Structural Overview",
-          description: "Authorship, dating, historical occasion, major theological themes, and canonical outline.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    book: { type: "string", example: "Romans" }
-                  },
-                  required: ["book"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Book introduction and outline" }
-          }
-        }
-      },
-      "/tools/chapter_summary": {
-        post: {
-          tags: ["📚 Topical & Reference"],
-          summary: "Chapter Summary & Outline",
-          description: "Concise summary and sectional outline of any biblical chapter.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    book: { type: "string", example: "John" },
-                    chapter: { type: "integer", example: 1 }
-                  },
-                  required: ["book", "chapter"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Chapter outline" }
-          }
-        }
-      },
-      "/tools/bible_names": {
-        post: {
-          tags: ["📚 Topical & Reference"],
-          summary: "Bible Names & Etymologies",
-          description: "Find meanings and language etymologies of biblical names.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    name: { type: "string", example: "Immanuel" }
-                  },
-                  required: ["name"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Name etymology and definition" }
-          }
-        }
-      },
-      "/tools/chronology": {
-        post: {
-          tags: ["📚 Topical & Reference"],
-          summary: "Biblical Chronology & Historical Timelines",
-          description: "Timelines of biblical events and epochs (Patriarchs, Exodus, Monarchy, Life of Christ, etc.).",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    period: { type: "string", example: "Patriarchs" }
-                  },
-                  required: ["period"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Chronological timeline" }
-          }
-        }
-      },
-      "/tools/daily_reading": {
-        post: {
-          tags: ["📚 Topical & Reference"],
-          summary: "Daily Canonical Reading Plan",
-          description: "Canonical reading plan for days 1 to 365.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    day: { type: "integer", default: 1, example: 1 }
-                  },
-                  required: ["day"]
-                }
-              }
-            }
-          },
-          responses: {
-            "200": { description: "Daily readings" }
-          }
-        }
-      },
+      // --- TIER 0: Catalog Discovery ---
       "/tools/get_available_resources": {
         post: {
-          tags: ["📚 Topical & Reference"],
+          tags: ["System"],
           summary: "List Available Resources & Catalog",
           description: "Discover all available Bibles, commentary sets, dictionaries, study packs, and AI personas.",
           requestBody: {
@@ -903,6 +59,801 @@ export function getOpenApiSpec(serverUrl: string = "https://berean-mcp.victorgoh
           }
         }
       },
+
+      // --- TIER 1: Composite Study Packs ---
+      "/tools/sermon_study_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs"],
+          summary: "Sermon & Homiletics Study Pack",
+          description: "Bundles Scripture, Alexander Maclaren, Charles Simeon outlines, Biblical Illustrator, Matthew Henry, and cross-references.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Romans 8:28-30", description: "Preaching scripture passage" },
+                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV"], default: "BSB" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Complete sermon preparation bundle" } }
+        }
+      },
+      "/tools/lesson_creator_study_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs"],
+          summary: "Lesson Creator & Teaching Study Pack",
+          description: "Bundles Scripture, chapter summaries, Charles Ellicott, Albert Barnes, and Expositor's Bible for teachers.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Luke 15:11-32", description: "Lesson scripture passage" },
+                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV"], default: "BSB" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Curriculum and discussion package" } }
+        }
+      },
+      "/tools/devotional_study_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs"],
+          summary: "Devotional Study Pack",
+          description: "Bundles Scripture, Maclaren, Spurgeon (Treasury of David), Albert Barnes, Matthew Henry, and Biblical Promises.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Psalm 23:1-6", description: "Devotional scripture passage" },
+                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV"], default: "BSB" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Pastoral and devotional meditation notes" } }
+        }
+      },
+      "/tools/prayer_guide_study_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs"],
+          summary: "Scripture Prayer Guide Study Pack",
+          description: "Bundles Scripture, Spurgeon/Benson adoration, Wesley examination, and promises for first-person ACTS prayer.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Ephesians 3:14-21", description: "Passage for prayer reflection" },
+                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV"], default: "BSB" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Scriptural prayer guide" } }
+        }
+      },
+      "/tools/passage_exegesis_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs"],
+          summary: "Passage Exegesis Study Pack",
+          description: "Bundles Primary Translation, OHGB Original Greek/Hebrew, Keil & Delitzsch / H.A.W. Meyer, Expositor's Greek NT, Pulpit Commentary, and JFB.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Romans 8:28-30", description: "Passage for exegesis" },
+                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV"], default: "BSB" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Exegetical analysis package" } }
+        }
+      },
+      "/tools/word_study_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs"],
+          summary: "Original Word Study Pack",
+          description: "Bundles Strong's/Thayer/BDB Lexicons, In-Context Morphology, and A.T. Robertson / Marvin Vincent Word Studies.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    strongs_number: { type: "string", example: "G26", description: "Strong's number (e.g. 'G26', 'H1254')" },
+                    lexicon: { type: "string", enum: ["strongs", "thayer", "bdb", "lsj", "step", "all"], default: "strongs" }
+                  },
+                  required: ["strongs_number"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Lexical and philological analysis" } }
+        }
+      },
+      "/tools/interlinear_study_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs"],
+          summary: "Continuous Interlinear Study Pack",
+          description: "Inline Greek/Hebrew to English word-by-word interlinear with continuous verse layout, grammatical parsing tags, and an automated lexical glossary.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Philippians 4:4-8", description: "Scripture reference" },
+                    glossary_filter: { type: "string", enum: ["all_words", "rare_and_notable", "none"], default: "rare_and_notable" },
+                    gloss_color: { type: "boolean", default: true },
+                    display_mode: { type: "string", enum: ["inline", "ruby", "table"], default: "inline" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Interlinear text and glossary" } }
+        }
+      },
+      "/tools/septuagint_study_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs"],
+          summary: "Septuagint (LXX) Comparative Study Pack",
+          description: "Greek Septuagint (LXX) text, Brenton English translation, Dead Sea Scrolls textual variants, and Hebrew Masoretic Text comparative exegesis.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Genesis 1:1-5", description: "Old Testament passage" },
+                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV"], default: "BSB" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "LXX vs Hebrew comparative analysis" } }
+        }
+      },
+      "/tools/ot_in_nt_study_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs"],
+          summary: "Old Testament in New Testament Study Pack",
+          description: "Apostolic hermeneutics and Old Testament quotations/allusions in the New Testament with verbatim Hebrew MT, Greek LXX, and Greek NT comparative alignment.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Hebrews 8:8-12", description: "New Testament passage with OT quotations" },
+                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV"], default: "BSB" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "OT in NT comparative alignment" } }
+        }
+      },
+      "/tools/covenant_theology_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs"],
+          summary: "Covenant Theology Study Pack",
+          description: "Redemptive covenants throughout Scripture with John Calvin, John Gill, and ISBE Encyclopedia insights.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Genesis 15:1-6", description: "Passage for covenant analysis" },
+                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV"], default: "BSB" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Covenant theology analysis package" } }
+        }
+      },
+      "/tools/commentary_study_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs"],
+          summary: "Multi-Commentary Comparative Study Pack",
+          description: "Dynamic multi-commentary bundler allowing custom multi-perspective lookups across any subset of the 26 available commentators in a single call.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Romans 8:28", description: "Scripture reference" },
+                    commentators: {
+                      type: "array",
+                      items: { type: "string" },
+                      example: ["Henry", "JFB", "Calvin", "Spur"],
+                      description: "List of commentary aliases"
+                    }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Side-by-side commentary synthesis" } }
+        }
+      },
+      "/tools/topic_study_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs"],
+          summary: "Topical Study Pack",
+          description: "Bundles Nave's Topical Concordance, Torrey's New Topical Textbook, Easton's Bible Dictionary, and cross-references.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    topic: { type: "string", example: "Grace", description: "Biblical topic name" },
+                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV"], default: "BSB" }
+                  },
+                  required: ["topic"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Topical research bundle" } }
+        }
+      },
+
+      // --- TIER 2: Specialized Single-Engine Tools ---
+      // Group A: Scripture Texts & Translations
+      "/tools/bible_lookup": {
+        post: {
+          tags: ["📖 Scripture Texts & Translations"],
+          summary: "Bible Verse & Passage Lookup",
+          description: "Retrieve verses from public domain Bible translations (BSB, NET, KJV, WEB, ASV, OHGB Hebrew/Greek, LXX).",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "John 3:16", description: "Scripture reference" },
+                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV", "OHGB", "LXX"], default: "BSB" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Passage text and formatted output" } }
+        }
+      },
+      "/tools/bible_search": {
+        post: {
+          tags: ["📖 Scripture Texts & Translations"],
+          summary: "Full-Text Scripture Search",
+          description: "Search the Bible for keywords or phrases across OT and NT.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    query: { type: "string", example: "peace of God", description: "Search query" },
+                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV", "OHGB"], default: "BSB" },
+                    book_filter: { type: "string", example: "Philippians", description: "Optional single book filter" },
+                    limit: { type: "integer", default: 20 }
+                  },
+                  required: ["query"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Search results with matching verses" } }
+        }
+      },
+      "/tools/parallel_passages": {
+        post: {
+          tags: ["📖 Scripture Texts & Translations"],
+          summary: "Parallel Passages & Gospel Harmony",
+          description: "Look up synoptic Gospel parallels and cross-testament narrative harmonies.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    query: { type: "string", example: "Beatitudes", description: "Passage reference or event name" }
+                  },
+                  required: ["query"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Parallel passage comparisons" } }
+        }
+      },
+      "/tools/daily_reading": {
+        post: {
+          tags: ["📖 Scripture Texts & Translations"],
+          summary: "Daily Bible Reading Plan",
+          description: "Retrieve scheduled readings from the 365-day whole-Bible reading plan with embedded text.",
+          requestBody: {
+            required: false,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    date: { type: "string", example: "2026-08-30", description: "Date in YYYY-MM-DD format (defaults to today)" },
+                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV"], default: "BSB" },
+                    include_text: { type: "boolean", default: true }
+                  }
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Daily reading schedule and Scripture" } }
+        }
+      },
+
+      // Group B: Classical Commentaries & Cross-References
+      "/tools/commentary_lookup": {
+        post: {
+          tags: ["💬 Classical Commentaries & Cross-References"],
+          summary: "Classical Commentary Lookup",
+          description: "Access 26 classical public-domain commentary sets and Tyndale Open Study Notes.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "John 1:1", description: "Scripture reference" },
+                    version: { type: "string", example: "Henry", description: "Commentator identifier or alias" }
+                  },
+                  required: ["reference", "version"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Commentary text" } }
+        }
+      },
+      "/tools/cross_references": {
+        post: {
+          tags: ["💬 Classical Commentaries & Cross-References"],
+          summary: "Treasury of Scripture Knowledge (TSK) Cross-References",
+          description: "Retrieve cross-references for any Bible verse.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "John 3:16", description: "Verse reference" },
+                    limit: { type: "integer", default: 15 }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "List of cross-references" } }
+        }
+      },
+
+      // Group C: Original Languages & Textual Alignment
+      "/tools/lexicon_lookup": {
+        post: {
+          tags: ["🏛 Original Languages & Textual Alignment"],
+          summary: "Greek & Hebrew Lexicon Lookup",
+          description: "Retrieve Strong's, TBESG/TBESH, Thayer's Greek, Brown-Driver-Briggs (BDB) Hebrew, or LSJ definitions.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    strongs_number: { type: "string", example: "G26", description: "Strong's number" },
+                    lexicon: { type: "string", enum: ["strongs", "thayer", "bdb", "lsj", "step", "all"], default: "strongs" }
+                  },
+                  required: ["strongs_number"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Lexicon definition entry" } }
+        }
+      },
+      "/tools/morphology_lookup": {
+        post: {
+          tags: ["🏛 Original Languages & Textual Alignment"],
+          summary: "Original Language Verse Morphology",
+          description: "Retrieve word-by-word morphological parsing and Strong's numbers for Greek NT or Hebrew OT verses.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "John 1:1", description: "Single verse reference" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Word-by-word syntax parsing" } }
+        }
+      },
+      "/tools/interlinear_lookup": {
+        post: {
+          tags: ["🏛 Original Languages & Textual Alignment"],
+          summary: "Inline Word-by-Word Interlinear Lookup",
+          description: "Retrieve continuous word-by-word Greek/Hebrew interlinear text.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "John 1:1-3", description: "Scripture reference" },
+                    display_mode: { type: "string", enum: ["inline", "ruby", "table"], default: "inline" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Interlinear text" } }
+        }
+      },
+      "/tools/septuagint_lookup": {
+        post: {
+          tags: ["🏛 Original Languages & Textual Alignment"],
+          summary: "Greek Septuagint (LXX) & Brenton Lookup",
+          description: "Look up Greek Septuagint (LXX) text, Brenton English translation, and textual divergence notes.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Genesis 1:1", description: "Old Testament passage" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Septuagint verses and notes" } }
+        }
+      },
+      "/tools/ot_quotations_lookup": {
+        post: {
+          tags: ["🏛 Original Languages & Textual Alignment"],
+          summary: "Old Testament Quotations & Allusions Lookup",
+          description: "Look up Old Testament quotations, citations, allusions, and Septuagint bridge references.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Hebrews 8:8", description: "Passage reference" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Quotation mapping and comparative citations" } }
+        }
+      },
+
+      // Group D: Theology, Doctrines & Devotional Tools
+      "/tools/theological_dictionary": {
+        post: {
+          tags: ["🏷️ Theology & Doctrinal Reference"],
+          summary: "Theological Dictionary & Encyclopedia",
+          description: "Search Tyndale Open Bible Dictionary, ISBE Encyclopedia, Easton's Bible Dictionary, and Smith's.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    term: { type: "string", example: "Covenant", description: "Theological term or concept" },
+                    source: { type: "string", enum: ["tyndale", "isbe", "easton", "smith"], default: "tyndale" }
+                  },
+                  required: ["term"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Theological article entry" } }
+        }
+      },
+      "/tools/topic_study": {
+        post: {
+          tags: ["🏷️ Theology & Doctrinal Reference"],
+          summary: "Topical Concordance Lookup",
+          description: "Search Nave's Topical Bible and Torrey's New Topical Textbook.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    query: { type: "string", example: "Faith", description: "Topic keyword" }
+                  },
+                  required: ["query"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Topical concordance verses" } }
+        }
+      },
+      "/tools/biblical_promises": {
+        post: {
+          tags: ["🏷️ Theology & Doctrinal Reference"],
+          summary: "Biblical Promises for Faith & Prayer",
+          description: "Retrieve topic-indexed biblical promises for encouragement and devotion.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    topic: { type: "string", example: "Peace", description: "Promise category" },
+                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV"], default: "BSB" }
+                  },
+                  required: ["topic"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Promises with Scripture text" } }
+        }
+      },
+
+      // Group E: Historical, Geographical & Cultural Backgrounds
+      "/tools/character_lookup": {
+        post: {
+          tags: ["📜 Historical & Cultural Context"],
+          summary: "Biblical Character Profiles & Genealogies",
+          description: "Biographical details, scripture references, and ASCII relationship family trees.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string", example: "David", description: "Character name" }
+                  },
+                  required: ["name"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Character profile and family tree" } }
+        }
+      },
+      "/tools/location_lookup": {
+        post: {
+          tags: ["📜 Historical & Cultural Context"],
+          summary: "Biblical Geography & GPS Coordinates",
+          description: "Geographical descriptions, GPS coordinates, and Google Maps links.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    location: { type: "string", example: "Jerusalem", description: "Place or site name" }
+                  },
+                  required: ["location"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Location details with coordinates" } }
+        }
+      },
+      "/tools/entity_disambiguation": {
+        post: {
+          tags: ["📜 Historical & Cultural Context"],
+          summary: "Biblical Entity Disambiguation",
+          description: "Disambiguate biblical persons or locations sharing identical names (e.g. Mary, James, John, Zechariah, Herod).",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string", example: "Mary", description: "Biblical name to disambiguate" }
+                  },
+                  required: ["name"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Disambiguated entity profiles and distinctions" } }
+        }
+      },
+      "/tools/convert_ancient_units": {
+        post: {
+          tags: ["📜 Historical & Cultural Context"],
+          summary: "Ancient Coins, Weights & Measures Converter",
+          description: "Convert ancient biblical weights, measures, distances, and currencies into modern metric, imperial, and labor purchasing power.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    unit: { type: "string", example: "Talent", description: "Ancient unit name" },
+                    amount: { type: "number", default: 1, description: "Numeric quantity" }
+                  },
+                  required: ["unit"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Converted modern equivalents and economic context" } }
+        }
+      },
+      "/tools/bible_names": {
+        post: {
+          tags: ["📜 Historical & Cultural Context"],
+          summary: "Bible Name Meanings & Etymologies",
+          description: "Etymology, original Hebrew/Greek roots, and spiritual significance of biblical names.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    query: { type: "string", example: "Joshua", description: "Name to look up" }
+                  },
+                  required: ["query"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Name meaning and etymology" } }
+        }
+      },
+      "/tools/chronology": {
+        post: {
+          tags: ["📜 Historical & Cultural Context"],
+          summary: "Biblical Timelines & Historical Eras",
+          description: "Chronological timelines, historical periods, and biblical events.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    query: { type: "string", example: "Exodus", description: "Event, figure, or era" }
+                  },
+                  required: ["query"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Chronological events and dates" } }
+        }
+      },
+      "/tools/book_analysis": {
+        post: {
+          tags: ["📜 Historical & Cultural Context"],
+          summary: "Book Overview, Authorship & Purpose",
+          description: "Authorship, dating, historical background, and theological themes for all 66 books of the Bible.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    book: { type: "string", example: "Romans", description: "Book name" }
+                  },
+                  required: ["book"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Book overview" } }
+        }
+      },
+      "/tools/chapter_summary": {
+        post: {
+          tags: ["📜 Historical & Cultural Context"],
+          summary: "Chapter Summaries & Key Verses",
+          description: "Structural outline, major themes, and central points for any chapter.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    book: { type: "string", example: "Romans", description: "Book name" },
+                    chapter: { type: "integer", example: 8, description: "Chapter number" }
+                  },
+                  required: ["book", "chapter"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Chapter summary" } }
+        }
+      },
+
+      // --- System Endpoints ---
       "/mcp": {
         get: {
           tags: ["System"],

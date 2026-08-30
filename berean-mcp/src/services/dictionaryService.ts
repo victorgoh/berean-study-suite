@@ -6,14 +6,57 @@ import { Env } from "../types.js";
 export async function lookupDictionary(
   env: Env,
   term: string,
-  source: string = "easton"
-): Promise<{ error?: string; formattedText?: string; title?: string }> {
-  const index = await getJsonFromR2<Record<string, string[]>>(env, "data/lookup/dictionaries_index.json");
-  if (!index) {
-    return { error: "Bible dictionary index (dictionaries_index.json) not available." };
+  source: string = "tyndale"
+): Promise<{ error?: string; formattedText?: string; title?: string; definition?: string }> {
+  if (!term || !term.trim()) {
+    return { error: "Please provide a term to lookup in the Bible dictionary." };
   }
 
-  const bestMatch = findBestMatch(term, Object.keys(index));
+  const cleanTerm = term.trim();
+
+  // 1. Try Tyndale Open Bible Dictionary from R2 (Tyndale.dictionary SQLite)
+  if (source === "tyndale" || source === "all" || !source) {
+    try {
+      let { db } = await getDatabase(env, "dictionaries/Tyndale.dictionary");
+      if (!db) {
+        const alt = await getDatabase(env, "data/dictionaries/Tyndale.dictionary");
+        db = alt.db;
+      }
+      if (db) {
+        // Direct exact match on headword or title first
+        let stmt = db.prepare("SELECT headword, title, definition, source FROM Dictionary WHERE headword = ? COLLATE NOCASE OR title = ? COLLATE NOCASE LIMIT 1;");
+        stmt.bind([cleanTerm, cleanTerm]);
+        if (stmt.step()) {
+          const row = stmt.getAsObject() as { headword: string; title: string; definition: string; source: string };
+          stmt.free();
+          const formattedText = `# Bible Dictionary: ${row.title || row.headword}\n\n${row.definition}\n\n---\n*Source: Tyndale Open Bible Dictionary, Tyndale House Publishers (CC BY-SA 4.0)*`;
+          return { title: row.title || row.headword, definition: row.definition, formattedText };
+        }
+        stmt.free();
+
+        // Prefix / substring match
+        stmt = db.prepare("SELECT headword, title, definition, source FROM Dictionary WHERE headword LIKE ? COLLATE NOCASE OR title LIKE ? COLLATE NOCASE LIMIT 1;");
+        stmt.bind([`%${cleanTerm}%`, `%${cleanTerm}%`]);
+        if (stmt.step()) {
+          const row = stmt.getAsObject() as { headword: string; title: string; definition: string; source: string };
+          stmt.free();
+          const formattedText = `# Bible Dictionary: ${row.title || row.headword}\n\n${row.definition}\n\n---\n*Source: Tyndale Open Bible Dictionary, Tyndale House Publishers (CC BY-SA 4.0)*`;
+          return { title: row.title || row.headword, definition: row.definition, formattedText };
+        }
+        stmt.free();
+      }
+    } catch (err) {
+      console.warn("Tyndale dictionary SQLite query error:", err);
+    }
+  }
+
+  // 2. Fallback to Legacy / Easton Dictionary Index if not found in Tyndale
+  const index = await getJsonFromR2<Record<string, string[]>>(env, "data/lookup/dictionaries_index.json");
+  if (!index) {
+    return { error: `No Bible dictionary entry found matching '${term}'.` };
+  }
+
+  const bestMatch = findBestMatch(cleanTerm, Object.keys(index));
   if (!bestMatch) {
     return { error: `No Bible dictionary entry found matching '${term}'.` };
   }
@@ -28,7 +71,6 @@ export async function lookupDictionary(
   for (const path of paths) {
     let content: string | null = null;
 
-    // 1. Try Cloudflare D1
     if (env.REFERENCE_DB) {
       try {
         const stmt = env.REFERENCE_DB.prepare("SELECT content FROM dictionary WHERE path = ? LIMIT 1").bind(path);
@@ -38,21 +80,6 @@ export async function lookupDictionary(
         }
       } catch (d1Err) {
         console.warn("D1 dictionary query error:", d1Err);
-      }
-    }
-
-    // 2. Fallback to R2 / local SQLite
-    if (!content && env.BIBLEMATE_DATA) {
-      const { db } = await getDatabase(env, "data/dictionary.data");
-      if (db) {
-        try {
-          const stmt = db.prepare("SELECT content FROM Dictionary WHERE path = ? LIMIT 1");
-          stmt.bind([path]);
-          if (stmt.step()) {
-            content = (stmt.getAsObject() as any).content;
-          }
-          stmt.free();
-        } catch (_) {}
       }
     }
 

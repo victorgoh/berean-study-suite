@@ -75,53 +75,97 @@ npx wrangler secret put API_KEY
 
 ## 📚 Classical Commentaries & Reference Data
 
-All classical commentary databases, lexicons, and biblical reference datasets are powered by the upstream [`biblematedata`](https://pypi.org/project/biblematedata/) library:
+The Berean Study Suite is strictly built on **100% Public Domain** classical historical works and **Open-Access (CC BY-SA 4.0)** academic datasets. No customized, proprietary, or non-public domain commentaries are included in the suite.
 
-- **Classical Exegesis & Homiletics**: Access extensive whole-Bible and testament-specific works by **Matthew Henry, John Calvin, John Gill, Jamieson-Fausset-Brown, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, Albert Barnes, Charles Ellicott**, and many others.
-- **Dynamic Resource Discovery**: Use the `get_available_resources` MCP tool at any time to query all active translations, commentary aliases, and lexicons installed in your environment.
+### Provenance & Licensing Directory
+
+| Resource / Commentary Set | Author(s) & Era | Status & License | Scope |
+| :--- | :--- | :--- | :--- |
+| **Tyndale Open Study Notes (`TNotes`)** | Tyndale House, Cambridge / STEPBible.org | **CC BY-SA 4.0** | Whole Bible (15,000+ verses) |
+| **Tyndale Open Bible Dictionary** | Tyndale House Publishers / STEPBible.org | **CC BY-SA 4.0** | 6,010 articles / 9,865 headwords |
+| **Matthew Henry's Commentary** | Matthew Henry (1662–1714) | **Public Domain** | Whole Bible (Devotional / Practical) |
+| **Jamieson-Fausset-Brown (JFB)** | R. Jamieson, A. R. Fausset, D. Brown (1871) | **Public Domain** | Whole Bible (Critical / Explanatory) |
+| **John Calvin's Commentaries** | John Calvin (1509–1564) | **Public Domain** | Whole Bible (Exegetical / Reformed) |
+| **John Gill's Exposition** | John Gill (1697–1771) | **Public Domain** | Whole Bible (Hebraic / Rabbinic) |
+| **Albert Barnes' Notes** | Albert Barnes (1798–1870) | **Public Domain** | Whole Bible (Verse-by-Verse Explanatory) |
+| **Alexander Maclaren's Expositions** | Alexander Maclaren (1826–1910) | **Public Domain** | Whole Bible (Expository / Homiletical) |
+| **Charles Simeon's *Horae Homileticae*** | Charles Simeon (1759–1836) | **Public Domain** | Whole Bible (2,500+ Sermon Outlines) |
+| **Charles Spurgeon (*Treasury of David*)** | Charles Spurgeon (1834–1892) | **Public Domain** | Whole Bible / Psalms Exposition |
+| **Keil & Delitzsch Commentary (KD)** | C. F. Keil & Franz Delitzsch (1807–1890) | **Public Domain** | Old Testament (Grammatical / ANE) |
+| **H. A. W. Meyer Commentary (CECNT)** | H. A. W. Meyer (1800–1873) | **Public Domain** | New Testament (Critical / Exegetical) |
+| **Expositor's Greek New Testament** | W. Robertson Nicoll (1851–1923) | **Public Domain** | New Testament (Greek Textual Exegesis) |
+| **The Pulpit Commentary** | H. D. M. Spence & J. S. Exell (1880–1919) | **Public Domain** | Whole Bible (Historical / Homiletical) |
+| **The Biblical Illustrator** | Joseph S. Exell (1887–1910) | **Public Domain** | Whole Bible (Illustrations & Sermons) |
+| **Charles Ellicott's Commentary (ECER)** | Charles Ellicott (1819–1905) | **Public Domain** | Whole Bible (English Readers) |
+| **The Expositor's Bible (EBC)** | W. Robertson Nicoll et al. (1887–1900) | **Public Domain** | Whole Bible (Theological Essays) |
+| **A. T. Robertson's Word Pictures** | A. T. Robertson (1863–1934) | **Public Domain** | New Testament (Koine Greek Syntax) |
+| **Marvin Vincent's Word Studies** | Marvin Vincent (1834–1922) | **Public Domain** | New Testament (Greek Etymology) |
+| **John Wesley's Explanatory Notes** | John Wesley (1703–1791) | **Public Domain** | Whole Bible (Practical Holiness) |
+| **Adam Clarke's Commentary** | Adam Clarke (1760–1832) | **Public Domain** | Whole Bible (Archaeology / Semitics) |
+| **Joseph Benson's Commentary** | Joseph Benson (1749–1821) | **Public Domain** | Whole Bible (Early Methodist) |
+| **Daniel Whedon's Commentary** | Daniel Whedon (1808–1885) | **Public Domain** | Whole Bible (Wesleyan-Arminian) |
+| **John Peter Lange's Commentary** | John Peter Lange (1802–1884) | **Public Domain** | Whole Bible (Tri-fold Exegesis) |
+| **Thomas Brooks' Expositions** | Thomas Brooks (1608–1680) | **Public Domain** | Whole Bible (Puritan Pastoral) |
+| **Cambridge Bible (CBSC)** | A. F. Kirkpatrick (1849–1940) | **Public Domain** | Whole Bible (Grammatical / Historical) |
+| **Preacher's Homiletical (PHC)** | Joseph S. Exell et al. (1892) | **Public Domain** | Whole Bible (Homiletic Analysis) |
+| **International Critical (ICCNT)** | Pre-1928 Scholars | **Public Domain** | New Testament (Textual Criticism) |
+
+*Tip: Use the `get_available_resources` MCP tool at any time to query all active translations, commentary aliases, and lexicons installed in your environment.*
 
 ---
 
 ## 🛠️ Complete MCP Tool Catalog
 
+### 0. Catalog Discovery & Metadata
+1. **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, study packs, personas, skills, workflows, and rules.
+
 ### 1. Composite Study Packs (High-Speed Single-Turn Endpoints)
-1. **`sermon_study_pack`**: Bundles Scripture (BSB), Alexander Maclaren (Expository Structure), Charles Simeon (Preaching Outline), Biblical Illustrator (Illustrations), Matthew Henry (Puritan Insights), and TSK Cross-References.
-2. **`devotional_study_pack`**: Bundles Scripture, Alexander Maclaren, Charles Spurgeon (Adoration), Albert Barnes (Practical Remarks), Matthew Henry (Aphorisms), and Biblical Promises.
-3. **`passage_exegesis_pack`**: Bundles Primary Translation, OHGB Original Greek/Hebrew, Keil & Delitzsch (OT) / H.A.W. Meyer (NT), Expositor's Greek NT, The Pulpit Commentary, and JFB.
-4. **`word_study_pack`**: Bundles Strong's/Thayer/BDB Lexicons, In-Context Morphology, and A.T. Robertson / Marvin Vincent Word Studies.
-5. **`lesson_creator_study_pack`**: Bundles Scripture, Chapter Summaries, Charles Ellicott, Albert Barnes, and The Expositor's Bible for teachers.
-6. **`prayer_guide_study_pack`**: Bundles Scripture, Charles Spurgeon / Joseph Benson Adoration, John Wesley Examination, and Biblical Promises for 1st-person ACTS prayer.
-7. **`covenant_theology_pack`**: Bundles Scripture, John Calvin's Covenant Exposition, John Gill's Prophecy, ISBE Encyclopedia, and Canonical Cross-References.
-8. **`topic_study_pack`**: Bundles Nave's Topical Concordance, Torrey's New Topical Textbook, Easton's Bible Dictionary, and cross-references.
-9. **`commentary_study_pack`**: Dynamic multi-commentary bundler allowing custom multi-perspective lookups across any subset of the available commentators in a single call.
-10. **`interlinear_study_pack`**: Inline Greek/Hebrew to English word-by-word interlinear with continuous verse layout, grammatical parsing tags, and an automated lexical glossary.
-11. **`ot_in_nt_study_pack`**: Apostolic hermeneutics and Old Testament quotations/allusions in the New Testament with verbatim Hebrew MT, Greek LXX, and Greek NT comparative alignment.
-12. **`septuagint_study_pack`**: Greek Septuagint (LXX) text, Brenton English translation, Dead Sea Scrolls textual variants, and Hebrew Masoretic Text comparative exegesis.
+2. **`sermon_study_pack`**: Preaching outlines, Alexander Maclaren homiletics, Charles Simeon outlines (*Horae Homileticae*), The Biblical Illustrator, Matthew Henry, and TSK cross-references.
+3. **`lesson_creator_study_pack`**: Sunday School and small group outlines, Albert Barnes' practical remarks, Charles Ellicott's historical context, and Expositor's Bible notes.
+4. **`devotional_study_pack`**: Pastoral reflection, Charles Spurgeon (*Treasury of David*), Alexander Maclaren, Albert Barnes, Matthew Henry, and Biblical Promises.
+5. **`prayer_guide_study_pack`**: Scripture for prayer, Spurgeon/Benson adoration, Wesley self-examination, and promises for first-person ACTS prayer.
+6. **`passage_exegesis_pack`**: Primary translation, OHGB original Greek/Hebrew, Keil & Delitzsch (OT) / H.A.W. Meyer (NT), Expositor's Greek NT, The Pulpit Commentary, and JFB.
+7. **`word_study_pack`**: Strong's numbers, TBESG/TBESH/Thayer/BDB lexicons, in-context morphology, and A.T. Robertson / Marvin Vincent word studies.
+8. **`interlinear_study_pack`**: Inline Greek/Hebrew to English word-by-word interlinear with continuous verse layout, grammatical parsing tags, and an automated lexical glossary.
+9. **`septuagint_study_pack`**: Greek Septuagint (LXX) text, Brenton English translation, Dead Sea Scrolls textual variants, and Hebrew Masoretic Text comparative exegesis.
+10. **`ot_in_nt_study_pack`**: Apostolic hermeneutics and Old Testament quotations/allusions in the New Testament with verbatim Hebrew MT, Greek LXX, and Greek NT comparative alignment.
+11. **`covenant_theology_pack`**: Redemptive covenants throughout Scripture with John Calvin, John Gill, and ISBE Encyclopedia insights.
+12. **`commentary_study_pack`**: Dynamic multi-commentary bundler allowing side-by-side comparative retrieval across any subset of the 26 available commentators with priority ordering.
+13. **`topic_study_pack`**: Nave's Topical Concordance, Torrey's New Topical Textbook, Easton's Bible Dictionary, and cross-references.
 
 ### 2. Specialized Single-Engine Tools
-13. **`bible_lookup`**: Retrieve full chapter and verse ranges across BSB, NET, KJV, ASV, WEB, OHGB, and LXX.
-14. **`bible_search`**: High-speed full-text search with regex and testament filters.
-15. **`commentary_lookup`**: Query any individual commentator with intelligent alias normalization.
-16. **`cross_references`**: Query Treasury of Scripture Knowledge (TSK) cross-reference collections.
-17. **`lexicon_lookup`**: Strong's, TBESG/TBESH, Thayer's Greek, BDB Hebrew, and LSJ Lexicons.
-18. **`morphology_lookup`**: Original language grammatical and parsing breakdowns.
-19. **`interlinear_lookup`**: Inline word-by-word Greek/Hebrew to English interlinear with continuous verse layout.
-20. **`ot_quotations_lookup`**: Look up Old Testament quotations, citations, allusions, and Septuagint bridge references for any NT or OT passage.
-21. **`septuagint_lookup`**: Look up Greek Septuagint (LXX) text, Brenton English translation, and textual divergence notes for any Old Testament passage.
-22. **`entity_disambiguation`**: Disambiguate biblical persons or locations sharing identical names (e.g. Mary, James, John, Zechariah, Herod).
-23. **`convert_ancient_units`**: Convert ancient biblical weights, measures, distances, and currencies into modern metric, imperial, and labor purchasing power.
-24. **`topic_study`**: Topical concordance lookups (Nave's & Torrey's).
-25. **`character_lookup`**: Biographical profiles of biblical figures.
-26. **`location_lookup`**: GPS coordinates and Google Maps links for biblical cities and sites.
-27. **`theological_dictionary`**: Easton's Bible Dictionary and ISBE Encyclopedia entries.
-28. **`parallel_passages`**: Gospel harmonies and synoptic comparisons.
-29. **`biblical_promises`**: Topic-indexed biblical promises for faith and prayer.
-30. **`book_analysis`**: Historical background, authorship, and date for all 66 books.
-31. **`chapter_summary`**: Structural summaries and central themes for any chapter.
+
+#### Scripture Texts & Translations
+14. **`bible_lookup`**: Retrieve full chapter and verse ranges across BSB, NET, KJV, ASV, WEB, OHGB, and LXX.
+15. **`bible_search`**: High-speed full-text search with regex and testament filters.
+16. **`parallel_passages`**: Gospel harmonies and Old/New Testament parallel passages.
+17. **`daily_reading`**: 365-day whole-Bible reading schedules with automatic Scripture embedding.
+
+#### Classical Commentaries & Cross-References
+18. **`commentary_lookup`**: Query any individual commentator (26 classical sets + Tyndale Open Study Notes) with intelligent alias normalization.
+19. **`cross_references`**: Query Treasury of Scripture Knowledge (TSK) cross-reference collections.
+
+#### Original Languages & Textual Alignment
+20. **`lexicon_lookup`**: Strong's, TBESG/TBESH, Thayer's Greek, BDB Hebrew, and LSJ Lexicons.
+21. **`morphology_lookup`**: Original language grammatical and parsing breakdowns.
+22. **`interlinear_lookup`**: Inline word-by-word Greek/Hebrew to English interlinear with continuous verse layout and rare-word glossary.
+23. **`septuagint_lookup`**: Look up Greek Septuagint (LXX) text, Brenton English translation, and textual divergence notes for any Old Testament passage.
+24. **`ot_quotations_lookup`**: Look up Old Testament quotations, citations, allusions, and Septuagint bridge references for any NT or OT passage.
+
+#### Theology, Doctrines & Devotional Tools
+25. **`theological_dictionary`**: Easton's Bible Dictionary and ISBE Encyclopedia entries.
+26. **`topic_study`**: Topical concordance lookups (Nave's & Torrey's).
+27. **`biblical_promises`**: Topic-indexed biblical promises for faith and prayer.
+
+#### Historical, Geographical & Cultural Backgrounds
+28. **`character_lookup`**: Biographical profiles & ASCII relationship family trees.
+29. **`location_lookup`**: GPS coordinates and Google Maps links for biblical cities and sites.
+30. **`entity_disambiguation`**: Disambiguate biblical persons or locations sharing identical names (e.g. Mary, James, John, Zechariah, Herod).
+31. **`convert_ancient_units`**: Convert ancient biblical weights, measures, distances, and currencies into modern metric, imperial, and labor purchasing power.
 32. **`bible_names`**: Etymological meanings and origins of biblical names.
 33. **`chronology`**: Biblical timelines and historical genealogies.
-34. **`daily_reading`**: 365-day whole-Bible reading schedules with automatic Scripture embedding.
-35. **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, study packs, personas, skills, workflows, and rules.
+34. **`book_analysis`**: Historical background, authorship, and date for all 66 books.
+35. **`chapter_summary`**: Structural summaries and central themes for any chapter.
 
 ---
 

@@ -637,7 +637,7 @@ export async function getTopicStudyPack(
   topic: string,
   version: string = "BSB"
 ): Promise<StudyPackResponse> {
-  const dictRes = await lookupDictionary(env, topic, "easton");
+  const dictRes = await lookupDictionary(env, topic, "tyndale");
   const promisesRes = await lookupPromises(env, topic, true, version);
 
   const sections: Record<string, string> = {};
@@ -676,8 +676,8 @@ export async function getCommentaryStudyPack(
   commentators?: string[],
   orderMode: "modern_first" | "classic_first" | "custom" = "modern_first"
 ): Promise<StudyPackResponse> {
-  const MODERN_PRIORITY = ["TNotes", "Guzik", "Barnes", "Calvin", "Gill", "Henry", "JFB"];
-  const CLASSIC_PRIORITY = ["Calvin", "Gill", "Henry", "JFB", "TNotes", "Barnes", "Guzik"];
+  const MODERN_PRIORITY = ["TNotes", "Barnes", "MacL", "Calvin", "Gill", "Henry", "JFB"];
+  const CLASSIC_PRIORITY = ["Calvin", "Gill", "Henry", "JFB", "TNotes", "Barnes", "MacL"];
 
   let list: string[];
   if (Array.isArray(commentators) && commentators.length > 0) {

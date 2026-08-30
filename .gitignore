@@ -58,3 +58,4 @@ cmti/
 *.whl
 *.log
 berean-mcp/data/
+.agents/
