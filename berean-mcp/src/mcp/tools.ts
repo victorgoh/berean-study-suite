@@ -125,7 +125,7 @@ export const DailyReadingSchema = {
 // --- Group B: Classical Commentaries & Cross-References ---
 
 export const CommentaryLookupSchema = {
-  version: z.string().default("Henry").describe("Commentary version or author: 'TNotes' (Tyndale Open Study Notes - CC BY-SA 4.0), 'Henry' (Matthew Henry), 'JFB' (Jamieson-Fausset-Brown), 'Calvin' (John Calvin), 'Barnes' (Albert Barnes), 'MacL' (Alexander Maclaren), 'HH' (Charles Simeon), 'Gill' (John Gill), 'Spur' (Charles Spurgeon), 'KD' (Keil & Delitzsch), 'EGNT' (Expositor's Greek NT), 'CECNT' (H.A.W. Meyer), 'Pulpit' (The Pulpit Commentary - 4 sharded volumes), 'BI' (Biblical Illustrator - 4 sharded volumes), 'ECER' (Charles Ellicott), 'EBC' (Expositor's Bible), 'Rob' (A.T. Robertson), 'Vincent' (Marvin Vincent), 'Wesley' (John Wesley), 'Clarke' (Adam Clarke), 'Benson' (Joseph Benson), 'Whedon' (Daniel Whedon), 'Lange' (John Peter Lange)"),
+  version: z.string().default("Henry").describe("Commentary version or author: 'TNotes' (Tyndale Open Study Notes - CC BY-SA 4.0), 'Henry' (Matthew Henry), 'JFB' (Jamieson-Fausset-Brown), 'Calvin' (John Calvin), 'Barnes' (Albert Barnes), 'MacL' (Alexander Maclaren), 'HH' (Charles Simeon), 'Gill' (John Gill), 'Spur' (Charles Spurgeon), 'KD' (Keil & Delitzsch), 'EGNT' (Expositor's Greek NT), 'CECNT' (H.A.W. Meyer), 'Pulpit' (The Pulpit Commentary), 'BI' (Biblical Illustrator), 'ECER' (Charles Ellicott), 'EBC' (Expositor's Bible), 'Rob' (A.T. Robertson), 'Vincent' (Marvin Vincent), 'Wesley' (John Wesley), 'Clarke' (Adam Clarke), 'Benson' (Joseph Benson), 'Whedon' (Daniel Whedon), 'Lange' (John Peter Lange)"),
   reference: z.string().describe("Passage reference, e.g., 'Romans 8:28', 'John 1:1-5', 'Genesis 1'")
 };
 

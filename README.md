@@ -11,7 +11,7 @@
 
 The **Berean Study Suite** is a unified, local-first research platform featuring:
 
-1. **Berean MCP Server (`berean-mcp`)**: Universal Model Context Protocol server providing **35 exegetical tools** (23 specialized single-engine tools + 12 high-speed composite Study Packs), 23 classical & modern commentary sets deployed on Cloudflare R2 (including sharded *Pulpit Commentary* and *Biblical Illustrator*), 8 Bible translations/manuscript editions, Greek/Hebrew lexicons, and full REST/OpenAPI/Swagger endpoints for any MCP client (Claude Desktop, Cursor, ChatGPT, Antigravity).
+1. **Berean MCP Server (`berean-mcp`)**: Universal Model Context Protocol server providing **35 exegetical tools** (23 specialized single-engine tools + 12 high-speed composite Study Packs), 23 classical & modern commentary sets deployed on Cloudflare R2, 8 Bible translations/manuscript editions, Greek/Hebrew lexicons, and full REST/OpenAPI/Swagger endpoints for any MCP client (Claude Desktop, Cursor, ChatGPT, Antigravity).
 2. **15 Theological Personas & Autonomous Pipelines**: 15 specialized theological personas, exegesis skills (`berean://skills/...`), universal typography standards (`berean://rules/typography`), and study prompts embedded directly into the MCP server with zero static token overhead.
 
 ---
@@ -93,7 +93,7 @@ The **Berean MCP Server** delivers **35 total tools** (23 specialized single-eng
 
 The Berean Study Suite is strictly built on **100% Public Domain** classical historical works and **Open-Access (CC BY-SA 4.0)** academic datasets:
 
-* **23 Deployed Commentary Sets (Cloudflare R2)**: Expository, grammatical, homiletical, and historical commentaries by Matthew Henry, John Calvin, John Gill, Albert Barnes, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, The Pulpit Commentary (4-volume sharded), and the Tyndale Open Study Notes.
+* **23 Deployed Commentary Sets (Cloudflare R2)**: Expository, grammatical, homiletical, and historical commentaries by Matthew Henry, John Calvin, John Gill, Albert Barnes, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, The Pulpit Commentary, and the Tyndale Open Study Notes.
 * **8 Bible Translations & Manuscript Editions**: BSB, NET, KJV, ASV, WEB, Open Hebrew & Greek Bible (OHGB), Septuagint (LXX), and OHGB Word-by-Word Interlinear.
 * **7 Original Language Lexicons**: STEPBible TBESG/TBESH, Thayer Greek, BDB Hebrew, LSJ, and morphological concordances.
 * **Academic Reference & Dictionaries**: Tyndale Open Bible Dictionary (6,010 articles), ISBE Encyclopedia, Easton's, Smith's, Nave's Topical, and TSK Cross-References.
