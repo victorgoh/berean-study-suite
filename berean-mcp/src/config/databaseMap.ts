@@ -254,6 +254,20 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
       if (bookNumber <= 44) return "commentaries/cBI_3.commentary";
       return "commentaries/cBI_4.commentary";
     }
+  },
+  {
+    key: "Pulpit",
+    name: "The Pulpit Commentary",
+    author: "H. D. M. Spence, Joseph S. Exell",
+    scope: "Whole Bible",
+    description: "Monumental 77-volume collection providing historical introductions, verse-by-verse exegesis, and multiple homiletic outlines.",
+    aliases: ["pulpit", "cpulpit", "the pulpit commentary", "pulpit commentary"],
+    getStoragePath: (bookNumber: number) => {
+      if (bookNumber <= 17) return "commentaries/cPulpit_1.commentary";
+      if (bookNumber <= 39) return "commentaries/cPulpit_2.commentary";
+      if (bookNumber <= 44) return "commentaries/cPulpit_3.commentary";
+      return "commentaries/cPulpit_4.commentary";
+    }
   }
 ];
 

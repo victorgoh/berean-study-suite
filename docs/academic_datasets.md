@@ -6,9 +6,9 @@ This document serves as the authoritative academic provenance catalog detailing 
 
 ---
 
-## 📖 1. Classical & Open-Access Commentaries (22 Deployed Sets)
+## 📖 1. Classical & Open-Access Commentaries (23 Deployed Sets)
 
-All 22 commentary sets listed below are **fully deployed, verified, and live** on the Cloudflare Edge R2 network.
+All 23 commentary sets listed below are **fully deployed, verified, and live** on the Cloudflare Edge R2 network.
 
 | Commentary Key | Title & Author | Historical Era | Theological / Methodological Scope | Status & License | Cloudflare R2 Storage Object |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -24,6 +24,7 @@ All 22 commentary sets listed below are **fully deployed, verified, and live** o
 | **`KD`** | **Keil and Delitzsch Commentary on the Old Testament**<br>*C. F. Keil & Franz Delitzsch* | 1807–1890 | Authoritative academic grammatical commentary on Biblical Hebrew syntax, Semitic philology, and ANE history. | **Public Domain** | `commentaries/cKD.commentary` |
 | **`CECNT`** | **Critical and Exegetical Commentary on the New Testament**<br>*H. A. W. Meyer* | 1800–1873 | Rigorous academic grammatical analysis of the Greek New Testament text and clause syntax. | **Public Domain** | `commentaries/cCECNT.commentary` |
 | **`EGNT`** | **The Expositor's Greek New Testament**<br>*W. Robertson Nicoll et al.* | 1851–1923 | Critical, verse-by-verse Greek exegetical commentary by leading British and European scholars. | **Public Domain** | `commentaries/cEGNT.commentary` |
+| **`Pulpit`** | **The Pulpit Commentary** (4 Volumes)<br>*H. D. M. Spence & Joseph S. Exell* | 1880–1919 | Monumental 77-volume collection providing historical introductions, exegesis, and multiple homiletic outlines (sharded across 4 volumes). | **Public Domain** | `commentaries/cPulpit_1-4.commentary` |
 | **`BI`** | **The Biblical Illustrator** (4 Volumes)<br>*Joseph S. Exell* | 1887–1910 | Massive treasury containing thousands of sermon outlines, anecdotes, and homiletical illustrations (sharded across 4 volumes). | **Public Domain** | `commentaries/cBI_1-4.commentary` |
 | **`ECER`** | **Commentary for English Readers**<br>*Charles Ellicott* | 1819–1905 | Clear, lay-accessible exposition synthesizing historical-critical scholarship with reverent evangelical faith. | **Public Domain** | `commentaries/cECER.commentary` |
 | **`EBC`** | **The Expositor's Bible**<br>*W. Robertson Nicoll et al.* | 1887–1900 | In-depth theological and expository essays by 19th-century scholars covering every book of the Bible. | **Public Domain** | `commentaries/cEBC.commentary` |
@@ -36,10 +37,8 @@ All 22 commentary sets listed below are **fully deployed, verified, and live** o
 | **`Lange`** | **Commentary on the Holy Scriptures**<br>*John Peter Lange* | 1802–1884 | Comprehensive tri-fold framework: (1) Exegetical/Critical, (2) Doctrinal/Ethical, and (3) Homiletical/Pastoral. | **Public Domain** | `commentaries/cLange.commentary` |
 
 > [!NOTE]
-> **Cloudflare R2 Sharding Notice for The Pulpit Commentary (`cPulpit`)**:
-> *The Pulpit Commentary* is a massive 77-volume collection whose monolithic uncompressed SQLite database exceeds 120 MB. On Cloudflare Workers (which has a 128 MB RAM limit on the standard/free tier), loading this uncompressed database directly into WASM SQLite causes Worker Out-Of-Memory (OOM) / HTTP 1102 errors.
-> 
-> To enable *The Pulpit Commentary* on Cloudflare Edge, the database must be sharded into multiple volume partitions (e.g. `cPulpit_1.commentary` to `cPulpit_4.commentary`, mirroring the structure of *The Biblical Illustrator* `cBI_1`–`cBI_4`). It is currently available for local execution and will be deployed to Cloudflare Edge once the sharding migration is finalized.
+> **Edge Database Sharding Architecture**:
+> To ensure low latency and prevent memory allocation spikes under Cloudflare Worker limits (128 MB RAM on standard workers), oversized collections such as *The Pulpit Commentary* (`cPulpit`) and *The Biblical Illustrator* (`cBI`) are partitioned into 4 canonical volume shards (`_1`: Genesis–Esther, `_2`: Job–Malachi, `_3`: Matthew–Acts, `_4`: Romans–Revelation). The Berean service layer automatically routes incoming passage queries to the correct shard dynamically.
 
 ---
 
