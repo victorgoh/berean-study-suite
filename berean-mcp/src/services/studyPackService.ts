@@ -45,7 +45,7 @@ function cleanEmbeddedDictionary(rawText: string): string {
 function cleanEmbeddedPromises(rawText: string): string {
   if (!rawText) return "";
   return rawText
-    .replace(/^#\s+Biblical\s+Promises\s+on:[^\n]+\n+/i, "")
+    .replace(/^#\s+Biblical\s+Promises(\s+on)?:[^\n]+\n+/i, "")
     .trim();
 }
 

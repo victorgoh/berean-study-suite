@@ -56,7 +56,7 @@ export async function lookupMorphology(
   );
 
   const formattedText =
-    `### Morphology & Parsing for ${parsed.bookName} ${parsed.chapterStart}:${parsed.verseStart}\n\n` +
+    `# Morphology & Parsing: ${parsed.bookName} ${parsed.chapterStart}:${parsed.verseStart}\n\n` +
     `| Original | Transliteration | Gloss/Meaning | Morphology | Lemma |\n` +
     `| :--- | :--- | :--- | :--- | :--- |\n` +
     tableRows.join("\n");

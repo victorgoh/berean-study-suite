@@ -50,7 +50,7 @@ export async function lookupBibleNames(
   });
 
   const lines = matches.slice(0, 30).map((m) => `• **${m.name}**: ${m.meaning}`);
-  const formattedText = `### Bible Name Meanings for "${query}":\n\n` + lines.join("\n");
+  const formattedText = `# Bible Names: "${query}"\n\n` + lines.join("\n");
 
   return { matches: matches.slice(0, 30), formattedText };
 }

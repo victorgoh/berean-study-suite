@@ -94,7 +94,7 @@ export async function lookupPromises(
 
     const title = decodeHtmlEntities(bestMatch);
     const lines: string[] = [];
-    lines.push(`# Biblical Promises on: ${title}\n`);
+    lines.push(`# Biblical Promises: ${title}\n`);
     lines.push(`**Scripture Promises**:`);
     for (const p of allPassages) {
       lines.push(`• **${p}**`);

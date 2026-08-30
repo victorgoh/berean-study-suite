@@ -43,7 +43,7 @@ export async function lookupCrossReferences(
       .trim();
 
     return {
-      formattedText: `Cross References for ${parsed.bookName} ${parsed.chapterStart}:${parsed.verseStart} (TSKe Treasury of Scripture Knowledge):\n\n${cleanText}`
+      formattedText: `# Cross References: ${parsed.bookName} ${parsed.chapterStart}:${parsed.verseStart} (TSK)\n\n${cleanText}`
     };
   } catch (err: any) {
     return { error: `Cross reference lookup error: ${err.message}` };

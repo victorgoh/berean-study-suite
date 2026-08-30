@@ -22,7 +22,7 @@ export async function lookupLexiconEntry(
         const cleanDef = cleanHtmlToMarkdown(row.Definition);
         return {
           definition: cleanDef,
-          formattedText: `### Hebrew Lexicon Entry (BDB) for ${row.Topic}:\n\n${cleanDef}`
+          formattedText: `# Hebrew Lexicon Entry: ${row.Topic} (BDB)\n\n${cleanDef}`
         };
       }
     } catch (d1Err: any) {
@@ -62,7 +62,7 @@ export async function lookupLexiconEntry(
 
     return {
       definition: cleanDef,
-      formattedText: `### Lexicon Entry for ${row.Topic} (${lexiconName}):\n\n${cleanDef}`
+      formattedText: `# Lexicon Entry: ${row.Topic} (${lexiconName})\n\n${cleanDef}`
     };
   } catch (err: any) {
     return { error: `Lexicon error: ${err.message}` };

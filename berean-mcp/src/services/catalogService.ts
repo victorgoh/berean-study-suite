@@ -74,7 +74,7 @@ export async function getAvailableResources(
 
   if (cat === "all" || cat === "bibles") {
     catalog.bibles = BIBLE_REGISTRY;
-    sections.push(`### 📖 Available Bible Translations (${BIBLE_REGISTRY.length})\n` +
+    sections.push(`## Available Bible Translations (${BIBLE_REGISTRY.length})\n` +
       BIBLE_REGISTRY.map(b => `- **${b.code}** (${b.name}): ${b.description} [${b.type}]`).join("\n"));
   }
 
@@ -86,43 +86,43 @@ export async function getAvailableResources(
       scope: c.scope,
       description: c.description
     }));
-    sections.push(`### 💬 Available Commentary Sets (${COMMENTARIES_LIST.length})\n` +
+    sections.push(`## Available Commentary Sets (${COMMENTARIES_LIST.length})\n` +
       COMMENTARIES_LIST.map(c => `- **${c.key}** — *${c.name}* [${c.scope}]: ${c.description}`).join("\n"));
   }
 
   if (cat === "all" || cat === "lexicons") {
     catalog.lexicons = LEXICON_REGISTRY;
-    sections.push(`### 🏛️ Original Language Lexicons (${LEXICON_REGISTRY.length})\n` +
+    sections.push(`## Original Language Lexicons (${LEXICON_REGISTRY.length})\n` +
       LEXICON_REGISTRY.map(l => `- **${l.code}** (${l.name}) [${l.language}]: ${l.description}`).join("\n"));
   }
 
   if (cat === "all" || cat === "study_packs") {
     catalog.study_packs = studyPacks;
-    sections.push(`### ⚡ Composite Study Packs (${studyPacks.length})\n` +
+    sections.push(`## Composite Study Packs (${studyPacks.length})\n` +
       studyPacks.map(p => `- **\`${p.name}\`**: ${p.description}`).join("\n"));
   }
 
   if (cat === "all" || cat === "personas") {
     catalog.personas = personas;
-    sections.push(`### 🎭 Study Personas (${personas.length})\n` +
+    sections.push(`## Study Personas (${personas.length})\n` +
       personas.map(p => `- **${p.name}**: ${p.focus}`).join("\n"));
   }
 
   if (cat === "all" || cat === "skills") {
     catalog.skills = skills;
-    sections.push(`### 🧠 Autonomous Skills & Pipelines (${skills.length})\n` +
+    sections.push(`## Autonomous Skills & Pipelines (${skills.length})\n` +
       skills.map(s => `- **${s.name}** (\`${s.uri}\`): ${s.description}`).join("\n"));
   }
 
   if (cat === "all" || cat === "workflows") {
     catalog.workflows = workflows;
-    sections.push(`### 📋 Workflows & Prompts (${workflows.length})\n` +
+    sections.push(`## Workflows & Prompts (${workflows.length})\n` +
       workflows.map(w => `- **${w.name}**: ${w.description}`).join("\n"));
   }
 
   if (cat === "all" || cat === "rules") {
     catalog.rules = rules;
-    sections.push(`### 📐 Formatting & Typography Rules (${rules.length})\n` +
+    sections.push(`## Formatting & Typography Rules (${rules.length})\n` +
       rules.map(r => `- **${r.name}** (\`${r.uri}\`): ${r.description}`).join("\n"));
   }
 
