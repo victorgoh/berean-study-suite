@@ -19,7 +19,7 @@ import tempfile
 import argparse
 
 HOME = os.path.expanduser("~")
-DATA_DIR = os.path.join(HOME, "biblemate", "data")
+DATA_DIR = os.environ.get("BEREAN_DATA") or os.environ.get("DATA_DIR") or os.path.join(HOME, "berean", "data")
 
 def escape_sql_str(val):
     if val is None:
@@ -144,16 +144,16 @@ def import_table_in_batches(src_db_path, src_query, dst_db_name, table_name, cre
     print(f"✅ Successfully imported {total_inserted} rows into {dst_db_name} ({table_name})!")
     return True
 
-def import_morphology(is_remote=True, skip_schema=False, batch_size=2500, offset=0):
+def import_morphology_to_d1(is_remote=True, skip_schema=False, batch_size=500, offset=0):
     src = os.path.join(DATA_DIR, "morphology.sqlite")
     create_sql = """
     DROP TABLE IF EXISTS morphology;
     CREATE TABLE morphology (
-        WordID INT,
-        ClauseID INT,
-        Book INT,
-        Chapter INT,
-        Verse INT,
+        WordID INTEGER PRIMARY KEY,
+        ClauseID INTEGER,
+        Book INTEGER,
+        Chapter INTEGER,
+        Verse INTEGER,
         Word TEXT,
         LexicalEntry TEXT,
         MorphologyCode TEXT,
@@ -166,7 +166,10 @@ def import_morphology(is_remote=True, skip_schema=False, batch_size=2500, offset
         Gloss TEXT
     );
     """
-    index_sql = "CREATE INDEX idx_morph_bcv ON morphology (Book, Chapter, Verse);"
+    index_sql = """
+    CREATE INDEX IF NOT EXISTS idx_morph_bcv ON morphology (Book, Chapter, Verse);
+    CREATE INDEX IF NOT EXISTS idx_morph_lexeme ON morphology (Lexeme);
+    """
     
     def transform(row):
         return tuple(str(r) if (i < 5 and isinstance(r, int)) else escape_sql_str(r) for i, r in enumerate(row))
@@ -174,7 +177,7 @@ def import_morphology(is_remote=True, skip_schema=False, batch_size=2500, offset
     return import_table_in_batches(
         src,
         "SELECT WordID, ClauseID, Book, Chapter, Verse, Word, LexicalEntry, MorphologyCode, Morphology, Lexeme, Transliteration, Pronunciation, Interlinear, Translation, Gloss FROM morphology",
-        "biblemate-morphology",
+        "berean-morphology",
         "morphology",
         create_sql,
         transform,
@@ -202,7 +205,7 @@ def import_lexicon_bdb(is_remote=True, skip_schema=False, batch_size=100, offset
     return import_table_in_batches(
         src,
         "SELECT Topic, Definition FROM Lexicon",
-        "biblemate-reference",
+        "berean-reference",
         "lexicon_bdb",
         create_sql,
         transform,
@@ -230,7 +233,7 @@ def import_encyclopedia_isbe(is_remote=True, skip_schema=False, batch_size=50, o
     return import_table_in_batches(
         src,
         "SELECT path, content FROM ISB",
-        "biblemate-reference",
+        "berean-reference",
         "encyclopedia_isbe",
         create_sql,
         transform,
@@ -258,7 +261,7 @@ def import_dictionary(is_remote=True, skip_schema=False, batch_size=100, offset=
     return import_table_in_batches(
         src,
         "SELECT path, content FROM Dictionary",
-        "biblemate-reference",
+        "berean-reference",
         "dictionary",
         create_sql,
         transform,
@@ -267,13 +270,181 @@ def import_dictionary(is_remote=True, skip_schema=False, batch_size=100, offset=
         is_remote=is_remote,
         skip_schema=skip_schema,
         col_names=("path", "content"),
+def import_step_lexicon(is_remote=True, skip_schema=False, batch_size=100, offset=0, db_name="biblemate-reference"):
+    src = os.path.join(DATA_DIR, "lexicons", "step_lexicon.sqlite")
+    if not os.path.exists(src):
+        src = os.path.join(os.path.dirname(__file__), "..", "data", "lexicons", "step_lexicon.sqlite")
+    
+    create_sql = """
+    DROP TABLE IF EXISTS lexicon_step;
+    CREATE TABLE lexicon_step (
+        strongs TEXT PRIMARY KEY,
+        base_number TEXT,
+        canonical_strongs TEXT,
+        language TEXT,
+        lemma TEXT,
+        transliteration TEXT,
+        morphology TEXT,
+        gloss TEXT,
+        definition TEXT
+    );
+    """
+    index_sql = """
+    CREATE INDEX IF NOT EXISTS idx_step_base ON lexicon_step (base_number);
+    CREATE INDEX IF NOT EXISTS idx_step_canonical ON lexicon_step (canonical_strongs);
+    CREATE INDEX IF NOT EXISTS idx_step_lemma ON lexicon_step (lemma);
+    """
+    
+    def transform(row):
+        return tuple(escape_sql_str(r) for r in row)
+
+    return import_table_in_batches(
+        src,
+        "SELECT strongs, base_number, canonical_strongs, language, lemma, transliteration, morphology, gloss, definition FROM lexicon_step",
+        db_name,
+        "lexicon_step",
+        create_sql,
+        transform,
+        batch_size=batch_size,
+        rows_per_insert=10,
+        is_remote=is_remote,
+        index_sql=index_sql,
+        skip_schema=skip_schema,
+        offset=offset
+    )
+
+def import_ot_in_nt(is_remote=True, skip_schema=False, batch_size=100, offset=0, db_name="biblemate-reference"):
+    src = os.path.join(DATA_DIR, "ot_in_nt.sqlite")
+    if not os.path.exists(src):
+        src = os.path.join(os.path.dirname(__file__), "..", "data", "ot_in_nt.sqlite")
+    
+    create_sql = """
+    DROP TABLE IF EXISTS ot_in_nt;
+    CREATE TABLE ot_in_nt (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nt_ref TEXT NOT NULL,
+        ot_ref TEXT NOT NULL,
+        lxx_ref TEXT,
+        quote_type TEXT NOT NULL,
+        classification TEXT NOT NULL,
+        hermeneutical_notes TEXT NOT NULL,
+        divergence_notes TEXT NOT NULL
+    );
+    """
+    index_sql = """
+    CREATE INDEX IF NOT EXISTS idx_ot_in_nt_nt ON ot_in_nt (nt_ref);
+    CREATE INDEX IF NOT EXISTS idx_ot_in_nt_ot ON ot_in_nt (ot_ref);
+    """
+    
+    def transform(row):
+        return tuple(escape_sql_str(r) for r in row)
+
+    return import_table_in_batches(
+        src,
+        "SELECT id, nt_ref, ot_ref, lxx_ref, quote_type, classification, hermeneutical_notes, divergence_notes FROM ot_in_nt",
+        db_name,
+        "ot_in_nt",
+        create_sql,
+        transform,
+        batch_size=batch_size,
+        rows_per_insert=10,
+        is_remote=is_remote,
+        index_sql=index_sql,
+        skip_schema=skip_schema,
+        offset=offset
+    )
+
+def import_entities(is_remote=True, skip_schema=False, batch_size=100, offset=0, db_name="biblemate-reference"):
+    src = os.path.join(os.path.dirname(__file__), "..", "data", "entities_units.sqlite")
+    if not os.path.exists(src):
+        src = os.path.join(DATA_DIR, "entities_units.sqlite")
+    
+    create_sql = """
+    DROP TABLE IF EXISTS entities;
+    CREATE TABLE entities (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        disambiguation_key TEXT NOT NULL UNIQUE,
+        entity_type TEXT NOT NULL,
+        strongs TEXT,
+        original_lemma TEXT,
+        role_era TEXT NOT NULL,
+        relationships TEXT,
+        key_passages TEXT NOT NULL,
+        summary TEXT NOT NULL
+    );
+    """
+    index_sql = """
+    CREATE INDEX IF NOT EXISTS idx_entities_name ON entities (name);
+    CREATE INDEX IF NOT EXISTS idx_entities_key ON entities (disambiguation_key);
+    """
+    
+    def transform(row):
+        return tuple(escape_sql_str(r) for r in row)
+
+    return import_table_in_batches(
+        src,
+        "SELECT id, name, disambiguation_key, entity_type, strongs, original_lemma, role_era, relationships, key_passages, summary FROM entities",
+        db_name,
+        "entities",
+        create_sql,
+        transform,
+        batch_size=batch_size,
+        rows_per_insert=10,
+        is_remote=is_remote,
+        index_sql=index_sql,
+        skip_schema=skip_schema,
+        offset=offset
+    )
+
+def import_units(is_remote=True, skip_schema=False, batch_size=100, offset=0, db_name="biblemate-reference"):
+    src = os.path.join(os.path.dirname(__file__), "..", "data", "entities_units.sqlite")
+    if not os.path.exists(src):
+        src = os.path.join(DATA_DIR, "entities_units.sqlite")
+    
+    create_sql = """
+    DROP TABLE IF EXISTS units;
+    CREATE TABLE units (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        unit_name TEXT NOT NULL,
+        category TEXT NOT NULL,
+        testament TEXT NOT NULL,
+        hebrew_greek TEXT NOT NULL,
+        standard_ratio TEXT NOT NULL,
+        metric_equivalent TEXT NOT NULL,
+        imperial_equivalent TEXT NOT NULL,
+        purchasing_power_context TEXT NOT NULL
+    );
+    """
+    index_sql = """
+    CREATE INDEX IF NOT EXISTS idx_units_name ON units (unit_name);
+    CREATE INDEX IF NOT EXISTS idx_units_category ON units (category);
+    """
+    
+    def transform(row):
+        return tuple(escape_sql_str(r) for r in row)
+
+    return import_table_in_batches(
+        src,
+        "SELECT id, unit_name, category, testament, hebrew_greek, standard_ratio, metric_equivalent, imperial_equivalent, purchasing_power_context FROM units",
+        db_name,
+        "units",
+        create_sql,
+        transform,
+        batch_size=batch_size,
+        rows_per_insert=10,
+        is_remote=is_remote,
+        index_sql=index_sql,
+        skip_schema=skip_schema,
         offset=offset
     )
 
 def main():
     parser = argparse.ArgumentParser(description="Import SQLite data to Cloudflare D1")
     parser.add_argument("--local", action="store_true", help="Execute against local D1 instead of remote")
-    parser.add_argument("--only", choices=["morphology", "bdb", "isbe", "dictionary"], help="Import only specific table")
+    parser.add_argument("--ref-db", default="biblemate-reference", help="D1 Reference Database name (default: biblemate-reference)")
+    parser.add_argument("--morph-db", default="biblemate-morphology", help="D1 Morphology Database name (default: biblemate-morphology)")
+    parser.add_argument("--only", choices=["morphology", "bdb", "isbe", "dictionary", "step", "ot_in_nt", "entities", "units"], help="Import only specific table")
     parser.add_argument("--skip-schema", action="store_true", help="Skip DROP/CREATE TABLE schema step")
     parser.add_argument("--batch-size", type=int, default=0, help="Custom batch size per execute call")
     parser.add_argument("--offset", type=int, default=0, help="Resume from row offset")
@@ -299,6 +470,22 @@ def main():
     if not args.only or args.only == "dictionary":
         bs = args.batch_size if args.batch_size > 0 else 100
         import_dictionary(is_remote, skip_schema=args.skip_schema, batch_size=bs, offset=args.offset)
+
+    if not args.only or args.only == "step":
+        bs = args.batch_size if args.batch_size > 0 else 500
+        import_step_lexicon(is_remote, skip_schema=args.skip_schema, batch_size=bs, offset=args.offset, db_name=args.ref_db)
+
+    if not args.only or args.only == "ot_in_nt":
+        bs = args.batch_size if args.batch_size > 0 else 200
+        import_ot_in_nt(is_remote, skip_schema=args.skip_schema, batch_size=bs, offset=args.offset, db_name=args.ref_db)
+
+    if not args.only or args.only == "entities":
+        bs = args.batch_size if args.batch_size > 0 else 100
+        import_entities(is_remote, skip_schema=args.skip_schema, batch_size=bs, offset=args.offset, db_name=args.ref_db)
+
+    if not args.only or args.only == "units":
+        bs = args.batch_size if args.batch_size > 0 else 100
+        import_units(is_remote, skip_schema=args.skip_schema, batch_size=bs, offset=args.offset, db_name=args.ref_db)
 
     print("\n" + "=" * 60)
     print("🎉 D1 Data Import Complete!")

@@ -22,7 +22,10 @@ export async function getAvailableResources(
     { name: "commentary_study_pack", description: "Multi-commentary synthesis across custom subsets of the available commentators." },
     { name: "lesson_creator_study_pack", description: "Teaching outlines, discussion questions, Albert Barnes, and Ellicott for teachers." },
     { name: "prayer_guide_study_pack", description: "Scriptural adoration, confession, thanksgiving, supplication, and biblical promises." },
-    { name: "covenant_theology_pack", description: "Redemptive-historical covenant progression, John Calvin, John Gill, and canonical narrative synthesis." }
+    { name: "covenant_theology_pack", description: "Redemptive-historical covenant progression, John Calvin, John Gill, and canonical narrative synthesis." },
+    { name: "interlinear_study_pack", description: "Inline Greek/Hebrew word-by-word interlinear with continuous verse layout, morphological tags, and original language glossary." },
+    { name: "ot_in_nt_study_pack", description: "Apostolic hermeneutics and Old Testament quotations/allusions in the New Testament with verbatim Hebrew MT, Greek LXX, and Greek NT comparative alignment." },
+    { name: "septuagint_study_pack", description: "Greek Septuagint (LXX) text, Brenton English translation, Dead Sea Scrolls textual variants, and Hebrew Masoretic Text comparative exegesis." }
   ];
 
   const personas = [

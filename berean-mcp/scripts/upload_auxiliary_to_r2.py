@@ -57,7 +57,10 @@ files_to_sync = [
     "commentaries/cTrapp.commentary",
     "commentaries/cBullinger.commentary",
     "commentaries/cAlford.commentary",
-    "commentaries/cFBMeyer.commentary"
+    "commentaries/cFBMeyer.commentary",
+    "commentaries/TNotes.commentary",
+    "commentaries/cTNotes.commentary",
+    "data/lexicons/step_lexicon.sqlite"
 ]
 
 def main():

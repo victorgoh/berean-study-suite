@@ -22,7 +22,7 @@ Try out the live public instance hosted on Cloudflare Workers:
 
 ## ⚡ Architecture & Performance
 
-- **27 MCP Tools & 9 Composite Study Packs**: Provides granular single-engine tools as well as high-speed composite Study Packs delivering up to 170,000 characters (~30,000 words) of verified biblical analysis in a single round-trip.
+- **34 MCP Tools & 12 Composite Study Packs**: Provides granular single-engine tools as well as high-speed composite Study Packs delivering up to 170,000 characters (~30,000 words) of verified biblical analysis in a single round-trip.
 - **Edge Cloudflare Execution**: Sub-50ms cold start, multi-tier LRU caching, and streaming JSON-RPC / Streamable HTTP transports.
 - **Hybrid Storage**:
   - **Cloudflare D1 (Serverless SQLite)**: Ultra-fast indexing for Strong's Hebrew Lexicon (BDB), ISBE/Easton's Encyclopedias, and OT/NT Morphological datasets.
@@ -75,10 +75,13 @@ npx wrangler secret put API_KEY
 
 ## 📚 Classical Commentaries & Reference Data
 
-All classical commentary databases, lexicons, and biblical reference datasets are powered by the upstream [`biblematedata`](https://pypi.org/project/biblematedata/) library:
+All classical commentary databases, lexicons, and biblical reference datasets are powered by upstream [`biblematedata`](https://pypi.org/project/biblematedata/) and **[STEPBible.org](https://www.stepbible.org/)** (Tyndale House, Cambridge):
 
 - **Classical Exegesis & Homiletics**: Access extensive whole-Bible and testament-specific works by **Matthew Henry, John Calvin, John Gill, Jamieson-Fausset-Brown, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, Albert Barnes, Charles Ellicott**, and many others.
+- **STEPBible Original Language Lexicons (TBESG & TBESH)**: Extended Greek and Hebrew Strong's lexicons with disambiguated senses, transliterations, and morphological classifications (CC BY 4.0).
+- **Tyndale Open Study Notes (TNotes)**: High-density historical-grammatical and exegetical study notes compiled by Tyndale House scholars.
 - **Dynamic Resource Discovery**: Use the `get_available_resources` MCP tool at any time to query all active translations, commentary aliases, and lexicons installed in your environment.
+- **Data Integration Guide**: See [../docs/stepbible_data_integration.md](../docs/stepbible_data_integration.md) for full compilation and deployment steps.
 
 ---
 
@@ -94,26 +97,34 @@ All classical commentary databases, lexicons, and biblical reference datasets ar
 7. **`covenant_theology_pack`**: Bundles Scripture, John Calvin's Covenant Exposition, John Gill's Prophecy, ISBE Encyclopedia, and Canonical Cross-References.
 8. **`topic_study_pack`**: Bundles Nave's Topical Concordance, Torrey's New Topical Textbook, Easton's Bible Dictionary, and cross-references.
 9. **`commentary_study_pack`**: Dynamic multi-commentary bundler allowing custom multi-perspective lookups across any subset of the available commentators in a single call.
+10. **`interlinear_study_pack`**: Inline Greek/Hebrew to English word-by-word interlinear with continuous verse layout, grammatical parsing tags, and an automated lexical glossary.
+11. **`ot_in_nt_study_pack`**: Apostolic hermeneutics and Old Testament quotations/allusions in the New Testament with verbatim Hebrew MT, Greek LXX, and Greek NT comparative alignment.
+12. **`septuagint_study_pack`**: Greek Septuagint (LXX) text, Brenton English translation, Dead Sea Scrolls textual variants, and Hebrew Masoretic Text comparative exegesis.
 
 ### 2. Specialized Single-Engine Tools
-10. **`bible_lookup`**: Retrieve full chapter and verse ranges across BSB, NET, KJV, ASV, WEB, and OHGB.
-11. **`bible_search`**: High-speed full-text search with regex and testament filters.
-12. **`commentary_lookup`**: Query any individual commentator with intelligent alias normalization.
-13. **`cross_references`**: Query Treasury of Scripture Knowledge (TSK) cross-reference collections.
-14. **`lexicon_lookup`**: Strong's, Thayer's Greek, BDB Hebrew, and LSJ Lexicons.
-15. **`morphology_lookup`**: Original language grammatical and parsing breakdowns.
-16. **`topic_study`**: Topical concordance lookups (Nave's & Torrey's).
-17. **`character_lookup`**: Biographical profiles of biblical figures.
-18. **`location_lookup`**: GPS coordinates and Google Maps links for biblical cities and sites.
-19. **`theological_dictionary`**: Easton's Bible Dictionary and ISBE Encyclopedia entries.
-20. **`parallel_passages`**: Gospel harmonies and synoptic comparisons.
-21. **`biblical_promises`**: Topic-indexed biblical promises for faith and prayer.
-22. **`book_analysis`**: Historical background, authorship, and date for all 66 books.
-23. **`chapter_summary`**: Structural summaries and central themes for any chapter.
-24. **`bible_names`**: Etymological meanings and origins of biblical names.
-25. **`chronology`**: Biblical timelines and historical genealogies.
-26. **`daily_reading`**: 365-day whole-Bible reading schedules with automatic Scripture embedding.
-27. **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, study packs, personas, skills, workflows, and rules.
+13. **`bible_lookup`**: Retrieve full chapter and verse ranges across BSB, NET, KJV, ASV, WEB, OHGB, and LXX.
+14. **`bible_search`**: High-speed full-text search with regex and testament filters.
+15. **`commentary_lookup`**: Query any individual commentator with intelligent alias normalization.
+16. **`cross_references`**: Query Treasury of Scripture Knowledge (TSK) cross-reference collections.
+17. **`lexicon_lookup`**: Strong's, TBESG/TBESH, Thayer's Greek, BDB Hebrew, and LSJ Lexicons.
+18. **`morphology_lookup`**: Original language grammatical and parsing breakdowns.
+19. **`interlinear_lookup`**: Inline word-by-word Greek/Hebrew to English interlinear with continuous verse layout.
+20. **`ot_quotations_lookup`**: Look up Old Testament quotations, citations, allusions, and Septuagint bridge references for any NT or OT passage.
+21. **`septuagint_lookup`**: Look up Greek Septuagint (LXX) text, Brenton English translation, and textual divergence notes for any Old Testament passage.
+22. **`entity_disambiguation`**: Disambiguate biblical persons or locations sharing identical names (e.g. Mary, James, John, Zechariah, Herod).
+23. **`convert_ancient_units`**: Convert ancient biblical weights, measures, distances, and currencies into modern metric, imperial, and labor purchasing power.
+24. **`topic_study`**: Topical concordance lookups (Nave's & Torrey's).
+25. **`character_lookup`**: Biographical profiles of biblical figures.
+26. **`location_lookup`**: GPS coordinates and Google Maps links for biblical cities and sites.
+27. **`theological_dictionary`**: Easton's Bible Dictionary and ISBE Encyclopedia entries.
+28. **`parallel_passages`**: Gospel harmonies and synoptic comparisons.
+29. **`biblical_promises`**: Topic-indexed biblical promises for faith and prayer.
+30. **`book_analysis`**: Historical background, authorship, and date for all 66 books.
+31. **`chapter_summary`**: Structural summaries and central themes for any chapter.
+32. **`bible_names`**: Etymological meanings and origins of biblical names.
+33. **`chronology`**: Biblical timelines and historical genealogies.
+34. **`daily_reading`**: 365-day whole-Bible reading schedules with automatic Scripture embedding.
+35. **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, study packs, personas, skills, workflows, and rules.
 
 ---
 
@@ -156,21 +167,27 @@ npm run typecheck
 # (wrangler.jsonc is in .gitignore to keep your private D1 Database IDs safe)
 cp wrangler.jsonc.example wrangler.jsonc
 
-# 3. Setup Cloudflare R2 Bucket & Upload Commentary/Bible Files
+# 3. Compile STEPBible Lexicons & Tyndale Study Notes (Optional / Recommended)
+python3 scripts/prepare_step_lexicon.py
+python3 scripts/prepare_tnotes.py
+
+# 4. Setup Cloudflare R2 Bucket & Upload Commentary/Bible/Auxiliary Files
 # (Ensures local data is downloaded: pip install biblematedata && biblematedata)
 npx wrangler r2 bucket create biblemate-data
 python3 scripts/sync_data_to_r2.py --bucket biblemate-data
+python3 scripts/upload_auxiliary_to_r2.py
 
-# 4. Setup Cloudflare D1 Databases & Import Morphology/Reference Indexes
+# 5. Setup Cloudflare D1 Databases & Import Morphology/Reference/STEP Indexes
 npx wrangler d1 create berean-morphology
 npx wrangler d1 create berean-reference
 # Paste the resulting database_id UUIDs into your local wrangler.jsonc
 python3 scripts/import_to_d1.py
+npx wrangler d1 execute berean-reference --remote --file=data/lexicons/step_lexicon_d1.sql
 
-# 5. Deploy Worker to Cloudflare Global Edge
+# 6. Deploy Worker to Cloudflare Global Edge
 npm run deploy
 
-# 6. Set Private API Key Secret for Authentication
+# 7. Set Private API Key Secret for Authentication
 npx wrangler secret put API_KEY
 ```
 

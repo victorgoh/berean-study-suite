@@ -17,7 +17,7 @@ export const BibleSearchSchema = {
 };
 
 export const CommentaryLookupSchema = {
-  version: z.string().default("Henry").describe("Commentary version or author: 'Henry' (Matthew Henry), 'JFB' (Jamieson-Fausset-Brown), 'Calvin' (John Calvin), 'Barnes' (Albert Barnes), 'MacL' (Alexander Maclaren), 'HH' (Charles Simeon / Horae Homileticae), 'Benson' (Joseph Benson), 'Clarke' (Adam Clarke), 'Gill' (John Gill), 'CECNT' (Meyer NT), 'ECER' (Charles Ellicott), 'BI' (Biblical Illustrator), 'Spur' (Charles Spurgeon), 'Rob' (A. T. Robertson Word Pictures), 'Vincent' (Marvin Vincent Word Studies), 'KD' (Keil & Delitzsch OT), 'Wesley' (John Wesley)"),
+  version: z.string().default("Henry").describe("Commentary version or author: 'Guzik' (David Guzik - Enduring Word), 'Everett' (Gary Everett Study Notes), 'Utley' (Bob Utley), 'Ironside' (H.A. Ironside), 'Morgan' (G. Campbell Morgan), 'FBMeyer' (F.B. Meyer), 'EGNT' (Expositor's Greek NT), 'Henry' (Matthew Henry), 'JFB' (Jamieson-Fausset-Brown), 'Calvin' (John Calvin), 'Barnes' (Albert Barnes), 'MacL' (Alexander Maclaren), 'HH' (Charles Simeon), 'Gill' (John Gill), 'Alford' (Henry Alford Greek NT), 'Bullinger' (Companion Bible), 'Trapp' (John Trapp), 'Ryle' (J.C. Ryle), 'KD' (Keil & Delitzsch), 'Rob' (A.T. Robertson), 'Vincent' (Marvin Vincent), 'Spur' (Charles Spurgeon), 'Wesley' (John Wesley), 'Clarke' (Adam Clarke), 'Benson' (Joseph Benson), 'ECER' (Charles Ellicott), 'EBC' (Expositor's Bible), 'BI' (Biblical Illustrator), 'Pulpit' (The Pulpit Commentary), or any custom commentary name/key"),
   reference: z.string().describe("Passage reference, e.g., 'Romans 8:28', 'John 1:1-5', 'Genesis 1'")
 };
 
@@ -91,19 +91,24 @@ export const DailyReadingSchema = {
 export const SermonStudyPackSchema = {
   reference: z.string().describe("Scripture passage reference to prepare a sermon on, e.g. 'Romans 8:1-11', 'Ephesians 2:1-10'"),
   version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
-  include_xrefs: z.boolean().default(true).describe("Whether to include key cross-references")
+  include_xrefs: z.boolean().default(true).describe("Whether to include key cross-references"),
+  include_continuationist: z.boolean().default(false).describe("Dynamically include modern continuationist / spirit-filled expository commentary (David Guzik, Gary Everett)"),
+  extra_commentators: z.array(z.string()).optional().describe("Optional additional commentators to bundle dynamically, e.g. ['Guzik', 'Everett', 'Calvin']")
 };
 
 export const DevotionalStudyPackSchema = {
   reference: z.string().describe("Scripture passage reference for devotional reflection, e.g. 'Psalm 23', 'John 15:1-8'"),
   version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
-  topic: z.string().optional().describe("Optional devotional theme or promise topic (e.g. 'Comfort', 'Peace', 'Grace')")
+  include_continuationist: z.boolean().default(false).describe("Dynamically include continuationist / spirit-led devotional reflections (David Guzik, Gary Everett)"),
+  extra_commentators: z.array(z.string()).optional().describe("Optional additional commentators to bundle dynamically")
 };
 
 export const PassageExegesisPackSchema = {
   reference: z.string().describe("Scripture passage reference for deep scholarly exegesis, e.g. 'John 1:1-5', 'Romans 8:28-39'"),
   version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
-  include_original: z.boolean().default(true).describe("Whether to include original Greek/Hebrew text (OHGB)")
+  include_original: z.boolean().default(true).describe("Whether to include original Greek/Hebrew text (OHGB)"),
+  include_continuationist: z.boolean().default(false).describe("Dynamically include continuationist / thematic structure commentary (David Guzik, Gary Everett)"),
+  extra_commentators: z.array(z.string()).optional().describe("Optional additional commentators to bundle dynamically")
 };
 
 export const WordStudyPackSchema = {
@@ -118,23 +123,69 @@ export const TopicStudyPackSchema = {
 };
 
 export const CommentaryStudyPackSchema = {
-  reference: z.string().describe("Passage reference to fetch multi-commentary perspectives for, e.g. 'John 3:16', 'Romans 8:28'"),
-  commentators: z.array(z.string()).default(["Henry", "JFB", "Calvin", "MacL", "Barnes", "Spur", "HH", "Clarke", "Gill"]).describe("List of commentary versions or authors to include (e.g. ['Henry', 'JFB', 'Calvin', 'MacL', 'Barnes', 'Spur', 'HH', 'Clarke', 'Gill', 'KD', 'CECNT', 'Pulpit'])")
+  reference: z.string().describe("Passage reference to fetch multi-commentary perspectives for, e.g. 'John 3:16', 'Romans 8:28', 'Genesis 1:1'"),
+  commentators: z.array(z.string()).optional().describe("Optional list of commentary versions or authors to include (e.g. ['TNotes', 'Guzik', 'Calvin', 'Henry', 'Gill', 'JFB', 'Barnes', 'Clarke'])"),
+  order_mode: z.enum(["modern_first", "classic_first", "custom"]).default("modern_first").describe("Ordering priority: 'modern_first' (TNotes/Guzik/Barnes before classic puritans), 'classic_first' (Calvin/Gill/Henry first), or 'custom' (strict order of provided array)")
 };
 
 export const LessonCreatorStudyPackSchema = {
   reference: z.string().describe("Scripture passage reference for Sunday School or small group lesson planning, e.g. 'Luke 15:11-32', 'Acts 2:42-47'"),
-  version: z.string().default("BSB").describe("Bible translation version (default: BSB)")
+  version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
+  extra_commentators: z.array(z.string()).optional().describe("Optional additional commentators to bundle dynamically")
 };
 
 export const PrayerGuideStudyPackSchema = {
   reference: z.string().describe("Scripture passage reference for prayer and intercession, e.g. 'Psalm 51', 'Ephesians 3:14-21'"),
   version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
-  topic: z.string().optional().describe("Optional prayer theme or promise topic (e.g. 'Healing', 'Forgiveness', 'Guidance')")
+  include_continuationist: z.boolean().default(false).describe("Dynamically include continuationist / spirit-led intercession, faith, and prayer insights (David Guzik, Gary Everett)"),
+  extra_commentators: z.array(z.string()).optional().describe("Optional additional commentators to bundle dynamically")
 };
 
 export const CovenantTheologyPackSchema = {
   reference: z.string().describe("Scripture passage reference for redemptive-historical covenant synthesis, e.g. 'Genesis 15', 'Hebrews 8'"),
-  version: z.string().default("BSB").describe("Bible translation version (default: BSB)")
+  version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
+  include_continuationist: z.boolean().default(false).describe("Dynamically include New Covenant Spirit empowerment and continuationist theological perspectives (David Guzik, Gary Everett)"),
+  extra_commentators: z.array(z.string()).optional().describe("Optional additional commentators to bundle dynamically")
 };
+
+export const InterlinearLookupSchema = {
+  reference: z.string().describe("Passage reference, e.g., 'Philippians 4:4-8', 'John 1:1-5', 'Psalm 23'"),
+  glossary_filter: z.enum(["rare_and_notable", "all_words", "none"]).default("rare_and_notable").describe("Filter mode for glossary entries at the bottom: 'rare_and_notable' (default), 'all_words', or 'none'"),
+  gloss_color: z.string().default("#888888").describe("HTML hex color code for the inline English gloss (default: '#888888')")
+};
+
+export const InterlinearStudyPackSchema = {
+  reference: z.string().describe("Passage reference for original language interlinear analysis, e.g., 'Philippians 4:4-8', 'John 1:1-5', 'Psalm 23'"),
+  glossary_filter: z.enum(["rare_and_notable", "all_words", "none"]).default("rare_and_notable").describe("Filter mode for glossary entries at the bottom: 'rare_and_notable' (default), 'all_words', or 'none'"),
+  gloss_color: z.string().default("#888888").describe("HTML hex color code for the inline English gloss (default: '#888888')")
+};
+
+export const OtQuotationsLookupSchema = {
+  reference: z.string().describe("New Testament or Old Testament passage reference to check for cross-testament citations, e.g., 'Hebrews 8:8', 'Matthew 1:23', 'Jeremiah 31:31', 'Isaiah 7:14', 'Romans 4:3'")
+};
+
+export const OtInNtStudyPackSchema = {
+  reference: z.string().describe("Passage reference for apostolic hermeneutics and OT-in-NT fulfillment exegesis, e.g., 'Hebrews 8:8-12', 'Matthew 1:22-23', 'Romans 4:1-8', 'Galatians 3:10-14', '1 Peter 2:4-10'"),
+  version: z.string().default("BSB").describe("Bible translation version for English text (default: BSB)")
+};
+
+export const SeptuagintLookupSchema = {
+  reference: z.string().describe("Old Testament Scripture reference for Septuagint Greek lookup, e.g., 'Genesis 1:1-5', 'Genesis 4:8', 'Exodus 3:14', 'Psalm 22:16', 'Isaiah 7:14'")
+};
+
+export const SeptuagintStudyPackSchema = {
+  reference: z.string().describe("Old Testament passage reference for Septuagint and Hebrew MT comparative study, e.g., 'Genesis 1:1-5', 'Exodus 1:1-7', 'Psalm 40:1-8', 'Isaiah 7:10-17'"),
+  version: z.string().default("BSB").describe("Bible translation version for standard English text (default: BSB)")
+};
+
+export const EntityDisambiguationSchema = {
+  name: z.string().describe("Biblical name to disambiguate across identical persons or locations, e.g., 'Mary', 'James', 'John', 'Zechariah', 'Herod', 'Antioch'")
+};
+
+export const ConvertAncientUnitsSchema = {
+  unit: z.string().describe("Biblical weight, measurement, or currency unit to convert, e.g., 'Talent', 'Shekel', 'Cubit', 'Denarius', 'Ephah', 'Bath', 'Span', 'Omer', 'Mite'"),
+  amount: z.number().default(1).describe("Quantity/amount of the specified ancient unit (default: 1)")
+};
+
+
 

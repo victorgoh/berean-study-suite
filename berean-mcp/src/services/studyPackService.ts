@@ -6,6 +6,9 @@ import { lookupMorphology } from "./morphologyService.js";
 import { lookupDictionary } from "./dictionaryService.js";
 import { lookupPromises } from "./promisesService.js";
 import { lookupChapterSummary } from "./chapterSummaryService.js";
+import { lookupInterlinear, getInterlinearStudyPack } from "./interlinearService.js";
+import { lookupOtQuotations, getOtInNtStudyPack } from "./otInNtService.js";
+import { lookupSeptuagint, getSeptuagintStudyPack } from "./septuagintService.js";
 import { Env, StudyPackResponse } from "../types.js";
 
 /**
@@ -45,23 +48,50 @@ function cleanEmbeddedDictionary(rawText: string): string {
 function cleanEmbeddedPromises(rawText: string): string {
   if (!rawText) return "";
   return rawText
-    .replace(/^#\s+Biblical\s+Promises(\s+on)?:[^\n]+\n+/i, "")
+    .replace(/^#\s+Biblical\s+Promises\s+on:[^\n]+\n+/i, "")
     .trim();
+}
+
+async function appendExtraCommentators(
+  env: Env,
+  reference: string,
+  extraCommentators: string[] | undefined,
+  alreadyFetched: string[],
+  sections: Record<string, string>,
+  startSectionIdx: number
+): Promise<{ text: string; nextSectionIdx: number }> {
+  if (!extraCommentators || extraCommentators.length === 0) return { text: "", nextSectionIdx: startSectionIdx };
+  let extraText = "";
+  let currentIdx = startSectionIdx;
+
+  for (const author of extraCommentators) {
+    if (alreadyFetched.map(a => a.toLowerCase()).includes(author.toLowerCase())) continue;
+    const res = await lookupCommentary(env, author, reference);
+    if (res.formattedText && !res.error) {
+      const cleaned = cleanEmbeddedCommentary(res.formattedText);
+      sections[`commentary_${author.toLowerCase()}`] = cleaned;
+      extraText += `## ${currentIdx++}. Commentary: ${author}\n${cleaned}\n\n`;
+    }
+  }
+  return { text: extraText, nextSectionIdx: currentIdx };
 }
 
 export async function getSermonStudyPack(
   env: Env,
   reference: string,
   version: string = "BSB",
-  includeXrefs: boolean = true
+  includeXrefs: boolean = true,
+    extraCommentators?: string[]
 ): Promise<StudyPackResponse> {
   const bibleRes = await lookupBiblePassage(env, version, reference);
-  const maclRes = await lookupCommentary(env, "MacL", reference);
+    const maclRes = await lookupCommentary(env, "MacL", reference);
   const simeonRes = await lookupCommentary(env, "HH", reference);
+  const ironsideRes = await lookupCommentary(env, "Ironside", reference);
   const biRes = await lookupCommentary(env, "BI", reference);
-  const henryRes = await lookupCommentary(env, "Henry", reference);
+  const trappRes = await lookupCommentary(env, "Trapp", reference);
   const xrefRes = includeXrefs ? await lookupCrossReferences(env, reference, 10) : null;
 
+    
   const sections: Record<string, string> = {};
   let text = `# Sermon Study Pack: ${reference}\n\n`;
 
@@ -71,6 +101,7 @@ export async function getSermonStudyPack(
 
   let sectionIdx = 2;
 
+  
   if (maclRes.formattedText && !maclRes.error) {
     const cleaned = cleanEmbeddedCommentary(maclRes.formattedText);
     sections["homiletics_maclaren"] = cleaned;
@@ -83,22 +114,34 @@ export async function getSermonStudyPack(
     text += `## ${sectionIdx++}. Homiletical Discourse & Preaching Outline (Charles Simeon - Horae Homileticae)\n${cleaned}\n\n`;
   }
 
+  if (ironsideRes.formattedText && !ironsideRes.error) {
+    const cleaned = cleanEmbeddedCommentary(ironsideRes.formattedText);
+    sections["expository_ironside"] = cleaned;
+    text += `## ${sectionIdx++}. Dispensational & Expository Insights (H. A. Ironside)\n${cleaned}\n\n`;
+  }
+
   if (biRes.formattedText && !biRes.error) {
     const cleaned = cleanEmbeddedCommentary(biRes.formattedText);
     sections["illustrations_biblical_illustrator"] = cleaned;
     text += `## ${sectionIdx++}. Sermon Illustrations & Historical Anecdotes (Biblical Illustrator)\n${cleaned}\n\n`;
   }
 
-  if (henryRes.formattedText && !henryRes.error) {
-    const cleaned = cleanEmbeddedCommentary(henryRes.formattedText);
-    sections["pastoral_henry"] = cleaned;
-    text += `## ${sectionIdx++}. Pithy Pastoral Aphorisms & Puritan Insights (Matthew Henry)\n${cleaned}\n\n`;
+  if (trappRes.formattedText && !trappRes.error) {
+    const cleaned = cleanEmbeddedCommentary(trappRes.formattedText);
+    sections["aphorisms_trapp"] = cleaned;
+    text += `## ${sectionIdx++}. Pithy Puritan Aphorisms & Classical Wit (John Trapp)\n${cleaned}\n\n`;
   }
 
+  
+  
   if (xrefRes && xrefRes.formattedText && !xrefRes.error) {
     sections["cross_references"] = xrefRes.formattedText;
     text += `## ${sectionIdx++}. Key Cross-References (TSK)\n${xrefRes.formattedText}\n\n`;
   }
+
+  const fetchedKeys = ["MacL", "HH", "Ironside", "BI", "Trapp"];
+  const extra = await appendExtraCommentators(env, reference, extraCommentators, fetchedKeys, sections, sectionIdx);
+  text += extra.text;
 
   const tip = `> [!TIP]\n> Use this data pack with the **Passionate Evangelist** persona to construct a compelling 3-point homiletical outline, poignant illustrations, and a direct gospel call to faith.\n`;
   text += tip;
@@ -110,6 +153,7 @@ export async function getSermonStudyPack(
       title: `Sermon Study Pack: ${reference}`,
       reference,
       version,
+      
       timestamp: new Date().toISOString()
     }
   };
@@ -119,14 +163,22 @@ export async function getDevotionalStudyPack(
   env: Env,
   reference: string,
   version: string = "BSB",
+    extraCommentators?: string[],
   topic?: string
 ): Promise<StudyPackResponse> {
+  const parsed = parseReferenceString(reference);
+  const isPsalm = parsed && parsed.bookNumber === 19;
+  const isGospel = parsed && parsed.bookNumber >= 40 && parsed.bookNumber <= 43;
+
   const bibleRes = await lookupBiblePassage(env, version, reference);
-  const maclRes = await lookupCommentary(env, "MacL", reference);
-  const spurRes = await lookupCommentary(env, "Spur", reference);
-  const barnesRes = await lookupCommentary(env, "Barnes", reference);
+    const maclRes = await lookupCommentary(env, "MacL", reference);
+  const devotionalRes = isPsalm
+    ? await lookupCommentary(env, "Spur", reference)
+    : isGospel
+    ? await lookupCommentary(env, "Ryle", reference)
+    : await lookupCommentary(env, "Barnes", reference);
   const henryRes = await lookupCommentary(env, "Henry", reference);
-  const promisesRes = topic ? await lookupPromises(env, topic, true, version) : null;
+      const promisesRes = topic ? await lookupPromises(env, topic, true, version) : null;
   const xrefRes = await lookupCrossReferences(env, reference, 8);
 
   const sections: Record<string, string> = {};
@@ -138,22 +190,18 @@ export async function getDevotionalStudyPack(
 
   let sectionIdx = 2;
 
+  
   if (maclRes.formattedText && !maclRes.error) {
     const cleaned = cleanEmbeddedCommentary(maclRes.formattedText);
     sections["exposition_maclaren"] = cleaned;
     text += `## ${sectionIdx++}. Devotional Exposition (Alexander Maclaren)\n${cleaned}\n\n`;
   }
 
-  if (spurRes.formattedText && !spurRes.error) {
-    const cleaned = cleanEmbeddedCommentary(spurRes.formattedText);
-    sections["meditation_spurgeon"] = cleaned;
-    text += `## ${sectionIdx++}. Heart Reflections & Meditation (Charles Spurgeon)\n${cleaned}\n\n`;
-  }
-
-  if (barnesRes.formattedText && !barnesRes.error) {
-    const cleaned = cleanEmbeddedCommentary(barnesRes.formattedText);
-    sections["applications_barnes"] = cleaned;
-    text += `## ${sectionIdx++}. Practical Life Applications (Albert Barnes - Remarks)\n${cleaned}\n\n`;
+  if (devotionalRes.formattedText && !devotionalRes.error) {
+    const authorName = isPsalm ? "Charles Spurgeon (Heart Meditation)" : isGospel ? "J. C. Ryle (Heart Application)" : "Albert Barnes (Practical Remarks)";
+    const cleaned = cleanEmbeddedCommentary(devotionalRes.formattedText);
+    sections["devotional_primary"] = cleaned;
+    text += `## ${sectionIdx++}. Pastoral & Heart Reflections (${authorName})\n${cleaned}\n\n`;
   }
 
   if (henryRes.formattedText && !henryRes.error) {
@@ -162,6 +210,8 @@ export async function getDevotionalStudyPack(
     text += `## ${sectionIdx++}. Supporting Pastoral Aphorisms (Matthew Henry)\n${cleaned}\n\n`;
   }
 
+  
+  
   if (promisesRes && promisesRes.formattedText && !promisesRes.error) {
     const cleaned = cleanEmbeddedPromises(promisesRes.formattedText);
     sections["promises"] = cleaned;
@@ -172,6 +222,10 @@ export async function getDevotionalStudyPack(
     sections["cross_references"] = xrefRes.formattedText;
     text += `## ${sectionIdx++}. Supporting Cross-References\n${xrefRes.formattedText}\n\n`;
   }
+
+  const fetchedKeys = ["MacL", "Henry", isPsalm ? "Spur" : isGospel ? "Ryle" : "Barnes"];
+  const extra = await appendExtraCommentators(env, reference, extraCommentators, fetchedKeys, sections, sectionIdx);
+  text += extra.text;
 
   const tip = `> [!TIP]\n> Use this data pack with the **Compassionate Pastor** persona to draft a 7-section daily devotional with historical insight, keyword meditation, 3 practical action steps, and a 1st-person closing prayer.\n`;
   text += tip;
@@ -184,6 +238,7 @@ export async function getDevotionalStudyPack(
       reference,
       version,
       topic,
+      
       timestamp: new Date().toISOString()
     }
   };
@@ -193,13 +248,15 @@ export async function getPassageExegesisPack(
   env: Env,
   reference: string,
   version: string = "BSB",
-  includeOriginal: boolean = true
+  includeOriginal: boolean = true,
+    extraCommentators?: string[]
 ): Promise<StudyPackResponse> {
   const parsed = parseReferenceString(reference);
   const isOT = parsed ? parsed.bookNumber <= 39 : false;
 
   const bibleRes = await lookupBiblePassage(env, version, reference);
   const originalRes = includeOriginal ? await lookupBiblePassage(env, "OHGB", reference) : null;
+  const lxxRes = (includeOriginal && isOT) ? await lookupSeptuagint(env, reference) : null;
   const morphRes = await lookupMorphology(env, reference);
   const primaryScholarRes = isOT
     ? await lookupCommentary(env, "KD", reference)
@@ -207,9 +264,10 @@ export async function getPassageExegesisPack(
   const secondaryScholarRes = isOT
     ? await lookupCommentary(env, "Clarke", reference)
     : await lookupCommentary(env, "EGNT", reference);
+  const alfordRes = !isOT ? await lookupCommentary(env, "Alford", reference) : null;
   const pulpitRes = await lookupCommentary(env, "Pulpit", reference);
   const jfbRes = await lookupCommentary(env, "JFB", reference);
-  const xrefRes = await lookupCrossReferences(env, reference, 10);
+    const xrefRes = await lookupCrossReferences(env, reference, 10);
 
   const sections: Record<string, string> = {};
   let text = `# Passage Exegesis Study Pack: ${reference}\n\n`;
@@ -223,6 +281,12 @@ export async function getPassageExegesisPack(
   if (originalRes && originalRes.formattedText && !originalRes.error) {
     sections["original_language_text"] = originalRes.formattedText;
     text += `## ${sectionIdx++}. Original Language Text (OHGB ${isOT ? "Hebrew/Aramaic" : "Greek"})\n${originalRes.formattedText}\n\n`;
+  }
+
+  if (lxxRes && lxxRes.verses && lxxRes.verses.length > 0) {
+    const lxxText = lxxRes.verses.map(v => `**[${v.chapter}:${v.verse}]** ${v.greek}\n*Brenton:* *"${v.english}"*${v.divergence ? `\n> 🔍 *MT Note:* ${v.divergence}` : ""}`).join("\n\n");
+    sections["septuagint_greek_text"] = lxxText;
+    text += `## ${sectionIdx++}. Greek Septuagint Text & Ancient Variants (LXX / Rahlfs)\n${lxxText}\n\n`;
   }
 
   if (morphRes && morphRes.formattedText && !morphRes.error) {
@@ -245,6 +309,12 @@ export async function getPassageExegesisPack(
     text += `## ${sectionIdx++}. Textual & Linguistic Insights (${scholarName})\n${cleaned}\n\n`;
   }
 
+  if (alfordRes && alfordRes.formattedText && !alfordRes.error) {
+    const cleaned = cleanEmbeddedCommentary(alfordRes.formattedText);
+    sections["critical_greek_alford"] = cleaned;
+    text += `## ${sectionIdx++}. Critical Greek Testament Exegesis (Henry Alford)\n${cleaned}\n\n`;
+  }
+
   if (pulpitRes.formattedText && !pulpitRes.error) {
     const cleaned = cleanEmbeddedCommentary(pulpitRes.formattedText);
     sections["structural_analysis_pulpit"] = cleaned;
@@ -257,10 +327,16 @@ export async function getPassageExegesisPack(
     text += `## ${sectionIdx++}. Exegetical Synthesis (Jamieson-Fausset-Brown)\n${cleaned}\n\n`;
   }
 
+  
   if (xrefRes && xrefRes.formattedText && !xrefRes.error) {
     sections["cross_references"] = xrefRes.formattedText;
     text += `## ${sectionIdx++}. Canonical Cross-References\n${xrefRes.formattedText}\n\n`;
   }
+
+  const fetchedKeys = [isOT ? "KD" : "CECNT", isOT ? "Clarke" : "EGNT", "Pulpit", "JFB"];
+  if (alfordRes) fetchedKeys.push("Alford");
+  const extra = await appendExtraCommentators(env, reference, extraCommentators, fetchedKeys, sections, sectionIdx);
+  text += extra.text;
 
   const tip = `> [!TIP]\n> Use this data pack with the **OT/NT Bible Scholar** persona to write rigorous academic exegesis, resolve textual variants, and unpack original language syntax.\n`;
   text += tip;
@@ -273,6 +349,7 @@ export async function getPassageExegesisPack(
       reference,
       version,
       language: isOT ? "Hebrew/Aramaic" : "Greek",
+      
       timestamp: new Date().toISOString()
     }
   };
@@ -281,14 +358,15 @@ export async function getPassageExegesisPack(
 export async function getLessonCreatorStudyPack(
   env: Env,
   reference: string,
-  version: string = "BSB"
+  version: string = "BSB",
+    extraCommentators?: string[]
 ): Promise<StudyPackResponse> {
   const bibleRes = await lookupBiblePassage(env, version, reference);
   const summaryRes = await lookupChapterSummary(env, reference);
-  const ellicottRes = await lookupCommentary(env, "ECER", reference);
+    const ellicottRes = await lookupCommentary(env, "ECER", reference);
   const ebcRes = await lookupCommentary(env, "EBC", reference);
   const barnesRes = await lookupCommentary(env, "Barnes", reference);
-  const xrefRes = await lookupCrossReferences(env, reference, 8);
+      const xrefRes = await lookupCrossReferences(env, reference, 8);
 
   const sections: Record<string, string> = {};
   let text = `# Lesson Creator Study Pack: ${reference}\n\n`;
@@ -304,6 +382,7 @@ export async function getLessonCreatorStudyPack(
     text += `## ${sectionIdx++}. Chapter Overview & Contextual Flow\n${summaryRes.formattedText}\n\n`;
   }
 
+  
   if (ellicottRes.formattedText && !ellicottRes.error) {
     const cleaned = cleanEmbeddedCommentary(ellicottRes.formattedText);
     sections["context_ellicott"] = cleaned;
@@ -322,10 +401,16 @@ export async function getLessonCreatorStudyPack(
     text += `## ${sectionIdx++}. Practical Lessons & Life Applications (Albert Barnes - Remarks)\n${cleaned}\n\n`;
   }
 
+  
+  
   if (xrefRes && xrefRes.formattedText && !xrefRes.error) {
     sections["cross_references"] = xrefRes.formattedText;
     text += `## ${sectionIdx++}. Supporting Scripture Cross-References\n${xrefRes.formattedText}\n\n`;
   }
+
+  const fetchedKeys = ["ECER", "EBC", "Barnes"];
+  const extra = await appendExtraCommentators(env, reference, extraCommentators, fetchedKeys, sections, sectionIdx);
+  text += extra.text;
 
   const tip = `> [!TIP]\n> Use this data pack with the **Biblical Content Interpreter** or **Bible Teacher** persona to construct small group study guides, Sunday School curricula, and interactive discussion questions.\n`;
   text += tip;
@@ -337,6 +422,7 @@ export async function getLessonCreatorStudyPack(
       title: `Bible Lesson Creator Study Pack: ${reference}`,
       reference,
       version,
+      
       timestamp: new Date().toISOString()
     }
   };
@@ -346,17 +432,21 @@ export async function getPrayerGuideStudyPack(
   env: Env,
   reference: string,
   version: string = "BSB",
+    extraCommentators?: string[],
   topic?: string
 ): Promise<StudyPackResponse> {
   const parsed = parseReferenceString(reference);
   const isPsalm = parsed && parsed.bookNumber === 19;
+  const isGospel = parsed && parsed.bookNumber >= 40 && parsed.bookNumber <= 43;
 
   const bibleRes = await lookupBiblePassage(env, version, reference);
   const devotionalPrayerRes = isPsalm
     ? await lookupCommentary(env, "Spur", reference)
+    : isGospel
+    ? await lookupCommentary(env, "Ryle", reference)
     : await lookupCommentary(env, "Benson", reference);
   const wesleyRes = await lookupCommentary(env, "Wesley", reference);
-  const promisesRes = topic ? await lookupPromises(env, topic, true, version) : null;
+      const promisesRes = topic ? await lookupPromises(env, topic, true, version) : null;
 
   const sections: Record<string, string> = {};
   let text = `# Prayer Guide Study Pack: ${reference}\n\n`;
@@ -368,7 +458,7 @@ export async function getPrayerGuideStudyPack(
   let sectionIdx = 2;
 
   if (devotionalPrayerRes.formattedText && !devotionalPrayerRes.error) {
-    const authorName = isPsalm ? "Charles Spurgeon (Treasury of David)" : "Joseph Benson (Notes on Piety & Grace)";
+    const authorName = isPsalm ? "Charles Spurgeon (Treasury of David)" : isGospel ? "J. C. Ryle (Expository Thoughts)" : "Joseph Benson (Notes on Piety)";
     const cleaned = cleanEmbeddedCommentary(devotionalPrayerRes.formattedText);
     sections["worship_affections"] = cleaned;
     text += `## ${sectionIdx++}. Heart Worship & Spiritual Affections (${authorName})\n${cleaned}\n\n`;
@@ -380,11 +470,17 @@ export async function getPrayerGuideStudyPack(
     text += `## ${sectionIdx++}. Examination for Personal Holiness & Obedience (John Wesley)\n${cleaned}\n\n`;
   }
 
+  
+  
   if (promisesRes && promisesRes.formattedText && !promisesRes.error) {
     const cleaned = cleanEmbeddedPromises(promisesRes.formattedText);
     sections["promises"] = cleaned;
     text += `## ${sectionIdx++}. Scriptural Promises to Claim in Prayer (${topic})\n${cleaned}\n\n`;
   }
+
+  const fetchedKeys = ["Wesley", isPsalm ? "Spur" : isGospel ? "Ryle" : "Benson"];
+  const extra = await appendExtraCommentators(env, reference, extraCommentators, fetchedKeys, sections, sectionIdx);
+  text += extra.text;
 
   const tip = `> [!TIP]\n> Use this data pack with the **Compassionate Pastor** persona to write personal, first-person prayers ("I", "we") following the ACTS model (Adoration, Confession, Thanksgiving, Supplication).\n`;
   text += tip;
@@ -397,6 +493,7 @@ export async function getPrayerGuideStudyPack(
       reference,
       version,
       topic,
+      
       timestamp: new Date().toISOString()
     }
   };
@@ -405,12 +502,14 @@ export async function getPrayerGuideStudyPack(
 export async function getCovenantTheologyPack(
   env: Env,
   reference: string,
-  version: string = "BSB"
+  version: string = "BSB",
+    extraCommentators?: string[]
 ): Promise<StudyPackResponse> {
   const bibleRes = await lookupBiblePassage(env, version, reference);
   const calvinRes = await lookupCommentary(env, "Calvin", reference);
-  const gillRes = await lookupCommentary(env, "Gill", reference);
-  const dictRes = await lookupDictionary(env, "Covenant", "isbe");
+    const gillRes = await lookupCommentary(env, "Gill", reference);
+      const dictRes = await lookupDictionary(env, "Covenant", "isbe");
+  const otQuoteRes = await lookupOtQuotations(env, reference);
   const xrefRes = await lookupCrossReferences(env, reference, 12);
 
   const sections: Record<string, string> = {};
@@ -422,18 +521,29 @@ export async function getCovenantTheologyPack(
 
   let sectionIdx = 2;
 
+  if (otQuoteRes.records && otQuoteRes.records.length > 0) {
+    const quoteSummary = otQuoteRes.records.map(r => 
+      `* **${r.nt_ref} ⟵ ${r.ot_ref}** (${r.quote_type} • *${r.classification}*)\n  *Apostolic Hermeneutics:* ${r.hermeneutical_notes}`
+    ).join("\n\n");
+    sections["covenant_source_alignment"] = quoteSummary;
+    text += `## ${sectionIdx++}. Underlying OT Covenant Source & Quotation Alignment\n${quoteSummary}\n\n`;
+  }
+
   if (calvinRes.formattedText && !calvinRes.error) {
     const cleaned = cleanEmbeddedCommentary(calvinRes.formattedText);
-    sections["covenant_exposition_calvin"] = cleaned;
+    sections["covenant_calvin"] = cleaned;
     text += `## ${sectionIdx++}. Christ-Centered Covenant Exposition (John Calvin)\n${cleaned}\n\n`;
   }
 
+  
   if (gillRes.formattedText && !gillRes.error) {
     const cleaned = cleanEmbeddedCommentary(gillRes.formattedText);
-    sections["rabbinic_prophetic_gill"] = cleaned;
+    sections["rabbinic_gill"] = cleaned;
     text += `## ${sectionIdx++}. Rabbinic & Prophetic Fulfillment (John Gill)\n${cleaned}\n\n`;
   }
 
+  
+  
   if (dictRes.formattedText && !dictRes.error) {
     const cleaned = cleanEmbeddedDictionary(dictRes.formattedText);
     sections["theological_dictionary_isbe"] = cleaned;
@@ -445,6 +555,10 @@ export async function getCovenantTheologyPack(
     text += `## ${sectionIdx++}. Canonical Redemptive-Historical Cross-References\n${xrefRes.formattedText}\n\n`;
   }
 
+  const fetchedKeys = ["Calvin", "Gill"];
+  const extra = await appendExtraCommentators(env, reference, extraCommentators, fetchedKeys, sections, sectionIdx);
+  text += extra.text;
+
   const tip = `> [!TIP]\n> Use this data pack with the **Biblical Theologian** or **Systematic Theologian** persona to trace how Old Testament types, covenants, and promises culminate in Jesus Christ.\n`;
   text += tip;
 
@@ -455,6 +569,7 @@ export async function getCovenantTheologyPack(
       title: `Covenant & Redemptive-Historical Theology Pack: ${reference}`,
       reference,
       version,
+      
       timestamp: new Date().toISOString()
     }
   };
@@ -558,11 +673,39 @@ export async function getTopicStudyPack(
 export async function getCommentaryStudyPack(
   env: Env,
   reference: string,
-  commentators: string[] = ["Henry", "JFB", "Calvin"]
+  commentators?: string[],
+  orderMode: "modern_first" | "classic_first" | "custom" = "modern_first"
 ): Promise<StudyPackResponse> {
-  const list = Array.isArray(commentators) && commentators.length > 0
-    ? commentators
-    : ["Henry", "JFB", "Calvin"];
+  const MODERN_PRIORITY = ["TNotes", "Guzik", "Barnes", "Calvin", "Gill", "Henry", "JFB"];
+  const CLASSIC_PRIORITY = ["Calvin", "Gill", "Henry", "JFB", "TNotes", "Barnes", "Guzik"];
+
+  let list: string[];
+  if (Array.isArray(commentators) && commentators.length > 0) {
+    list = [...commentators];
+    if (orderMode === "modern_first") {
+      list.sort((a, b) => {
+        const idxA = MODERN_PRIORITY.findIndex(k => k.toLowerCase() === a.toLowerCase());
+        const idxB = MODERN_PRIORITY.findIndex(k => k.toLowerCase() === b.toLowerCase());
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return 0;
+      });
+    } else if (orderMode === "classic_first") {
+      list.sort((a, b) => {
+        const idxA = CLASSIC_PRIORITY.findIndex(k => k.toLowerCase() === a.toLowerCase());
+        const idxB = CLASSIC_PRIORITY.findIndex(k => k.toLowerCase() === b.toLowerCase());
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return 0;
+      });
+    }
+  } else {
+    list = orderMode === "classic_first" 
+      ? ["Calvin", "Henry", "JFB", "Gill"]
+      : ["TNotes", "Calvin", "Henry", "JFB"];
+  }
 
   const sections: Record<string, string> = {};
   let text = `# Commentary Study Pack: ${reference}\n\n`;
@@ -595,9 +738,20 @@ export async function getCommentaryStudyPack(
     metadata: {
       title: `Commentary Study Pack: ${reference}`,
       reference,
+      orderMode,
       commentators: list,
       commentaries: commentaryMap,
       timestamp: new Date().toISOString()
     }
   };
 }
+
+export { 
+  getInterlinearStudyPack, 
+  lookupInterlinear, 
+  getOtInNtStudyPack, 
+  lookupOtQuotations,
+  getSeptuagintStudyPack,
+  lookupSeptuagint
+};
+

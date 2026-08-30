@@ -7,8 +7,6 @@ if (typeof (globalThis as any).self === "undefined") {
 }
 
 import initSqlJs, { Database, SqlJsStatic } from "sql.js";
-// @ts-ignore
-import sqlWasm from "sql.js/dist/sql-wasm.wasm";
 import { Env } from "../types.js";
 
 let SQL: SqlJsStatic | null = null;
@@ -17,12 +15,18 @@ const dbCache = new Map<string, { db: Database; lastUsed: number }>();
 async function getSqlJs(): Promise<SqlJsStatic> {
   if (!SQL) {
     try {
-      if (sqlWasm) {
+      let wasmModule: any = null;
+      try {
+        // @ts-ignore
+        wasmModule = (await import("sql.js/dist/sql-wasm.wasm")).default;
+      } catch (_) {}
+
+      if (wasmModule && typeof WebAssembly !== "undefined") {
         SQL = await initSqlJs({
           instantiateWasm(imports, successCallback) {
             try {
-              const instance = new WebAssembly.Instance(sqlWasm as any, imports);
-              (successCallback as any)(instance, sqlWasm);
+              const instance = new WebAssembly.Instance(wasmModule as any, imports);
+              (successCallback as any)(instance, wasmModule);
               return instance.exports;
             } catch (err: any) {
               console.error("WASM instantiate error:", err);
@@ -51,14 +55,42 @@ export async function getDatabase(env: Env, r2Key: string): Promise<{ db: Databa
     }
 
     const r2Bucket = env.BIBLEMATE_DATA || env.BEREAN_DATA;
-    if (!r2Bucket) {
-      return { db: null, error: "R2 bucket binding (BIBLEMATE_DATA / BEREAN_DATA) is undefined in Worker environment." };
-    }
+    let arrayBuffer: ArrayBuffer | null = null;
 
-    // Fetch SQLite binary from Cloudflare R2
-    const object = await r2Bucket.get(r2Key);
-    if (!object) {
-      return { db: null, error: `R2 Object key '${r2Key}' returned null from bucket.` };
+    if (r2Bucket) {
+      // Fetch SQLite binary from Cloudflare R2
+      const object = await r2Bucket.get(r2Key);
+      if (!object) {
+        return { db: null, error: `R2 Object key '${r2Key}' returned null from bucket.` };
+      }
+      arrayBuffer = await object.arrayBuffer();
+    } else {
+      // Fallback for local Node.js / CLI testing
+      try {
+        // @ts-ignore
+        const fs = await import("node:fs");
+        // @ts-ignore
+        const path = await import("node:path");
+        const localCandidates = [
+          path.resolve(process.cwd(), "data", r2Key),
+          path.resolve(process.cwd(), "..", "data", r2Key),
+          path.resolve(process.env.HOME || "", "berean", "data", r2Key),
+          path.resolve(process.env.HOME || "", ".biblemate", "data", r2Key),
+          path.resolve(process.env.HOME || "", "berean", "data", "lexicons", path.basename(r2Key)),
+          path.resolve(process.cwd(), "data", "lexicons", path.basename(r2Key))
+        ];
+        for (const candidate of localCandidates) {
+          if (fs.existsSync(candidate)) {
+            const buf = fs.readFileSync(candidate);
+            arrayBuffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+            break;
+          }
+        }
+      } catch (_) {}
+
+      if (!arrayBuffer) {
+        return { db: null, error: `Database file '${r2Key}' not found in R2 or local filesystem.` };
+      }
     }
 
     // Evict existing commentaries or oldest DB before allocating new WASM memory
@@ -87,9 +119,8 @@ export async function getDatabase(env: Env, r2Key: string): Promise<{ db: Databa
       }
     }
 
-    const arrayBuffer = await object.arrayBuffer();
     const sql = await getSqlJs();
-    const db = new sql.Database(new Uint8Array(arrayBuffer));
+    const db = new sql.Database(new Uint8Array(arrayBuffer!));
 
     dbCache.set(r2Key, { db, lastUsed: Date.now() });
     return { db };

@@ -87,10 +87,13 @@ The **Berean MCP Server** delivers **27 total tools** (18 specialized single-eng
 
 ## 📚 Classical Commentaries & Reference Data
 
-All classical commentary databases, lexicons, and biblical reference datasets are powered by the upstream [`biblematedata`](https://pypi.org/project/biblematedata/) library:
+All classical commentary databases, lexicons, and biblical reference datasets are powered by upstream [`biblematedata`](https://pypi.org/project/biblematedata/) and **[STEPBible.org](https://www.stepbible.org/)** (Tyndale House, Cambridge):
 
 - **Classical Exegesis & Homiletics**: Access extensive whole-Bible and testament-specific works by **Matthew Henry, John Calvin, John Gill, Jamieson-Fausset-Brown, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, Albert Barnes, Charles Ellicott**, and many others.
+- **STEPBible Original Language Lexicons (TBESG & TBESH)**: Extended Greek and Hebrew Strong's lexicons with disambiguated senses, transliterations, and morphological classifications from Tyndale House, Cambridge (CC BY 4.0).
+- **Tyndale Open Study Notes (TNotes)**: High-density historical-grammatical and exegetical study notes compiled by Tyndale House scholars.
 - **Dynamic Resource Discovery**: Use the `get_available_resources` MCP tool at any time to list all active translations, commentary aliases, and lexicons available in your current environment.
+- **Data Integration Guide**: See [docs/stepbible_data_integration.md](docs/stepbible_data_integration.md) for full compilation and deployment steps.
 
 ---
 
@@ -262,6 +265,7 @@ Connect your studies directly to your personal notes:
 ## 📖 Documentation
 
 - **[docs/mcp_client_integration.md](docs/mcp_client_integration.md)**: Multi-client setup guide for Antigravity IDE, Claude Desktop, Cursor, and VS Code.
+- **[docs/stepbible_data_integration.md](docs/stepbible_data_integration.md)**: Guide on compiling, integrating, and deploying STEPBible datasets (TBESG, TBESH, Tyndale Open Study Notes, Septuagint, and OT in NT).
 - **[docs/ai_team_personas.md](docs/ai_team_personas.md)**: Profiles and guidelines for the 15 AI study personas.
 - **[docs/slash_commands.md](docs/slash_commands.md)**: Reference guide for workflow commands and the 27 MCP tools.
 - **[docs/study_outputs.md](docs/study_outputs.md)**: Guide to study output formats, folder layouts, and document export.
@@ -288,5 +292,6 @@ However, biblical and theological study is never an end in itself. We earnestly 
 
 Special thanks and deep appreciation to:
 - **[Eliran Wong](https://github.com/eliranwong)** for his pioneering work on [Biblemate-Agentic-workspace](https://github.com/eliranwong/Biblemate-Agentic-workspace) as the foundational architecture on which this suite is built, and for creating and maintaining the indispensable [`biblematedata`](https://pypi.org/project/biblematedata/) package.
+- **[STEPBible.org](https://www.stepbible.org/)** and **Tyndale House, Cambridge** for generously publishing the TBESG Greek Lexicon, TBESH Hebrew Lexicon, and Tyndale Open Study Notes under open-access Creative Commons licenses.
 - The **Model Context Protocol (MCP)** community for establishing the open standard bridging language models and structured domain tools.
 - All public domain biblical scholars, commentators, and translators whose lifelong labours continue to enrich students of Scripture worldwide.

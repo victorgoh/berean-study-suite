@@ -116,6 +116,7 @@ export interface StudyPackResponse {
   formattedText: string;
   sections?: Record<string, string>;
   metadata?: StudyPackMetadata;
+  result?: any;
   error?: string;
 }
 

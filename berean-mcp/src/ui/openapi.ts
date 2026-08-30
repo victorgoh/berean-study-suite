@@ -390,6 +390,205 @@ export function getOpenApiSpec(serverUrl: string = "https://berean-mcp.victorgoh
           }
         }
       },
+      "/tools/interlinear_study_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs", "🏛 Original Languages"],
+          summary: "Original Language Interlinear Study Pack",
+          description: "Generate an inline word-by-word Greek/Hebrew to English interlinear with continuous verse layout, grammatical parsing tags, and an automated lexical glossary.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Philippians 4:4-8", description: "Scripture reference for interlinear study" },
+                    glossary_filter: { type: "string", enum: ["rare_and_notable", "all_words", "none"], default: "rare_and_notable", description: "Glossary filter mode" },
+                    gloss_color: { type: "string", default: "#888888", description: "HTML hex color code for the inline English gloss" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: {
+            "200": { description: "Standardized interlinear study pack bundle" }
+          }
+        }
+      },
+      "/tools/interlinear_lookup": {
+        post: {
+          tags: ["🏛 Original Languages"],
+          summary: "Inline Interlinear Lookup (Alias)",
+          description: "Word-by-word original language interlinear lookup with in-line glosses.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Philippians 4:4-8" },
+                    glossary_filter: { type: "string", enum: ["rare_and_notable", "all_words", "none"], default: "rare_and_notable" },
+                    gloss_color: { type: "string", default: "#888888" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: {
+            "200": { description: "Interlinear output" }
+          }
+        }
+      },
+      "/tools/ot_in_nt_study_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs", "📜 Exegesis & Theology"],
+          summary: "Apostolic Hermeneutics & OT-in-NT Fulfillment Study Pack",
+          description: "Comprehensive composite study pack analyzing Old Testament quotations and allusions in the New Testament with verbatim Hebrew MT, Greek LXX, and Greek NT comparative alignment.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Hebrews 8:8-12", description: "Passage reference containing OT citation or allusion" },
+                    version: { type: "string", default: "BSB", description: "Bible translation version for English text" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: {
+            "200": { description: "Standardized OT-in-NT fulfillment study pack bundle" }
+          }
+        }
+      },
+      "/tools/ot_quotations_lookup": {
+        post: {
+          tags: ["📜 Exegesis & Theology", "🔗 Cross References"],
+          summary: "OT Quotations & Allusions Lookup Engine",
+          description: "Look up Old Testament quotations, citations, allusions, and Septuagint bridge references for any NT or OT passage.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Hebrews 8:8", description: "Passage reference to check for cross-testament citations" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: {
+            "200": { description: "OT/NT quotation records and alignment data" }
+          }
+        }
+      },
+      "/tools/septuagint_study_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs", "🏛 Original Languages"],
+          summary: "Greek Septuagint & Hebrew MT Comparative Study Pack",
+          description: "Comprehensive composite study pack analyzing the Greek Septuagint (LXX), Brenton English translation, Dead Sea Scrolls textual variants, and Hebrew Masoretic Text comparative exegesis.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Genesis 1:1-5", description: "Old Testament Scripture reference" },
+                    version: { type: "string", default: "BSB", description: "Bible translation version for standard English text" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: {
+            "200": { description: "Standardized Septuagint study pack bundle" }
+          }
+        }
+      },
+      "/tools/septuagint_lookup": {
+        post: {
+          tags: ["🏛 Original Languages"],
+          summary: "Septuagint Greek & Brenton English Lookup",
+          description: "Look up Greek Septuagint (LXX) text, Brenton English translation, and textual divergence notes for any Old Testament passage.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Genesis 1:1", description: "Old Testament passage reference" }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: {
+            "200": { description: "Septuagint Greek and Brenton English verses" }
+          }
+        }
+      },
+      "/tools/entity_disambiguation": {
+        post: {
+          tags: ["👤 Biblical People & Places"],
+          summary: "Biblical Entity Disambiguation Engine",
+          description: "Disambiguate biblical persons or locations sharing identical names (e.g. Mary, James, John, Zechariah, Herod), returning exact identities, lineages, roles, and biblical passages.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string", example: "Mary", description: "Biblical name to disambiguate" }
+                  },
+                  required: ["name"]
+                }
+              }
+            }
+          },
+          responses: {
+            "200": { description: "Disambiguated entity records" }
+          }
+        }
+      },
+      "/tools/convert_ancient_units": {
+        post: {
+          tags: ["🏛 Original Languages", "⚖️ Biblical Metrology"],
+          summary: "Ancient Biblical Units & Currency Converter",
+          description: "Convert ancient biblical weights (Talent, Shekel, Mina), dry/liquid measurements (Cor, Ephah, Bath, Hin, Omer), distances (Cubit, Span, Stadion), and currencies (Denarius, Drachma, Stater, Talent, Mite) into modern metric, imperial, and labor-wage purchasing power.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    unit: { type: "string", example: "Talent", description: "Biblical unit to convert" },
+                    amount: { type: "number", default: 1, description: "Quantity of the specified unit" }
+                  },
+                  required: ["unit"]
+                }
+              }
+            }
+          },
+          responses: {
+            "200": { description: "Converted metric, imperial, and purchasing power equivalents" }
+          }
+        }
+      },
       "/tools/lexicon_lookup": {
         post: {
           tags: ["🏛 Original Languages"],

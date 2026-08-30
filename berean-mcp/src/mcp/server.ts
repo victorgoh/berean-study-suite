@@ -26,7 +26,15 @@ import {
   CommentaryStudyPackSchema,
   LessonCreatorStudyPackSchema,
   PrayerGuideStudyPackSchema,
-  CovenantTheologyPackSchema
+  CovenantTheologyPackSchema,
+  InterlinearLookupSchema,
+  InterlinearStudyPackSchema,
+  OtQuotationsLookupSchema,
+  OtInNtStudyPackSchema,
+  SeptuagintLookupSchema,
+  SeptuagintStudyPackSchema,
+  EntityDisambiguationSchema,
+  ConvertAncientUnitsSchema
 } from "./tools.js";
 import { getAvailableResources } from "../services/catalogService.js";
 import { BEREAN_PERSONAS, WORKFLOW_PROMPTS } from "./prompts.js";
@@ -36,6 +44,7 @@ import { searchBible } from "../services/searchService.js";
 import { lookupCrossReferences } from "../services/xrefService.js";
 import { lookupLexiconEntry } from "../services/lexiconService.js";
 import { lookupMorphology } from "../services/morphologyService.js";
+import { lookupInterlinear } from "../services/interlinearService.js";
 import { lookupCommentary } from "../services/commentaryService.js";
 import { lookupTopic } from "../services/topicsService.js";
 import { lookupCharacter } from "../services/charactersService.js";
@@ -58,8 +67,17 @@ import {
   getCommentaryStudyPack,
   getLessonCreatorStudyPack,
   getPrayerGuideStudyPack,
-  getCovenantTheologyPack
+  getCovenantTheologyPack,
+  getInterlinearStudyPack,
+  getOtInNtStudyPack,
+  lookupOtQuotations,
+  getSeptuagintStudyPack,
+  lookupSeptuagint
 } from "../services/studyPackService.js";
+import {
+  lookupEntityDisambiguation,
+  convertAncientUnits
+} from "../services/unitsAndEntitiesService.js";
 import { Env } from "../types.js";
 import { z } from "zod";
 
@@ -346,8 +364,8 @@ export function createMcpServer(env: Env) {
     "devotional_study_pack",
     "High-speed composite tool that bundles scripture text, meditation cross-references, and biblical promises for devotional reflections in a single one-shot response.",
     DevotionalStudyPackSchema,
-    async ({ reference, version, topic }) => {
-      const res = await getDevotionalStudyPack(env, reference, version, topic);
+    async ({ reference, version }) => {
+      const res = await getDevotionalStudyPack(env, reference, version);
       return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
     }
   );
@@ -388,10 +406,10 @@ export function createMcpServer(env: Env) {
   // 23. Commentary Study Pack (Multi-Commentary Bundler)
   server.tool(
     "commentary_study_pack",
-    "High-speed composite tool that retrieves multiple biblical commentaries (e.g. Matthew Henry, JFB, Calvin, Maclaren, Barnes, Spurgeon) for a passage in a single request.",
+    "High-speed composite tool that retrieves multiple biblical commentaries (e.g. Tyndale Open Study Notes, Matthew Henry, JFB, Calvin, Maclaren, Barnes, Spurgeon) for a passage in a single request with priority ordering.",
     CommentaryStudyPackSchema,
-    async ({ reference, commentators }) => {
-      const res = await getCommentaryStudyPack(env, reference, commentators);
+    async ({ reference, commentators, order_mode }) => {
+      const res = await getCommentaryStudyPack(env, reference, commentators, order_mode);
       return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
     }
   );
@@ -412,8 +430,8 @@ export function createMcpServer(env: Env) {
     "prayer_guide_study_pack",
     "High-speed composite tool that bundles scripture text, Spurgeon/Benson adoration, Wesley examination, and biblical promises for 1st-person ACTS prayer.",
     PrayerGuideStudyPackSchema,
-    async ({ reference, version, topic }) => {
-      const res = await getPrayerGuideStudyPack(env, reference, version, topic);
+    async ({ reference, version }) => {
+      const res = await getPrayerGuideStudyPack(env, reference, version);
       return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
     }
   );
@@ -425,6 +443,118 @@ export function createMcpServer(env: Env) {
     CovenantTheologyPackSchema,
     async ({ reference, version }) => {
       const res = await getCovenantTheologyPack(env, reference, version);
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 27. Interlinear Study Pack (Original Language Syntax & Glosses)
+  server.tool(
+    "interlinear_study_pack",
+    "High-speed composite tool that generates an inline Greek/Hebrew to English word-by-word interlinear with continuous verse layout, grammatical parsing, and original language glossary.",
+    InterlinearStudyPackSchema,
+    async ({ reference, glossary_filter, gloss_color }) => {
+      const res = await getInterlinearStudyPack(env, reference, glossary_filter, gloss_color);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 28. Inline Interlinear Lookup (Alias)
+  server.tool(
+    "interlinear_lookup",
+    "Generate an inline word-by-word Greek/Hebrew to English interlinear with continuous verse layout and an automated glossary of rare/notable words at the bottom.",
+    InterlinearLookupSchema,
+    async ({ reference, glossary_filter, gloss_color }) => {
+      const res = await lookupInterlinear(env, reference, glossary_filter, gloss_color);
+      if (res.error) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 29. OT-in-NT Study Pack (11th Composite Pack)
+  server.tool(
+    "ot_in_nt_study_pack",
+    "Comprehensive composite study pack analyzing Old Testament quotations and allusions in the New Testament with verbatim Hebrew MT, Greek LXX, and Greek NT alignment, apostolic hermeneutics, and Christological fulfillment.",
+    OtInNtStudyPackSchema,
+    async ({ reference, version }) => {
+      const res = await getOtInNtStudyPack(env, reference, version);
+      if (res.error && !res.formattedText) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 30. OT Quotations & Allusions Lookup Engine
+  server.tool(
+    "ot_quotations_lookup",
+    "Look up Old Testament quotations, citations, allusions, and Septuagint bridge references for any NT or OT passage.",
+    OtQuotationsLookupSchema,
+    async ({ reference }) => {
+      const res = await lookupOtQuotations(env, reference);
+      if (res.error && !res.formattedText) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 31. Greek Septuagint Study Pack (12th Composite Pack)
+  server.tool(
+    "septuagint_study_pack",
+    "Comprehensive composite study pack analyzing the Greek Septuagint (LXX), Brenton English translation, Dead Sea Scrolls textual variants, and Hebrew Masoretic Text comparative exegesis.",
+    SeptuagintStudyPackSchema,
+    async ({ reference, version }) => {
+      const res = await getSeptuagintStudyPack(env, reference, version);
+      if (res.error && !res.formattedText) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 32. Septuagint Greek & Brenton English Lookup
+  server.tool(
+    "septuagint_lookup",
+    "Look up Greek Septuagint (LXX) text, Brenton English translation, and textual divergence notes for any Old Testament passage.",
+    SeptuagintLookupSchema,
+    async ({ reference }) => {
+      const res = await lookupSeptuagint(env, reference);
+      if (res.error && !res.formattedText) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 33. Biblical Entity Disambiguation Engine
+  server.tool(
+    "entity_disambiguation",
+    "Disambiguate biblical persons or locations sharing identical names (e.g. Mary, James, John, Zechariah, Herod), returning exact identities, lineages, roles, and biblical passages.",
+    EntityDisambiguationSchema,
+    async ({ name }) => {
+      const res = await lookupEntityDisambiguation(env, name);
+      if (res.error && !res.formattedText) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
+  // 34. Ancient Biblical Units & Currency Converter
+  server.tool(
+    "convert_ancient_units",
+    "Convert ancient biblical weights (Talent, Shekel, Mina), dry/liquid measurements (Cor, Ephah, Bath, Hin, Omer), distances (Cubit, Span, Stadion), and currencies (Denarius, Drachma, Stater, Talent, Mite) into modern metric, imperial, and labor-wage purchasing power.",
+    ConvertAncientUnitsSchema,
+    async ({ unit, amount }) => {
+      const res = await convertAncientUnits(env, unit, amount);
+      if (res.error && !res.formattedText) {
+        return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
+      }
       return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
     }
   );

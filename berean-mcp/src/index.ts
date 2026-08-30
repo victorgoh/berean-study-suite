@@ -13,6 +13,7 @@ import { searchBible } from "./services/searchService.js";
 import { lookupCrossReferences } from "./services/xrefService.js";
 import { lookupLexiconEntry } from "./services/lexiconService.js";
 import { lookupMorphology } from "./services/morphologyService.js";
+import { lookupInterlinear } from "./services/interlinearService.js";
 import { lookupCommentary } from "./services/commentaryService.js";
 import { lookupTopic } from "./services/topicsService.js";
 import { lookupCharacter } from "./services/charactersService.js";
@@ -36,8 +37,17 @@ import {
   getCommentaryStudyPack,
   getLessonCreatorStudyPack,
   getPrayerGuideStudyPack,
-  getCovenantTheologyPack
+  getCovenantTheologyPack,
+  getInterlinearStudyPack,
+  getOtInNtStudyPack,
+  lookupOtQuotations,
+  getSeptuagintStudyPack,
+  lookupSeptuagint
 } from "./services/studyPackService.js";
+import {
+  lookupEntityDisambiguation,
+  convertAncientUnits
+} from "./services/unitsAndEntitiesService.js";
 import { renderExplorerHtml } from "./ui/explorer.js";
 import { renderScalarHtml } from "./ui/scalar.js";
 import { renderSwaggerHtml } from "./ui/swagger.js";
@@ -151,7 +161,9 @@ export default {
               commentary_study_pack: "/tools/commentary_study_pack",
               lesson_creator_study_pack: "/tools/lesson_creator_study_pack",
               prayer_guide_study_pack: "/tools/prayer_guide_study_pack",
-              covenant_theology_pack: "/tools/covenant_theology_pack"
+              covenant_theology_pack: "/tools/covenant_theology_pack",
+              interlinear_study_pack: "/tools/interlinear_study_pack",
+              interlinear_lookup: "/tools/interlinear_lookup"
             }
           }
         }, null, 2),
@@ -287,7 +299,7 @@ export default {
 
     if (url.pathname === "/tools/devotional_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getDevotionalStudyPack(env, body.reference || body.passage || "Psalm 23", body.version || "BSB", body.topic);
+      const res = await getDevotionalStudyPack(env, body.reference || body.passage || "Psalm 23", body.version || "BSB");
       return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
     }
 
@@ -311,7 +323,7 @@ export default {
 
     if (url.pathname === "/tools/commentary_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getCommentaryStudyPack(env, body.reference || body.passage || "Romans 8:28", body.commentators || ["Henry", "JFB", "Calvin", "MacL", "Barnes", "Spur"]);
+      const res = await getCommentaryStudyPack(env, body.reference || body.passage || "Romans 8:28", body.commentators, body.order_mode);
       return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
     }
 
@@ -323,13 +335,61 @@ export default {
 
     if (url.pathname === "/tools/prayer_guide_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getPrayerGuideStudyPack(env, body.reference || body.passage || "Psalm 23", body.version || "BSB", body.topic);
+      const res = await getPrayerGuideStudyPack(env, body.reference || body.passage || "Psalm 23", body.version || "BSB");
       return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
     }
 
     if (url.pathname === "/tools/covenant_theology_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await getCovenantTheologyPack(env, body.reference || body.passage || "Genesis 15", body.version || "BSB");
+      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+
+    if (url.pathname === "/tools/interlinear_study_pack" && request.method === "POST") {
+      const body = (await request.json().catch(() => ({}))) as any;
+      const res = await getInterlinearStudyPack(env, body.reference || body.passage || "Philippians 4:4-8", body.glossary_filter, body.gloss_color);
+      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+
+    if (url.pathname === "/tools/interlinear_lookup" && request.method === "POST") {
+      const body = (await request.json().catch(() => ({}))) as any;
+      const res = await lookupInterlinear(env, body.reference || body.passage || "Philippians 4:4-8", body.glossary_filter, body.gloss_color);
+      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+
+    if (url.pathname === "/tools/ot_in_nt_study_pack" && request.method === "POST") {
+      const body = (await request.json().catch(() => ({}))) as any;
+      const res = await getOtInNtStudyPack(env, body.reference || body.passage || "Hebrews 8:8-12", body.version || "BSB");
+      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+
+    if (url.pathname === "/tools/ot_quotations_lookup" && request.method === "POST") {
+      const body = (await request.json().catch(() => ({}))) as any;
+      const res = await lookupOtQuotations(env, body.reference || body.passage || "Hebrews 8:8");
+      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+
+    if (url.pathname === "/tools/septuagint_study_pack" && request.method === "POST") {
+      const body = (await request.json().catch(() => ({}))) as any;
+      const res = await getSeptuagintStudyPack(env, body.reference || body.passage || "Genesis 1:1-5", body.version || "BSB");
+      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+
+    if (url.pathname === "/tools/septuagint_lookup" && request.method === "POST") {
+      const body = (await request.json().catch(() => ({}))) as any;
+      const res = await lookupSeptuagint(env, body.reference || body.passage || "Genesis 1:1");
+      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+
+    if (url.pathname === "/tools/entity_disambiguation" && request.method === "POST") {
+      const body = (await request.json().catch(() => ({}))) as any;
+      const res = await lookupEntityDisambiguation(env, body.name || "Mary");
+      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+
+    if (url.pathname === "/tools/convert_ancient_units" && request.method === "POST") {
+      const body = (await request.json().catch(() => ({}))) as any;
+      const res = await convertAncientUnits(env, body.unit || "Talent", body.amount || 1);
       return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
     }
 
@@ -345,8 +405,8 @@ export default {
             protocol: "Model Context Protocol (MCP) Streamable HTTP",
             endpoint: "/mcp",
             instructions: "Send JSON-RPC 2.0 POST requests to /mcp with standard initialize or tool calls.",
-            toolsCount: 27,
-            studyPacksCount: 9
+            toolsCount: 34,
+            studyPacksCount: 12
           }, null, 2), {
             headers: { "Content-Type": "application/json", ...corsHeaders }
           });

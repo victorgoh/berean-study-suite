@@ -35,10 +35,14 @@ export const BIBLE_REGISTRY: BibleMeta[] = [
   { code: "WEB", name: "World English Bible", language: "English", type: "English Translation", description: "Public domain modern English translation of the Holy Bible." },
   { code: "ASV", name: "American Standard Version (1901)", language: "English", type: "English Translation", description: "Highly literal formal-equivalence American translation." },
   { code: "OHGB", name: "Open Hebrew and Greek Bible", language: "Hebrew / Greek", type: "Original Language", description: "Original Westminster Leningrad Codex (OT) and Greek New Testament (NA28/Nestle1904)." },
+  { code: "LXX", name: "Septuagint (Rahlfs / Brenton)", language: "Greek / English", type: "Original Language", description: "Ancient Greek translation of the Old Testament with Brenton English translation and MT divergence notes." },
   { code: "OHGBi", name: "OHGB Interlinear Bible", language: "Hebrew / Greek / English", type: "Interlinear", description: "Word-by-word original language interlinear with Strong's and morphological tags." }
 ];
 
 export const LEXICON_REGISTRY: LexiconMeta[] = [
+  { code: "TBESG", name: "Tyndale Brief Extended Strong's Greek Lexicon", language: "Greek", description: "Modern, scholarly, context-tagged definitions with sub-lemma disambiguation (STEPBible / Tyndale House)." },
+  { code: "TBESH", name: "Tyndale Brief Extended Strong's Hebrew Lexicon", language: "Hebrew/Aramaic", description: "Modern, scholarly contextual definitions for Old Testament terms with sub-lemma disambiguation (STEPBible / Tyndale House)." },
+
   { code: "BDB", name: "Brown-Driver-Briggs Hebrew and English Lexicon", language: "Hebrew/Aramaic", description: "Standard authoritative academic lexicon for Biblical Hebrew and Aramaic." },
   { code: "Thayer", name: "Thayer's Greek-English Lexicon of the New Testament", language: "Greek", description: "Classic comprehensive New Testament Greek lexicon keyed to Strong's numbers." },
   { code: "LSJ", name: "Liddell-Scott-Jones Greek-English Lexicon", language: "Greek", description: "Exhaustive lexicon of Classical and Koine Greek." },
@@ -47,6 +51,16 @@ export const LEXICON_REGISTRY: LexiconMeta[] = [
 ];
 
 export const COMMENTARIES_LIST: CommentaryMeta[] = [
+  {
+    key: "TNotes",
+    name: "Tyndale Open Study Notes",
+    author: "Tyndale House, Cambridge / STEPBible.org",
+    scope: "Whole Bible",
+    description: "Modern, concise, high-density study notes with original language, historical, and Ancient Near Eastern background (CC BY-SA 4.0).",
+    aliases: ["tnotes", "tyndale", "tyndalenotes", "tyndaleopenstudynotes", "ton"],
+    getStoragePath: () => "commentaries/TNotes.commentary"
+  },
+
   {
     key: "Henry",
     name: "Matthew Henry's Commentary on the Whole Bible",

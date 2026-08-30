@@ -50,6 +50,11 @@ cmti/
 *.devx
 *.sqlite
 *.db
+*.commentary
+*.bible
+*.data
+*.sql
 *.zip
 *.whl
 *.log
+berean-mcp/data/
