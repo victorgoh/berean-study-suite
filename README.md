@@ -91,40 +91,14 @@ The **Berean MCP Server** delivers **35 total tools** (23 specialized single-eng
 
 ## 📚 Classical Commentaries & Biblical Reference Data
 
-The Berean Study Suite is strictly built on **100% Public Domain** classical historical works and **Open-Access (CC BY-SA 4.0)** academic datasets. No customized, proprietary, or non-public domain commentaries are included in the suite.
+The Berean Study Suite is strictly built on **100% Public Domain** classical historical works and **Open-Access (CC BY-SA 4.0)** academic datasets:
 
-### Provenance & Licensing Directory
+* **27 Classical & Modern Commentary Sets**: Expository, grammatical, homiletical, and historical commentaries by Matthew Henry, John Calvin, John Gill, Albert Barnes, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, and the Tyndale Open Study Notes.
+* **8 Bible Translations & Manuscript Editions**: BSB, NET, KJV, ASV, WEB, Open Hebrew & Greek Bible (OHGB), Septuagint (LXX), and OHGB Word-by-Word Interlinear.
+* **7 Original Language Lexicons**: STEPBible TBESG/TBESH, Thayer Greek, BDB Hebrew, LSJ, and morphological concordances.
+* **Academic Reference & Dictionaries**: Tyndale Open Bible Dictionary (6,010 articles), ISBE Encyclopedia, Easton's, Smith's, Nave's Topical, and TSK Cross-References.
 
-| Resource / Commentary Set | Author(s) & Era | Status & License | Scope |
-| :--- | :--- | :--- | :--- |
-| **Tyndale Open Study Notes (`TNotes`)** | Tyndale House, Cambridge / STEPBible.org | **CC BY-SA 4.0** | Whole Bible (15,000+ verses) |
-| **Tyndale Open Bible Dictionary** | Tyndale House Publishers / STEPBible.org | **CC BY-SA 4.0** | 6,010 articles / 9,865 headwords |
-| **Matthew Henry's Commentary** | Matthew Henry (1662–1714) | **Public Domain** | Whole Bible (Devotional / Practical) |
-| **Jamieson-Fausset-Brown (JFB)** | R. Jamieson, A. R. Fausset, D. Brown (1871) | **Public Domain** | Whole Bible (Critical / Explanatory) |
-| **John Calvin's Commentaries** | John Calvin (1509–1564) | **Public Domain** | Whole Bible (Exegetical / Reformed) |
-| **John Gill's Exposition** | John Gill (1697–1771) | **Public Domain** | Whole Bible (Hebraic / Rabbinic) |
-| **Albert Barnes' Notes** | Albert Barnes (1798–1870) | **Public Domain** | Whole Bible (Verse-by-Verse Explanatory) |
-| **Alexander Maclaren's Expositions** | Alexander Maclaren (1826–1910) | **Public Domain** | Whole Bible (Expository / Homiletical) |
-| **Charles Simeon's *Horae Homileticae*** | Charles Simeon (1759–1836) | **Public Domain** | Whole Bible (2,500+ Sermon Outlines) |
-| **Charles Spurgeon (*Treasury of David*)** | Charles Spurgeon (1834–1892) | **Public Domain** | Whole Bible / Psalms Exposition |
-| **Keil & Delitzsch Commentary (KD)** | C. F. Keil & Franz Delitzsch (1807–1890) | **Public Domain** | Old Testament (Grammatical / ANE) |
-| **H. A. W. Meyer Commentary (CECNT)** | H. A. W. Meyer (1800–1873) | **Public Domain** | New Testament (Critical / Exegetical) |
-| **Expositor's Greek New Testament** | W. Robertson Nicoll (1851–1923) | **Public Domain** | New Testament (Greek Textual Exegesis) |
-| **The Pulpit Commentary** | H. D. M. Spence & J. S. Exell (1880–1919) | **Public Domain** | Whole Bible (Historical / Homiletical) |
-| **The Biblical Illustrator** | Joseph S. Exell (1887–1910) | **Public Domain** | Whole Bible (Illustrations & Sermons) |
-| **Charles Ellicott's Commentary (ECER)** | Charles Ellicott (1819–1905) | **Public Domain** | Whole Bible (English Readers) |
-| **The Expositor's Bible (EBC)** | W. Robertson Nicoll et al. (1887–1900) | **Public Domain** | Whole Bible (Theological Essays) |
-| **A. T. Robertson's Word Pictures** | A. T. Robertson (1863–1934) | **Public Domain** | New Testament (Koine Greek Syntax) |
-| **Marvin Vincent's Word Studies** | Marvin Vincent (1834–1922) | **Public Domain** | New Testament (Greek Etymology) |
-| **John Wesley's Explanatory Notes** | John Wesley (1703–1791) | **Public Domain** | Whole Bible (Practical Holiness) |
-| **Adam Clarke's Commentary** | Adam Clarke (1760–1832) | **Public Domain** | Whole Bible (Archaeology / Semitics) |
-| **Joseph Benson's Commentary** | Joseph Benson (1749–1821) | **Public Domain** | Whole Bible (Early Methodist) |
-| **Daniel Whedon's Commentary** | Daniel Whedon (1808–1885) | **Public Domain** | Whole Bible (Wesleyan-Arminian) |
-| **John Peter Lange's Commentary** | John Peter Lange (1802–1884) | **Public Domain** | Whole Bible (Tri-fold Exegesis) |
-| **Thomas Brooks' Expositions** | Thomas Brooks (1608–1680) | **Public Domain** | Whole Bible (Puritan Pastoral) |
-| **Cambridge Bible (CBSC)** | A. F. Kirkpatrick (1849–1940) | **Public Domain** | Whole Bible (Grammatical / Historical) |
-| **Preacher's Homiletical (PHC)** | Joseph S. Exell et al. (1892) | **Public Domain** | Whole Bible (Homiletic Analysis) |
-| **International Critical (ICCNT)** | Pre-1928 Scholars | **Public Domain** | New Testament (Textual Criticism) |
+👉 **[View the Complete Academic Datasets & Provenance Directory &rarr;](docs/academic_datasets.md)** for detailed tables covering historical eras, theological scopes, database object keys, and licensing.
 
 *Tip: Use the `get_available_resources` MCP tool at any time to list all active translations, commentary aliases, and lexicons in your environment.*
 
@@ -343,6 +317,7 @@ Connect your studies directly to your personal notes:
 
 ## 📖 Documentation
 
+- **[docs/academic_datasets.md](docs/academic_datasets.md)**: Authoritative academic provenance directory for all 27 commentaries, 8 translations, 7 lexicons, and dictionaries.
 - **[docs/mcp_client_integration.md](docs/mcp_client_integration.md)**: Multi-client setup guide for Antigravity IDE, Claude Desktop, Cursor, and VS Code.
 - **[docs/ai_team_personas.md](docs/ai_team_personas.md)**: Profiles and guidelines for the 15 AI study personas.
 - **[docs/slash_commands.md](docs/slash_commands.md)**: Reference guide for workflow commands and the 35 MCP tools.
