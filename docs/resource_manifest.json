@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "description": "Manifest template for Berean MCP Bible resources. Populate sourceRevision, checksums, sizes, and presence fields during validation.",
+  "sources": {
+    "biblematedata": {
+      "label": "BibleMateData package",
+      "sourceUrl": "<record-the-actual-package-download-url>",
+      "license": "<verify-package-license>"
+    },
+    "stepbible": {
+      "label": "STEPBible / Tyndale House",
+      "sourceUrl": "https://github.com/STEPBible/STEPBible-Data",
+      "license": "<record-license-from-each-source-file>"
+    },
+    "other": {
+      "label": "Other or unverified source",
+      "sourceUrl": "<required-for-each-resource>",
+      "license": "<required-for-each-resource>"
+    }
+  },
+  "resources": [
+    {
+      "id": "biblematedata-bibles",
+      "sourceFamily": "biblematedata",
+      "localGlob": "data/bibles/*.bible",
+      "r2Prefix": "bibles/",
+      "d1": null,
+      "required": true,
+      "needsReview": true,
+      "note": "Verify each Bible version against the BibleMateData package manifest and record its exact upstream source."
+    },
+    {
+      "id": "biblematedata-reference-files",
+      "sourceFamily": "biblematedata",
+      "localPaths": [
+        "data/exlb3.data",
+        "data/biblePeople.data",
+        "data/book_analysis.data",
+        "data/chapter_summary.data",
+        "collections3.sqlite",
+        "data/lookup/*.json"
+      ],
+      "r2Keys": [
+        "data/exlb3.data",
+        "data/biblePeople.data",
+        "data/book_analysis.data",
+        "data/chapter_summary.data",
+        "collections3.sqlite",
+        "data/lookup/*.json"
+      ],
+      "d1": null,
+      "required": false,
+      "needsReview": true
+    },
+    {
+      "id": "biblematedata-commentaries",
+      "sourceFamily": "biblematedata",
+      "localGlob": "commentaries/*.commentary",
+      "r2Prefix": "commentaries/",
+      "d1": null,
+      "required": false,
+      "needsReview": true,
+      "note": "Verify the upstream edition and license for every commentary; filenames alone do not prove BibleMateData provenance."
+    },
+    {
+      "id": "stepbible-lexicon",
+      "sourceFamily": "stepbible",
+      "localPaths": ["data/lexicons/step_lexicon.sqlite", "data/lexicons/step_lexicon_d1.sql"],
+      "r2Keys": ["data/lexicons/step_lexicon.sqlite"],
+      "d1": {"database": "biblemate-reference", "table": "step_lexicon"},
+      "required": false,
+      "needsReview": true
+    },
+    {
+      "id": "stepbible-tnotes",
+      "sourceFamily": "stepbible",
+      "localPaths": ["data/commentaries/TNotes.commentary"],
+      "r2Keys": ["commentaries/TNotes.commentary"],
+      "d1": null,
+      "required": false,
+      "needsReview": true
+    },
+    {
+      "id": "stepbible-entities-units",
+      "sourceFamily": "stepbible",
+      "localGlob": "data/{lookup,*.data}/*entities* or *units*",
+      "r2Prefix": "data/",
+      "d1": {"database": "biblemate-reference", "tables": ["entities", "units"]},
+      "required": false,
+      "needsReview": true
+    },
+    {
+      "id": "other-unverified-classical-commentaries",
+      "sourceFamily": "other",
+      "localGlob": "commentaries/c*.commentary",
+      "r2Prefix": "commentaries/",
+      "d1": null,
+      "required": false,
+      "needsReview": true,
+      "note": "Confirm the exact digital edition, source URL, and license for Lange and other classical commentaries."
+    }
+  ]
+}

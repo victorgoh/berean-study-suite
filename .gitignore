@@ -7,6 +7,7 @@ Thumbs.db
 # IDE and Editor settings
 .vscode/
 .idea/
+**/.wrangler/
 *.sublime-project
 *.sublime-workspace
 
@@ -58,4 +59,5 @@ cmti/
 *.whl
 *.log
 berean-mcp/data/
+berean-mcp/scripts/upload_asv_to_r2.sh
 .agents/
