@@ -16,6 +16,19 @@ This runbook establishes one auditable inventory for resources used by the Berea
 
 The rule is: do not infer provenance from a filename. Every uploaded object needs a source URL, license, source revision/date, SHA-256 checksum, schema version, and destination key.
 
+## Operating model for this project
+
+This is a modest single-user or small-group deployment. Keep operations simple:
+
+- Support one local deployment and one Cloudflare deployment; add staging only if a real need appears.
+- Use GitHub for code, documentation, manifests, and conversion scripts.
+- Keep resource files in local data folders or Cloudflare R2; do not commit production datasets.
+- Redeploy the complete Worker when code or resource changes need to be recovered.
+- Keep checksums and provenance for verification, but defer storage-level versioning, release promotion, and automated rollback.
+- Require human approval before uploads, D1 changes, deployments, destructive actions, or use of unverified resources.
+
+The normal workflow is: `discover → validate → convert → test → human approval → upload/deploy → health-check → report`.
+
 ## Source authorities
 
 | Source | Canonical source to record | Typical license / review |
@@ -222,10 +235,10 @@ Add these items to the implementation plan:
 1. **Manifest-driven deployment CLI**: `data:validate`, `data:upload`, `data:verify`, and `data:status` commands.
 2. **Required versus optional feature contracts**: the Worker starts with optional datasets missing; each feature returns a clear “resource unavailable” response.
 3. **Remote health endpoint**: report resource IDs and availability, never credentials or private paths.
-4. **Checksum and rollback policy**: upload immutable versioned keys, then update a small manifest pointer; retain the previous known-good set.
+4. **Simple recovery policy**: retain reproducible local inputs and redeploy the complete instance if code or resource changes need to be replaced.
 5. **Schema migrations**: version SQLite schemas and reject incompatible files before upload.
 6. **License and attribution bundle**: publish `THIRD_PARTY_NOTICES.md` and retain each dataset’s license beside its manifest record.
-7. **Size and memory gates**: record file sizes and shard large commentaries before Worker deployment; the current loader buffers SQLite objects in memory.
+7. **Size and memory gates**: record file sizes and shard only datasets that cause real Worker memory or latency failures.
 8. **CI smoke tests**: test one Bible, commentary, dictionary, lexicon, D1, and R2 lookup on every deployment.
 9. **Security checks**: ensure R2 remains private, D1 is only reachable through intended Worker routes, and API authentication is tested separately from CORS.
 10. **Source refresh schedule**: document when each dataset should be re-downloaded and how changes are reviewed.

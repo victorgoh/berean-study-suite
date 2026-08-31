@@ -263,6 +263,12 @@ Any modern agentic coding assistant can autonomously inspect your local environm
 
 ## 🛠️ Customization & Extending the Suite (With Your AI Assistant)
 
+### Simple deployment model
+
+Berean Study Suite is intended for a single user or small group. Use one local deployment or one Cloudflare deployment, validate changes before applying them, and redeploy the complete instance when recovery is needed. The project deliberately defers enterprise features such as storage-level versioning, release promotion, multiple staging environments, and automated rollback until actual usage requires them.
+
+AI assistants should explain consequential changes and request human approval before uploading data, changing D1, deploying, deleting files, or using resources with unresolved provenance or licensing.
+
 > [!NOTE]
 > *Note: The following customization suggestions and ideas are AI-generated to illustrate possibilities for extending the suite.*
 
