@@ -142,7 +142,9 @@ export async function lookupCommentary(
     stmt.free();
 
     if (rows.length === 0) {
-      return { error: `No commentary found in c${cleanVer} for ${parsed.bookName} ${reference}.` };
+      return {
+        error: `VERSE_NOT_FOUND: No commentary found in c${cleanVer} for ${parsed.bookName} ${reference}. Request the chapter explicitly or choose another commentary.`
+      };
     }
 
     let commentaryOutput = "";
