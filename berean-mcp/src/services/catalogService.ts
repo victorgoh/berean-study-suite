@@ -5,6 +5,7 @@ import { Env } from "../types.js";
 
 export interface ResourceCatalogOptions {
   category?: "all" | "bibles" | "commentaries" | "lexicons" | "study_packs" | "personas" | "skills" | "workflows" | "rules";
+  includeStudyPacks?: boolean;
 }
 
 export async function getAvailableResources(
@@ -12,6 +13,7 @@ export async function getAvailableResources(
   options: ResourceCatalogOptions = { category: "all" }
 ): Promise<{ error?: string; catalog?: any; formattedText?: string }> {
   const cat = options.category || "all";
+  const includeStudyPacks = options.includeStudyPacks !== false;
 
   const studyPacks = [
     { name: "passage_exegesis_pack", description: "Comprehensive verse-by-verse exegesis with Greek/Hebrew, morphology, Keil & Delitzsch / Meyer, Expositor's Greek NT, and JFB." },
@@ -99,7 +101,7 @@ export async function getAvailableResources(
       LEXICON_REGISTRY.map(l => `- **${l.code}** (${l.name}) [${l.language}]: ${l.description}`).join("\n"));
   }
 
-  if (cat === "all" || cat === "study_packs") {
+  if (includeStudyPacks && (cat === "all" || cat === "study_packs")) {
     catalog.study_packs = studyPacks;
     sections.push(`## Composite Study Packs (${studyPacks.length})\n` +
       studyPacks.map(p => `- **\`${p.name}\`**: ${p.description}`).join("\n"));
@@ -133,4 +135,3 @@ export async function getAvailableResources(
 
   return { catalog, formattedText };
 }
-

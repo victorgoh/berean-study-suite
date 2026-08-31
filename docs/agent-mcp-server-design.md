@@ -4,6 +4,49 @@ Audience: AI programming agents; human review required.
 
 ## REST error contract
 
+## MCP response contract
+
+MCP tool calls use compact output by default to reduce context-window usage. A
+tool may accept `output_mode` with these values:
+
+- `compact`: bounded, structured output for AI processing (default)
+- `standard`: structured output with a larger readable text rendering
+- `full`: comprehensive human-readable rendering, subject to the server limit
+
+MCP results expose `structuredContent` and also include serialized structured
+JSON in a text content block for compatibility with clients that do not consume
+`structuredContent`. Responses include `metadata.output_mode`,
+`metadata.character_count`, and `metadata.truncated`. Responses are never
+silently truncated. If a complete resource exceeds the selected limit, the
+server returns `RESOURCE_TOO_LARGE` and identifies the resource size and
+available alternatives. These are application conventions built on MCP's
+standard `structuredContent` result field; they are not MCP-defined names.
+
+## Human Explorer and AI tool profiles
+
+The human Explorer and AI-facing MCP interface have different content policies:
+
+The MCP server uses `MCP_PROFILE` to control tool exposure. The default is
+`ai`; set `MCP_PROFILE=human` only for a human-oriented MCP connection that
+needs Study Packs. The Explorer's REST routes are unaffected by this setting.
+The sanitized Wrangler template declares `MCP_PROFILE=ai`; a human-oriented
+MCP deployment must explicitly override that variable.
+
+| Capability | Human Explorer | AI MCP interface |
+|---|---|---|
+| Multiple commentaries | Allowed for comparison | One commentary per request by default |
+| Preferred commentary | Optional | Supported through the commentary parameter |
+| Study Packs | Available | Not exposed by default |
+| Output style | Full and readable | Compact and structured |
+| Primary goal | Comprehensive research | Focused evidence retrieval |
+
+Study Packs intentionally combine multiple sources and are optimized for human
+reading. They should not be included in an AI-facing tool catalog
+because their responses can consume substantial context and tokens. The AI
+profile should expose granular lookup tools and allow the caller to select one
+preferred commentary. This is an interface policy, not a restriction on the
+underlying resource collection.
+
 REST tool endpoints return HTTP status codes that reflect the outcome. MCP protocol responses remain MCP-compatible and are not changed by this REST contract.
 
 Successful requests return HTTP `200` with the service result. Failures use this envelope:

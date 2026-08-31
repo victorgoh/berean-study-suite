@@ -1,5 +1,14 @@
 import { z } from "zod";
 
+// MCP clients may omit this field; the server defaults to compact output.
+// It is included in the shared tool shape as the rollout expands across the
+// tool catalog.
+export const OutputModeSchema = {
+  output_mode: z.enum(["compact", "standard", "full"]).default("compact").describe(
+    "Response detail: compact minimizes AI context usage, standard is balanced, and full is comprehensive for human reading."
+  )
+};
+
 // =========================================================================
 // TIER 0: RESOURCE CATALOG & DISCOVERY
 // =========================================================================
@@ -213,6 +222,5 @@ export const ChapterSummarySchema = {
   book: z.string().describe("Bible book name, e.g. 'Genesis', 'John', 'Romans'"),
   chapter: z.number().default(1).describe("Chapter number (e.g. 1, 3, 8)")
 };
-
 
 

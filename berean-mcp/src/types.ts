@@ -5,6 +5,8 @@ export interface Env {
   REFERENCE_DB?: D1Database;
   API_KEY?: string;
   ENVIRONMENT?: string;
+  /** MCP tool exposure profile. Defaults to "ai"; use "human" to expose Study Packs. */
+  MCP_PROFILE?: "ai" | "human";
   ANALYTICS_SNIPPET?: string;
   CF_BEACON_TOKEN?: string;
 }
@@ -119,4 +121,3 @@ export interface StudyPackResponse {
   result?: any;
   error?: string;
 }
-

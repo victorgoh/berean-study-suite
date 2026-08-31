@@ -127,6 +127,16 @@ mcpServers:
 
 ### 📦 Composite Study Packs (Single-Turn Synthesis)
 
+> **Token and context note:** Composite Study Packs are convenient for human research because they assemble several related resources into one readable response. That same design can produce a large MCP result and increase token usage, latency, and context-window pressure in an AI client. For routine AI requests, prefer a specific Bible, commentary, lexicon, morphology, or cross-reference lookup. Request a composite pack when its broader context is genuinely useful.
+
+For AI-assisted research, use one commentary per request and select the preferred commentary explicitly when needed. The Explorer supports multi-commentary comparison and Study Packs for human readers; those composite tools are human-oriented and should be omitted from an AI-facing MCP tool set.
+
+Large dictionary and encyclopedia articles are standalone resources. They are
+not automatically embedded in AI-oriented responses. If a complete article is
+larger than the MCP response limit, the request returns an explicit
+`RESOURCE_TOO_LARGE` result rather than silently truncating the source. Use the
+human Explorer for complete long-form articles.
+
 | Tool Name | Focus & Included Resources |
 | :--- | :--- |
 | **`covenant_theology_pack`** | Redemptive-historical covenant progression, Calvin exegesis, Matthew Henry architecture, Gill prophecy, ISBE encyclopedia, and 12 TSK cross-references. |

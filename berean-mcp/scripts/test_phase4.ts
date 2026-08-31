@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { parseReferenceString } from "../src/services/bibleService.js";
 import worker from "../src/index.js";
+import { getAvailableResources } from "../src/services/catalogService.js";
 
 const context = {} as ExecutionContext;
 const env = {
@@ -13,6 +14,11 @@ const env = {
 assert.equal(parseReferenceString("John 3:16")?.bookNumber, 43);
 assert.equal(parseReferenceString("x".repeat(201)), null);
 assert.equal(parseReferenceString("John 1:1-25:1"), null);
+
+const aiCatalog = await getAvailableResources(env as any, { includeStudyPacks: false });
+assert.equal(aiCatalog.catalog?.study_packs, undefined);
+const humanCatalog = await getAvailableResources(env as any, { includeStudyPacks: true });
+assert.ok((humanCatalog.catalog?.study_packs?.length || 0) > 0);
 
 const live = await worker.fetch(new Request("https://test/health/live"), env, context);
 assert.equal(live.status, 200);

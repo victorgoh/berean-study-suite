@@ -80,12 +80,42 @@ import {
 } from "../services/unitsAndEntitiesService.js";
 import { Env } from "../types.js";
 import { z } from "zod";
+import { normalizeMcpToolResult } from "./output.js";
+import { OutputModeSchema } from "./tools.js";
 
 export function createMcpServer(env: Env) {
-  const server = new McpServer({
+  const baseServer = new McpServer({
     name: "berean-mcp",
     version: "1.0.0"
   });
+
+  // Apply the MCP response policy once at the registration boundary. This
+  // keeps all tools consistent without changing the underlying REST/Explorer
+  // presentation paths.
+  const server = new Proxy(baseServer, {
+    get(target, property, receiver) {
+      if (property === "tool") {
+        return (...args: any[]) => {
+          const callbackIndex = args.length - 1;
+          const callback = args[callbackIndex];
+          if (typeof callback !== "function") return (target as any).tool(...args);
+          // Add the shared option to every tool without repeating it in all
+          // individual Zod input-shape declarations.
+          if (args.length >= 3 && args[2] && typeof args[2] === "object") {
+            args[2] = { ...args[2], ...OutputModeSchema };
+          }
+          args[callbackIndex] = async (input: unknown, ...rest: unknown[]) => {
+            const result = await callback(input, ...rest);
+            return normalizeMcpToolResult(result, input);
+          };
+          return (target as any).tool(...args);
+        };
+      }
+      return Reflect.get(target, property, receiver);
+    }
+  }) as McpServer;
+
+  const exposeStudyPacks = env.MCP_PROFILE === "human";
 
   // --- Register Tools ---
 
@@ -99,7 +129,10 @@ export function createMcpServer(env: Env) {
     "List all available Bible translations, classical commentary sets, original language lexicons, study packs, and personas in this Berean MCP instance.",
     GetAvailableResourcesSchema,
     async ({ category }) => {
-      const res = await getAvailableResources(env, { category });
+      const res = await getAvailableResources(env, {
+        category,
+        includeStudyPacks: env.MCP_PROFILE === "human"
+      });
       if (res.error) {
         return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
       }
@@ -108,7 +141,8 @@ export function createMcpServer(env: Env) {
   );
 
   // =========================================================================
-  // TIER 1: HIGH-SPEED COMPOSITE STUDY PACKS (One-Shot Multi-Engine Endpoints)
+  if (exposeStudyPacks) {
+  // TIER 1: HUMAN-ORIENTED COMPOSITE STUDY PACKS (One-Shot Multi-Engine Endpoints)
   // =========================================================================
 
   // --- Ministry, Homiletics & Practical Application ---
@@ -261,6 +295,8 @@ export function createMcpServer(env: Env) {
   );
 
   // =========================================================================
+  }
+
   // TIER 2: SPECIALIZED SINGLE-ENGINE TOOLS (Granular Academic Engines)
   // =========================================================================
 

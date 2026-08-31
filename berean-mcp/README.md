@@ -22,7 +22,7 @@ Try out the live public instance hosted on Cloudflare Workers:
 
 ## ⚡ Architecture & Performance
 
-- **35 MCP Tools & 12 Composite Study Packs**: Provides granular single-engine tools as well as high-speed composite Study Packs delivering up to 170,000 characters (~30,000 words) of verified biblical analysis in a single round-trip.
+- **35 MCP Tools & 12 Composite Study Packs**: Provides granular single-engine tools as well as composite Study Packs for convenient, comprehensive human research. Some packs can return up to 170,000 characters (~30,000 words) in a single round-trip.
 - **Edge Cloudflare Execution**: Sub-50ms cold start, multi-tier LRU caching, and streaming JSON-RPC / Streamable HTTP transports.
 - **Hybrid Storage**:
   - **Cloudflare D1 (Serverless SQLite)**: Ultra-fast indexing for Strong's Hebrew Lexicon (BDB), ISBE/Easton's Encyclopedias, and OT/NT Morphological datasets.
@@ -94,6 +94,10 @@ The Berean Study Suite is strictly built on **100% Public Domain** classical his
 1. **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, study packs, personas, skills, workflows, and rules.
 
 ### 1. Composite Study Packs (High-Speed Single-Turn Endpoints)
+
+> **AI usage note:** Composite Study Packs are optimized for human readers who want several related resources together. They are not necessarily token-efficient for AI clients: a single response can contain multiple commentaries, Scripture text, cross-references, and language data. Prefer the granular tools for focused AI requests, and use larger Study Packs only when the additional context is needed.
+
+For AI-facing MCP use, request one commentary at a time and specify the preferred commentary when relevant (for example, `TNotes`, `Henry`, or `JFB`). The human Explorer may use multiple commentaries and Study Packs for comparison and comprehensive research. Study Pack tools are human-oriented and should be omitted from an AI-facing tool set.
 2. **`sermon_study_pack`**: Preaching outlines, Alexander Maclaren homiletics, Charles Simeon outlines (*Horae Homileticae*), The Biblical Illustrator, Matthew Henry, and TSK cross-references.
 3. **`lesson_creator_study_pack`**: Sunday School and small group outlines, Albert Barnes' practical remarks, Charles Ellicott's historical context, and Expositor's Bible notes.
 4. **`devotional_study_pack`**: Pastoral reflection, Charles Spurgeon (*Treasury of David*), Alexander Maclaren, Albert Barnes, Matthew Henry, and Biblical Promises.

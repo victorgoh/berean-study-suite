@@ -20,7 +20,7 @@ The **Berean Study Suite** is a unified, local-first research platform featuring
 
 The **Berean Study Suite** was developed to provide an open, standardized bridge between historic biblical scholarship and modern AI assistants. By adopting the **Model Context Protocol (MCP)** and high-efficiency composite study pipelines, the suite delivers:
 
-* **⚡ Context & Token Efficiency**: Single-turn composite Study Packs bundle original language morphology, cross-references, and commentaries into concise payloads, drastically reducing token burn and preserving the AI's active reasoning window.
+* **📚 Human-Friendly Study Packs**: Single-turn composite Study Packs bring together original-language morphology, cross-references, and commentaries for convenient human research. Because they intentionally return substantial context, they can consume significant tokens when requested through an AI client.
 * **🎯 Hallucination-Free Exegesis**: Queries verified SQLite databases directly, grounding AI responses in authentic biblical manuscripts and centuries of trusted commentary.
 * **🔌 Universal Multi-Client Portability**: Works natively across Google Antigravity, Claude Desktop, Cursor, ChatGPT, and standalone Web Explorers.
 * **🌍 Flexible Edge & Local Deployment**: Runs completely offline on local machines or globally on Cloudflare Workers with sub-50ms latency.
@@ -28,6 +28,12 @@ The **Berean Study Suite** was developed to provide an open, standardized bridge
 ---
 
 ## 🌐 Live Demo & Interactive Explorers
+
+> **AI usage note:** The Explorer and composite Study Packs are designed for comprehensive human study. A Study Pack may include several commentaries, Scripture text, cross-references, and language resources in one response. This is convenient for a human reader, but can increase AI context usage, latency, and token cost. When using an AI client, request a focused single-engine lookup or a narrower passage when possible.
+
+### Human Explorer and AI MCP usage
+
+The Bible Study Explorer is optimized for human research and may combine multiple commentaries, dictionaries, encyclopedias, cross-references, and language resources in a Study Pack. The intended AI-facing MCP workflow is more focused: use one commentary per request, with the preferred commentary selected explicitly when needed. Composite Study Packs are intended for the human Explorer and should be omitted from an AI tool catalog because their multi-source responses can consume substantial context and tokens.
 
 Try out the live public instance hosted globally on Cloudflare Workers:
 
@@ -331,6 +337,7 @@ Connect your studies directly to your personal notes:
 - **[docs/human-study-outputs.md](docs/human-study-outputs.md)**: Guide to study outputs and document export.
 - **[docs/agent-resource-data-runbook.md](docs/agent-resource-data-runbook.md)**: AI-agent resource preparation and deployment runbook.
 - **[docs/agent-resource-manifest.json](docs/agent-resource-manifest.json)**: Machine-readable resource manifest template.
+- **[docs/agent-shared-resource-contract.md](docs/agent-shared-resource-contract.md)**: Shared R2/D1 read-only resource contract for other Cloudflare projects.
 - **[docs/shared-typography-standards.md](docs/shared-typography-standards.md)**: Output formatting standards.
 
 ---
