@@ -12,6 +12,7 @@ export interface ParsedReference {
 }
 
 export function parseReferenceString(refStr: string): ParsedReference | null {
+  if (typeof refStr !== "string" || refStr.length > 200) return null;
   const trimmed = refStr.trim();
 
   // Pattern 1: Book C:V-C:V (e.g., Matt 5:1-7:27)
@@ -19,7 +20,7 @@ export function parseReferenceString(refStr: string): ParsedReference | null {
   if (m1) {
     const bookNum = resolveBookNumber(m1[1]);
     if (!bookNum) return null;
-    return {
+    const result = {
       bookName: OFFICIAL_BOOK_NAMES[bookNum],
       bookNumber: bookNum,
       chapterStart: parseInt(m1[2], 10),
@@ -27,6 +28,8 @@ export function parseReferenceString(refStr: string): ParsedReference | null {
       chapterEnd: parseInt(m1[4], 10),
       verseEnd: parseInt(m1[5], 10)
     };
+    if (result.chapterEnd - result.chapterStart > 20) return null;
+    return result;
   }
 
   // Pattern 2: Book C:V-V (e.g., John 3:16-18)
@@ -35,7 +38,7 @@ export function parseReferenceString(refStr: string): ParsedReference | null {
     const bookNum = resolveBookNumber(m2[1]);
     if (!bookNum) return null;
     const ch = parseInt(m2[2], 10);
-    return {
+    const result = {
       bookName: OFFICIAL_BOOK_NAMES[bookNum],
       bookNumber: bookNum,
       chapterStart: ch,
@@ -43,6 +46,8 @@ export function parseReferenceString(refStr: string): ParsedReference | null {
       chapterEnd: ch,
       verseEnd: parseInt(m2[4], 10)
     };
+    if (result.verseEnd - result.verseStart > 500) return null;
+    return result;
   }
 
   // Pattern 3: Book C:V (e.g., John 3:16)

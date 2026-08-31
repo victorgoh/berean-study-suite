@@ -158,14 +158,31 @@ mcpServers:
 
 ## 🔒 Security & Verification (Cloudflare Deployment Example)
 
-To verify that your Cloudflare Workers deployment is active, healthy, and authenticated:
+The public demonstration deployment is intentionally unauthenticated. A private deployment may enforce authentication at the Worker or Cloudflare edge. Use the appropriate URL and credentials for the deployment you are testing:
 
 ```bash
-# Test Health Endpoint (Cloudflare deployment example)
+# Test public health endpoint
 curl -s https://berean-mcp.<your-subdomain>.workers.dev/health
 
-# Test Bible Lookup via REST
+# Test authenticated Bible Lookup on a protected deployment
 curl -s -X POST "https://berean-mcp.<your-subdomain>.workers.dev/tools/bible_lookup?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"version":"BSB","reference":"John 3:16"}'
 ```
+
+### Deployment-aware health checks
+
+Health results describe the deployment being queried; local and Cloudflare deployments can have different bindings and datasets.
+
+```bash
+# Worker process is responding; does not require R2 or D1.
+curl -s https://berean-mcp.<your-subdomain>.workers.dev/health/live
+
+# Required R2/D1 bindings are configured and usable.
+curl -s https://berean-mcp.<your-subdomain>.workers.dev/health/ready
+
+# Reports representative Bible resource and database availability.
+curl -s https://berean-mcp.<your-subdomain>.workers.dev/health/resources
+```
+
+`/health/live` is a liveness check. `/health/ready` returns HTTP `503` when required bindings are absent. `/health/resources` performs representative R2/D1 checks and returns `ready` or `degraded`; optional datasets may be unavailable without preventing the Worker from starting.

@@ -11,7 +11,10 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "build": "tsc --noEmit",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "data:status": "python3 scripts/resource_data.py status",
+    "data:validate": "python3 scripts/resource_data.py validate",
+    "data:upload-plan": "python3 scripts/resource_data.py upload-plan"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.1",

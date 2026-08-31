@@ -33,7 +33,7 @@ Try out the live public instance hosted on Cloudflare Workers:
 
 ## 🔒 Security & Authentication
 
-The server supports private API Key / Bearer Token authorization enforced at Cloudflare's global edge:
+Authentication is deployment-specific. The repository's public demonstration Worker is intentionally unauthenticated. A private/custom deployment can add API-key or Bearer-token authorization at the Worker or Cloudflare edge; configure and document that protection for the deployment before sharing its URL.
 
 ### 1. Set Secret in Cloudflare
 ```bash
@@ -82,7 +82,7 @@ The Berean Study Suite is strictly built on **100% Public Domain** classical his
 * **7 Original Language Lexicons**: STEPBible TBESG/TBESH, Thayer Greek, BDB Hebrew, LSJ, and morphological concordances.
 * **Academic Reference & Dictionaries**: Tyndale Open Bible Dictionary (6,010 articles), ISBE Encyclopedia, Easton's, Smith's, Nave's Topical, and TSK Cross-References.
 
-👉 **[View the Complete Academic Datasets & Provenance Directory &rarr;](../docs/academic_datasets.md)** for detailed tables covering historical eras, theological scopes, database object keys, and licensing.
+👉 **[View the Complete Academic Datasets & Provenance Directory &rarr;](../docs/shared-academic-datasets.md)** for detailed tables covering historical eras, theological scopes, database object keys, and licensing.
 
 *Tip: Use the `get_available_resources` MCP tool at any time to query all active translations, commentary aliases, and lexicons installed in your environment.*
 

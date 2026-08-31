@@ -57,6 +57,43 @@ import { Env } from "./types.js";
 // Keep active transports map in memory (per isolate)
 const activeTransports = new Map<string, WebStandardStreamableHTTPServerTransport>();
 
+function jsonResponse(payload: unknown, corsHeaders: Record<string, string>, status = 200): Response {
+  return new Response(JSON.stringify(payload, null, 2), {
+    status,
+    headers: { "Content-Type": "application/json", ...corsHeaders }
+  });
+}
+
+async function checkResourceAvailability(env: Env): Promise<Record<string, string>> {
+  const resources: Record<string, string> = {};
+  const bucket = env.BIBLEMATE_DATA || env.BEREAN_DATA;
+  resources.r2_binding = bucket ? "available" : "missing";
+
+  if (bucket) {
+    for (const [name, key] of [["bible_index", "data/lookup/bible_names.json"], ["bible_text", "bibles/BSB.bible"]] as const) {
+      try {
+        resources[name] = (await bucket.head(key)) ? "available" : "missing";
+      } catch (_) {
+        resources[name] = "error";
+      }
+    }
+  }
+
+  for (const [name, database] of [["morphology_d1", env.MORPHOLOGY_DB], ["reference_d1", env.REFERENCE_DB]] as const) {
+    if (!database) {
+      resources[name] = "missing";
+      continue;
+    }
+    try {
+      await database.prepare("SELECT 1 AS ok").first();
+      resources[name] = "available";
+    } catch (_) {
+      resources[name] = "error";
+    }
+  }
+  return resources;
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
@@ -73,6 +110,33 @@ export default {
       return new Response(null, {
         headers: corsHeaders
       });
+    }
+
+    // Bound REST request bodies before parsing to protect the Worker from oversized input.
+    const contentLength = Number(request.headers.get("content-length") || 0);
+    if (request.method === "POST" && contentLength > 256 * 1024) {
+      return jsonResponse({ error: { code: "REQUEST_TOO_LARGE", message: "Request body exceeds the 256 KiB limit." } }, corsHeaders, 413);
+    }
+
+    // Deployment-aware health endpoints. Liveness is dependency-free.
+    if (url.pathname === "/health/live") {
+      return jsonResponse({ status: "ok", check: "live", name: "berean-mcp", environment: env.ENVIRONMENT || "unknown" }, corsHeaders);
+    }
+
+    if (url.pathname === "/health/ready") {
+      const checks = {
+        r2_binding: Boolean(env.BIBLEMATE_DATA || env.BEREAN_DATA),
+        morphology_d1: Boolean(env.MORPHOLOGY_DB),
+        reference_d1: Boolean(env.REFERENCE_DB)
+      };
+      const ready = Object.values(checks).every(Boolean);
+      return jsonResponse({ status: ready ? "ready" : "not_ready", check: "ready", checks }, corsHeaders, ready ? 200 : 503);
+    }
+
+    if (url.pathname === "/health/resources") {
+      const resources = await checkResourceAvailability(env);
+      const ready = ["r2_binding", "morphology_d1", "reference_d1"].every((key) => resources[key] === "available");
+      return jsonResponse({ status: ready ? "ready" : "degraded", check: "resources", resources }, corsHeaders, ready ? 200 : 503);
     }
 
     // OpenAPI 3.1 JSON Specification

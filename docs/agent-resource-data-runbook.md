@@ -1,8 +1,14 @@
-# Bible Resource Inventory, Provenance, and Deployment Plan
+# Bible Resource Inventory, Provenance, and Deployment Runbook
+
+> **TL;DR for humans**
+>
+> This AI-written runbook explains how the Berean Study Suite should identify, verify, convert, and deploy Bible-related resources. It separates BibleMateData resources from STEPBible/Tyndale resources and flags files whose source or license is uncertain. It covers both local development and Cloudflare storage: **R2** is Cloudflare object storage for resource files, while **D1** is Cloudflare’s serverless SQLite database. Before uploading or redistributing any file, verify its source, license, schema, checksum, and intended destination.
+>
+> The detailed inventory, commands, manifest structure, validation requirements, and AI prompts below are primarily intended for AI programming agents implementing or maintaining this workflow. Treat unresolved provenance and licensing entries as requiring human review.
 
 ## Purpose
 
-This plan establishes one auditable inventory for resources used by the Berean MCP server. It separates:
+This runbook establishes one auditable inventory for resources used by the Berean MCP server. It separates:
 
 1. **BibleMateData** package resources, normally found under `~/biblemate/data/`.
 2. **STEPBible** resources, downloaded or generated from STEPBible / Tyndale House sources.
@@ -95,13 +101,26 @@ Commit the manifests and metadata, not large source databases. Use one authorita
 
 Maintain two generated status views from the same manifest:
 
-- `docs/resource_manifest.json`: committed desired inventory and provenance.
+- `docs/agent-resource-manifest.json`: committed desired inventory and provenance.
 - `docs/resource_status.local.json`: generated local presence/checksum report; do not commit if it contains machine-specific paths.
 - `docs/resource_status.r2.json`: generated remote R2/D1 presence/checksum report; commit only if it contains no secrets and is intentionally used as a deployment record.
 
 For each resource, distinguish `sourceFamily`, `sourceVerified`, `licenseVerified`, `required`, `localPresent`, `r2Present`, and `d1Present`. A missing optional file must not make the Worker fail.
 
 ## Preparation workflow
+
+### Local-only Phase 2 commands
+
+The repository includes a safe, manifest-driven local validator. These commands inspect local files, calculate checksums, run SQLite integrity checks, and print an R2 upload plan. They do not upload to R2, import into D1, delete files, or deploy Workers.
+
+```bash
+cd berean-mcp
+npm run data:status
+npm run data:validate
+npm run data:upload-plan
+```
+
+Set `BEREAN_DATA_DIR` when the data lives outside the repository. Resources marked `needsReview` are intentionally skipped from the upload plan until a human verifies their provenance and license. A future remote uploader should consume the same manifest and require explicit human approval.
 
 ### Local preparation
 

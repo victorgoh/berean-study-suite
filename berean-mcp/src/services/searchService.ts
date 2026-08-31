@@ -9,6 +9,10 @@ export async function searchBible(
   bookFilter?: string,
   limit: number = 50
 ): Promise<{ error?: string; totalCount?: number; matches?: BibleVerse[]; formattedText?: string }> {
+  if (typeof query !== "string" || query.trim().length === 0 || query.length > 200) {
+    return { error: "Search query must be between 1 and 200 characters." };
+  }
+  limit = Math.min(Math.max(Number.isFinite(limit) ? Math.floor(limit) : 50, 1), 100);
   let ver = version.toUpperCase();
   if (ver === "OHGBI" || ver === "OHGB-I" || ver === "INTERLINEAR") {
     ver = "OHGB";

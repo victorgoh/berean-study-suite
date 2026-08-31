@@ -98,7 +98,7 @@ The Berean Study Suite is strictly built on **100% Public Domain** classical his
 * **7 Original Language Lexicons**: STEPBible TBESG/TBESH, Thayer Greek, BDB Hebrew, LSJ, and morphological concordances.
 * **Academic Reference & Dictionaries**: Tyndale Open Bible Dictionary (6,010 articles), ISBE Encyclopedia, Easton's, Smith's, Nave's Topical, and TSK Cross-References.
 
-👉 **[View the Complete Academic Datasets & Provenance Directory &rarr;](docs/academic_datasets.md)** for detailed tables covering historical eras, theological scopes, database object keys, and licensing.
+👉 **[View the Complete Academic Datasets & Provenance Directory &rarr;](docs/shared-academic-datasets.md)** for detailed tables covering historical eras, theological scopes, database object keys, and licensing.
 
 *Tip: Use the `get_available_resources` MCP tool at any time to list all active translations, commentary aliases, and lexicons in your environment.*
 
@@ -144,7 +144,7 @@ npx tsx scripts/test_ot_in_nt.ts            # Test OT quotations in NT alignment
 npx tsx scripts/test_entities_and_units.ts  # Test entity disambiguation & unit conversion
 ```
 
-*(For comprehensive integration details and advanced options, see [docs/stepbible_data_integration.md](docs/stepbible_data_integration.md).)*
+*(For comprehensive integration details and advanced options, see [docs/agent-stepbible-data-integration.md](docs/agent-stepbible-data-integration.md).)*
 
 ---
 
@@ -252,7 +252,7 @@ If you encounter any issues getting the suite to run (e.g., Node dependencies, M
 
 * **Google Antigravity IDE**: Open this workspace and ask the chat agent:
   > *"I'm having trouble getting the Berean Study Suite running. Please inspect my environment, fix any issues, and get everything working for me."*
-* **Claude Code / Claude Desktop**: Run `claude` in this directory or connect via MCP (see [docs/mcp_client_integration.md](docs/mcp_client_integration.md)) and prompt:
+* **Claude Code / Claude Desktop**: Run `claude` in this directory or connect via MCP (see [docs/human-mcp-client-integration.md](docs/human-mcp-client-integration.md)) and prompt:
   > *"Diagnose my Berean Study Suite setup, ensure all Node dependencies are installed, run typecheck and the focused service tests, and verify that all 35 MCP tools are live."*
 * **Cursor / Windsurf**: Open this project in Agent mode and prompt:
   > *"Help me set up Berean Study Suite. Check my Node environment and ensure the MCP server tests pass."*
@@ -317,12 +317,15 @@ Connect your studies directly to your personal notes:
 
 ## 📖 Documentation
 
-- **[docs/academic_datasets.md](docs/academic_datasets.md)**: Authoritative academic provenance directory for all 27 commentaries, 8 translations, 7 lexicons, and dictionaries.
-- **[docs/mcp_client_integration.md](docs/mcp_client_integration.md)**: Multi-client setup guide for Antigravity IDE, Claude Desktop, Cursor, and VS Code.
-- **[docs/ai_team_personas.md](docs/ai_team_personas.md)**: Profiles and guidelines for the 15 AI study personas.
-- **[docs/slash_commands.md](docs/slash_commands.md)**: Reference guide for workflow commands and the 35 MCP tools.
-- **[docs/stepbible_data_integration.md](docs/stepbible_data_integration.md)**: Compile, import, verify, and deploy STEPBible lexicons and related study datasets.
-- **[docs/study_outputs.md](docs/study_outputs.md)**: Guide to study output formats, folder layouts, and document export.
+- **[docs/shared-academic-datasets.md](docs/shared-academic-datasets.md)**: Authoritative academic provenance directory.
+- **[docs/human-mcp-client-integration.md](docs/human-mcp-client-integration.md)**: Multi-client setup guide.
+- **[docs/agent-ai-team-personas.md](docs/agent-ai-team-personas.md)**: Profiles and guidelines for AI study personas.
+- **[docs/shared-slash-commands.md](docs/shared-slash-commands.md)**: Reference guide for workflow commands and MCP tools.
+- **[docs/agent-stepbible-data-integration.md](docs/agent-stepbible-data-integration.md)**: Compile, import, verify, and deploy STEPBible datasets.
+- **[docs/human-study-outputs.md](docs/human-study-outputs.md)**: Guide to study outputs and document export.
+- **[docs/agent-resource-data-runbook.md](docs/agent-resource-data-runbook.md)**: AI-agent resource preparation and deployment runbook.
+- **[docs/agent-resource-manifest.json](docs/agent-resource-manifest.json)**: Machine-readable resource manifest template.
+- **[docs/shared-typography-standards.md](docs/shared-typography-standards.md)**: Output formatting standards.
 
 ---
 
