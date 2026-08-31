@@ -64,6 +64,17 @@ function jsonResponse(payload: unknown, corsHeaders: Record<string, string>, sta
   });
 }
 
+function restServiceResponse(result: any, corsHeaders: Record<string, string>): Response {
+  if (!result?.error) return jsonResponse(result, corsHeaders);
+  const message = String(result.error);
+  let code = "REQUEST_FAILED";
+  let status = 400;
+  if (/not found|not available|not installed/i.test(message)) { code = "RESOURCE_UNAVAILABLE"; status = 404; }
+  if (/database|R2|D1|storage/i.test(message)) { code = "DEPENDENCY_UNAVAILABLE"; status = 503; }
+  if (/query failed|exception|internal/i.test(message)) { code = "INTERNAL_ERROR"; status = 500; }
+  return jsonResponse({ error: { code, message, retryable: status >= 500 } }, corsHeaders, status);
+}
+
 async function checkResourceAvailability(env: Env): Promise<Record<string, string>> {
   const resources: Record<string, string> = {};
   const bucket = env.BIBLEMATE_DATA || env.BEREAN_DATA;
@@ -253,61 +264,61 @@ export default {
       const body = request.method === "POST" ? (await request.json().catch(() => ({}))) as any : {};
       const category = body.category || url.searchParams.get("category") || "all";
       const res = await getAvailableResources(env, { category });
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/bible_lookup" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupBiblePassage(env, body.version || "BSB", body.reference || body.passage || "");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/bible_search" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await searchBible(env, body.query || body.text || "", body.version || "BSB", body.book_filter || body.book, body.limit || 50);
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/commentary_lookup" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupCommentary(env, body.version || body.commentary || "Henry", body.reference || body.passage || "");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/cross_references" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupCrossReferences(env, body.reference || body.passage || "", body.limit || 15);
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/lexicon_lookup" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupLexiconEntry(env, body.strongs_number || body.strongs || body.query || "", body.lexicon || "strongs");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/morphology_lookup" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupMorphology(env, body.reference || body.passage || "");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/topic_study" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupTopic(env, body.query || body.topic || body.term || "");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/character_lookup" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupCharacter(env, body.name || body.query || body.character || "");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/location_lookup" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupLocation(env, body.location || body.query || body.name || "");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/theological_dictionary" && request.method === "POST") {
@@ -316,151 +327,151 @@ export default {
       const res = body.source === "isbe"
         ? await lookupEncyclopedia(env, term, "isbe")
         : await lookupDictionary(env, term, body.source || "easton");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/parallel_passages" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupParallels(env, body.query || body.reference || body.passage || "", body.include_text ?? true, body.version || "BSB");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/biblical_promises" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupPromises(env, body.topic || body.category || body.query || "", body.include_text ?? true, body.version || "BSB");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/book_analysis" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupBookAnalysis(env, body.book || body.query || "", body.section);
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/chapter_summary" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupChapterSummary(env, body.book || body.query || "", body.chapter || 1);
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/bible_names" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupBibleNames(env, body.query || body.name || body.search || "");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/chronology" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupChronology(env, body.query || body.period || body.event || "");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/daily_reading" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await getDailyReading(env, body.date, body.include_text ?? true, body.version || "BSB");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/sermon_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await getSermonStudyPack(env, body.reference || body.passage || "Romans 8:1-4", body.version || "BSB", body.include_xrefs ?? true);
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/devotional_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await getDevotionalStudyPack(env, body.reference || body.passage || "Psalm 23", body.version || "BSB");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/passage_exegesis_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await getPassageExegesisPack(env, body.reference || body.passage || "John 1:1-5", body.version || "BSB", body.include_original ?? true);
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/word_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await getWordStudyPack(env, body.strongs_number || body.strongs || body.query || "G2842", body.reference || body.passage, body.lexicon || "strongs");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/topic_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await getTopicStudyPack(env, body.topic || body.query || "Justification", body.version || "BSB");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/commentary_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await getCommentaryStudyPack(env, body.reference || body.passage || "Romans 8:28", body.commentators, body.order_mode);
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/lesson_creator_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await getLessonCreatorStudyPack(env, body.reference || body.passage || "Luke 15:11-32", body.version || "BSB");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/prayer_guide_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await getPrayerGuideStudyPack(env, body.reference || body.passage || "Psalm 23", body.version || "BSB");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/covenant_theology_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await getCovenantTheologyPack(env, body.reference || body.passage || "Genesis 15", body.version || "BSB");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/interlinear_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await getInterlinearStudyPack(env, body.reference || body.passage || "Philippians 4:4-8", body.glossary_filter, body.gloss_color, body.display_mode || body.displayMode);
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/interlinear_lookup" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupInterlinear(env, body.reference || body.passage || "Philippians 4:4-8", body.glossary_filter, body.gloss_color, body.display_mode || body.displayMode);
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/ot_in_nt_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await getOtInNtStudyPack(env, body.reference || body.passage || "Hebrews 8:8-12", body.version || "BSB");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/ot_quotations_lookup" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupOtQuotations(env, body.reference || body.passage || "Hebrews 8:8");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/septuagint_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await getSeptuagintStudyPack(env, body.reference || body.passage || "Genesis 1:1-5", body.version || "BSB");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/septuagint_lookup" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupSeptuagint(env, body.reference || body.passage || "Genesis 1:1");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/entity_disambiguation" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await lookupEntityDisambiguation(env, body.name || "Mary");
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     if (url.pathname === "/tools/convert_ancient_units" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await convertAncientUnits(env, body.unit || "Talent", body.amount || 1);
-      return new Response(JSON.stringify(res), { headers: { "Content-Type": "application/json", ...corsHeaders } });
+      return restServiceResponse(res, corsHeaders);
     }
 
     // --- MCP Streamable HTTP endpoint ---

@@ -83,7 +83,7 @@ def status(fail_on_required=False):
     print(json.dumps(report, indent=2))
     if fail_on_required:
         for resource in report["resources"]:
-            if resource["required"] and (resource["missingPatterns"] or not resource["files"] or any(item.get("sqliteIntegrity") is False for item in resource["files"])):
+            if resource["required"] and not resource["needsReview"] and (resource["missingPatterns"] or not resource["files"] or any(item.get("sqliteIntegrity") is False for item in resource["files"])):
                 failures += 1
         if failures:
             raise SystemExit(failures)

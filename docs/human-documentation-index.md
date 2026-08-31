@@ -12,4 +12,5 @@ For in-depth details about the workflows, slash commands, and team structure, pl
 - **[shared-academic-datasets.md](shared-academic-datasets.md)**: Dataset provenance and licensing catalog.
 - **[agent-resource-data-runbook.md](agent-resource-data-runbook.md)**: AI-agent resource preparation and deployment runbook.
 - **[agent-resource-manifest.json](agent-resource-manifest.json)**: Machine-readable resource manifest.
+- **[agent-mcp-server-design.md](agent-mcp-server-design.md)**: MCP server runtime and REST error contract for AI agents.
 - **[shared-typography-standards.md](shared-typography-standards.md)**: Shared output formatting standards.

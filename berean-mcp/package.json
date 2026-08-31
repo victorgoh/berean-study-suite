@@ -14,7 +14,10 @@
     "typecheck": "tsc --noEmit",
     "data:status": "python3 scripts/resource_data.py status",
     "data:validate": "python3 scripts/resource_data.py validate",
-    "data:upload-plan": "python3 scripts/resource_data.py upload-plan"
+    "data:upload-plan": "python3 scripts/resource_data.py upload-plan",
+    "test:phase4": "tsx scripts/test_phase4.ts",
+    "test:smoke": "npm run test:phase4",
+    "test": "npm run test:phase4"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.1",
