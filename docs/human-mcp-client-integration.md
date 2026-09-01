@@ -12,7 +12,7 @@ The Berean MCP Server provides access to verified classical and modern commentar
 
 | Environment | Transport | Endpoint URL |
 | :--- | :--- | :--- |
-| **Cloudflare Workers (Global Edge)** | Streamable HTTP | `https://berean-mcp.<your-subdomain>.workers.dev/mcp?key=YOUR_API_KEY` |
+| **Cloudflare Workers (Global Edge)** | Streamable HTTP | `https://berean-mcp.victorgoh.workers.dev/mcp` |
 | **Local Machine (Zero Network)** | Stdio | `npx -y tsx berean-mcp/scripts/run_local_stdio.ts` |
 | **Local Machine (Local HTTP Server)** | Streamable HTTP | `http://localhost:7860/mcp` |
 
@@ -66,13 +66,18 @@ Add Berean MCP to your `claude_desktop_config.json` (`~/Library/Application Supp
       "command": "npx",
       "args": [
         "-y",
-        "mcp-proxy",
-        "https://berean-mcp.<your-subdomain>.workers.dev/mcp?key=YOUR_API_KEY"
+        "mcp-remote",
+        "https://berean-mcp.victorgoh.workers.dev/mcp"
       ]
     }
   }
 }
 ```
+
+`mcp-remote` provides the local process bridge Claude Desktop uses to connect to
+the remote Streamable HTTP MCP endpoint. Restart Claude Desktop after saving the
+configuration. Use the plain URL shown above; do not wrap it in Markdown link
+syntax or add a trailing `?key` unless your deployment specifically requires it.
 
 *For local offline execution directly with Node.js:*
 ```json
