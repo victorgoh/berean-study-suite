@@ -1,6 +1,6 @@
 # Slash Commands & Workflows Reference Guide
 
-The **Berean Study Suite** operates on a pure, zero-overhead MCP architecture. You can trigger comprehensive studies using natural language prompts (or the 4 optional UI slash shortcuts in Antigravity), backed by **9 high-speed composite Study Packs** and **18 specialized single-engine MCP tools** (27 MCP tools total) from the **Berean MCP Server**.
+The **Berean Study Suite** operates on a pure, zero-overhead MCP architecture. You can trigger focused research and comprehensive studies using natural language prompts (or the optional UI slash shortcuts in Antigravity). The available tools depend on the configured MCP profile; use `tools/list` or `get_available_resources` for the authoritative current catalog.
 
 ---
 
@@ -24,7 +24,7 @@ You can execute these setup and diagnostic commands directly in chat in any proj
 | Prompt | Purpose | Execution Details |
 | :--- | :--- | :--- |
 | **`berean init`** | Installs slash shortcuts in the active workspace. | Inspects project, creates `.agents/workflows/`, and writes `/berean`, `/berean-plus`, `/docx`, and `/image`. |
-| **`berean check`** | Diagnoses workspace health and MCP connection. | Verifies connectivity to the Berean MCP Server (27 tools, 26 commentaries) and confirms workspace configuration. |
+| **`berean check`** | Diagnoses workspace health and MCP connection. | Verifies connectivity to the Berean MCP Server and confirms workspace configuration. |
 
 ---
 
@@ -75,4 +75,3 @@ For specific queries, the agent can call any of the 18 individual MCP tools:
 - **`bible_names`**: Etymological meanings and origins of biblical names.
 - **`chronology`**: Biblical timelines, kings chronology, and historical genealogies.
 - **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, study packs, personas, skills, workflows, and rules.
-

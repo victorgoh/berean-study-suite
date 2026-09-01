@@ -1,6 +1,6 @@
 /**
  * Complete OpenAPI 3.1.0 Specification for Berean MCP Server
- * Auto-documents all 35 biblical study tools and composite study packs
+ * Auto-documents the currently configured biblical study tools and composite study packs
  */
 
 export function getOpenApiSpec(serverUrl: string = "https://berean-mcp.victorgoh.workers.dev"): object {

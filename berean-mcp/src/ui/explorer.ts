@@ -688,6 +688,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       <div class="hero-title">
         <h2>A Companion for Studying & Praying Through God’s Word</h2>
         <p>Explore Scripture texts, trusted classical study notes, word meanings, and guided prayers for daily reflection and growth.</p>
+        <p style="font-size:0.82rem; color:var(--text-dim); margin-top:0.45rem;">Human-oriented research interface: compare multiple sources and use comprehensive Study Packs in one readable workspace.</p>
       </div>
 
       <!-- Category Filter Tabs (4 Simple Journeys) -->
@@ -872,7 +873,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
   </footer>
 
   <script>
-    // Complete 35-Tool Context Configuration
+    // Complete tool context configuration
     const TOOL_CONFIG = {
       // 1. Read & Search
       scripture: {
@@ -1499,7 +1500,10 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         } else if (parsed.matches) {
           md = "# Search Results for: " + q + " (" + parsed.totalCount + " matches)\\n\\n" + parsed.matches.map(x => "[" + x.book + " " + x.chapter + ":" + x.verse + " (" + v + ")] " + x.text).join("\\n\\n");
         } else if (parsed.error) {
-          md = "**Error**: " + parsed.error;
+          const errorMessage = typeof parsed.error === "string"
+            ? parsed.error
+            : (parsed.error.message || parsed.error.code || JSON.stringify(parsed.error));
+          md = "**Error**: " + errorMessage;
         } else {
           md = JSON.stringify(parsed, null, 2);
         }

@@ -679,7 +679,7 @@ export function renderPlaygroundHtml(): string {
         <div class="brand-icon">⚡</div>
         <div class="brand-text">
           <h1>Berean MCP Server</h1>
-          <p>Universal Bible Exegesis Engine • 26 Tools & 8 Composite Study Packs</p>
+          <p>Universal Bible Exegesis Engine • Focused Research & Human Study Packs</p>
         </div>
       </a>
       <div class="header-links">
@@ -709,9 +709,9 @@ export function renderPlaygroundHtml(): string {
         
         <!-- Category Filter Pills -->
         <div class="category-pills" id="category-pills">
-          <div class="cat-pill active" data-cat="all">All Tools (26)</div>
+          <div class="cat-pill active" data-cat="all">All Tools</div>
           <div class="cat-pill" data-cat="scripture">📖 Scripture (5)</div>
-          <div class="cat-pill" data-cat="packs">⚡ Study Packs (9)</div>
+          <div class="cat-pill" data-cat="packs">⚡ Study Packs</div>
           <div class="cat-pill" data-cat="languages">🏛 Languages (3)</div>
           <div class="cat-pill" data-cat="topical">📚 Topical & Bio (9)</div>
         </div>

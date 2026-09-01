@@ -12,7 +12,7 @@ Try out the live public instance hosted on Cloudflare Workers:
 
 | Resource | URL | Description |
 | :--- | :--- | :--- |
-| **📖 Bible Study Explorer** | [https://berean-mcp.victorgoh.workers.dev/](https://berean-mcp.victorgoh.workers.dev/) | Reader-friendly UI to explore all 35 tools, scripture texts, and classical commentaries |
+| **📖 Bible Study Explorer** | [https://berean-mcp.victorgoh.workers.dev/](https://berean-mcp.victorgoh.workers.dev/) | Reader-friendly UI to explore Scripture texts, Study Packs, and classical commentaries |
 | **⚡ Scalar API Reference** | [https://berean-mcp.victorgoh.workers.dev/docs](https://berean-mcp.victorgoh.workers.dev/docs) | Interactive API documentation with built-in request runner & multi-language snippets |
 | **📜 Swagger UI** | [https://berean-mcp.victorgoh.workers.dev/swagger](https://berean-mcp.victorgoh.workers.dev/swagger) | Classic OpenAPI schema visualizer & tester |
 | **📋 OpenAPI Spec** | [https://berean-mcp.victorgoh.workers.dev/openapi.json](https://berean-mcp.victorgoh.workers.dev/openapi.json) | Complete OpenAPI 3.1.0 JSON schema |
@@ -22,7 +22,7 @@ Try out the live public instance hosted on Cloudflare Workers:
 
 ## ⚡ Architecture & Performance
 
-- **35 MCP Tools & 12 Composite Study Packs**: Provides granular single-engine tools as well as composite Study Packs for convenient, comprehensive human research. Some packs can return up to 170,000 characters (~30,000 words) in a single round-trip.
+- **Focused MCP tools and Composite Study Packs**: Provides granular single-engine tools for AI-assisted research and composite Study Packs for convenient, comprehensive human research. Some packs can return substantial content in a single round-trip.
 - **Edge Cloudflare Execution**: Sub-50ms cold start, multi-tier LRU caching, and streaming JSON-RPC / Streamable HTTP transports.
 - **Hybrid Storage**:
   - **Cloudflare D1 (Serverless SQLite)**: Ultra-fast indexing for Strong's Hebrew Lexicon (BDB), ISBE/Easton's Encyclopedias, and OT/NT Morphological datasets.

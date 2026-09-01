@@ -11,7 +11,7 @@
 
 The **Berean Study Suite** is a unified, local-first research platform featuring:
 
-1. **Berean MCP Server (`berean-mcp`)**: Universal Model Context Protocol server providing **35 exegetical tools** (23 specialized single-engine tools + 12 high-speed composite Study Packs), 23 classical & modern commentary sets deployed on Cloudflare R2, 8 Bible translations/manuscript editions, Greek/Hebrew lexicons, and full REST/OpenAPI/Swagger endpoints for any MCP client (Claude Desktop, Cursor, ChatGPT, Antigravity).
+1. **Berean MCP Server (`berean-mcp`)**: Universal Model Context Protocol server providing focused Bible research tools, optional human-oriented Study Packs, classical & modern commentary sets deployed on Cloudflare R2, Bible translations/manuscript editions, Greek/Hebrew lexicons, and full REST/OpenAPI/Swagger endpoints for MCP clients.
 2. **15 Theological Personas & Autonomous Pipelines**: 15 specialized theological personas, exegesis skills (`berean://skills/...`), universal typography standards (`berean://rules/typography`), and study prompts embedded directly into the MCP server with zero static token overhead.
 
 ---
@@ -39,7 +39,7 @@ Try out the live public instance hosted globally on Cloudflare Workers:
 
 | Resource | URL | Description |
 | :--- | :--- | :--- |
-| **📖 Bible Study Explorer** | [https://berean-mcp.victorgoh.workers.dev/](https://berean-mcp.victorgoh.workers.dev/) | Reader-friendly Web UI to explore all 35 tools, Scripture texts, and classical commentaries |
+| **📖 Bible Study Explorer** | [https://berean-mcp.victorgoh.workers.dev/](https://berean-mcp.victorgoh.workers.dev/) | Reader-friendly Web UI to explore Scripture texts, Study Packs, and classical commentaries |
 | **⚡ Scalar API Reference** | [https://berean-mcp.victorgoh.workers.dev/docs](https://berean-mcp.victorgoh.workers.dev/docs) | Interactive API documentation with built-in request runner & multi-language snippets |
 | **📜 Swagger UI** | [https://berean-mcp.victorgoh.workers.dev/swagger](https://berean-mcp.victorgoh.workers.dev/swagger) | Classic OpenAPI schema visualizer & API playground |
 | **📋 OpenAPI Spec** | [https://berean-mcp.victorgoh.workers.dev/openapi.json](https://berean-mcp.victorgoh.workers.dev/openapi.json) | Complete OpenAPI 3.1.0 JSON schema |
@@ -68,7 +68,7 @@ Accessible via `berean://skills/berean-plus` and the `berean-plus-study` prompt,
 
 ## 🛠️ Berean MCP Server (`berean-mcp`)
 
-The **Berean MCP Server** delivers **35 total tools** (23 specialized single-engine tools and 12 high-performance composite study packs):
+The **Berean MCP Server** exposes focused research tools and human-oriented composite Study Packs according to the configured MCP profile. Use MCP `tools/list` or `get_available_resources` to discover the current tool set.
 
 ### 1. High-Speed Composite Study Packs (Single-Turn Endpoints)
 - **`sermon_study_pack`** — Aggregates Scripture (BSB), Alexander Maclaren homiletics, Charles Simeon outlines (*Horae Homileticae*), The Biblical Illustrator, Matthew Henry, and TSK cross-references.
@@ -161,7 +161,7 @@ npx tsx scripts/test_entities_and_units.ts  # Test entity disambiguation & unit 
 > Installation and configuration are best and most effortlessly handled directly by your AI coding assistant (**Google Antigravity IDE**, **Claude Code**, **Cursor**, or **Windsurf**).
 > 
 > Simply clone the repository, open the workspace folder in your AI agent, and prompt:
-> > *"Please set up the Berean Study Suite for me. Inspect my Node environment, install dependencies in berean-mcp, and run the typecheck plus focused service tests to verify all 35 tools work."*
+> > *"Please set up the Berean Study Suite for me. Inspect my Node environment, install dependencies in berean-mcp, and run the typecheck plus focused service tests to verify the currently exposed tools work."*
 > 
 > Your agent will automatically inspect your environment, execute the setup steps, and ensure all tools and personas are ready for study.
 
@@ -236,7 +236,7 @@ You can also start the MCP server directly from your terminal in either **Stdio*
   * Health Check: `http://localhost:7860/health`
 
 #### D. Testing Your Local Setup
-Verify that all 35 tools, 12 composite study packs, and local SQLite databases are working:
+Verify the currently exposed tools, Study Packs, and local SQLite databases are working:
 ```bash
 cd berean-mcp
 npm run typecheck
@@ -259,7 +259,7 @@ If you encounter any issues getting the suite to run (e.g., Node dependencies, M
 * **Google Antigravity IDE**: Open this workspace and ask the chat agent:
   > *"I'm having trouble getting the Berean Study Suite running. Please inspect my environment, fix any issues, and get everything working for me."*
 * **Claude Code / Claude Desktop**: Run `claude` in this directory or connect via MCP (see [docs/human-mcp-client-integration.md](docs/human-mcp-client-integration.md)) and prompt:
-  > *"Diagnose my Berean Study Suite setup, ensure all Node dependencies are installed, run typecheck and the focused service tests, and verify that all 35 MCP tools are live."*
+  > *"Diagnose my Berean Study Suite setup, ensure all Node dependencies are installed, run typecheck and the focused service tests, and verify that the currently exposed MCP tools are live."*
 * **Cursor / Windsurf**: Open this project in Agent mode and prompt:
   > *"Help me set up Berean Study Suite. Check my Node environment and ensure the MCP server tests pass."*
 
@@ -314,7 +314,7 @@ Connect your studies directly to your personal notes:
 
 ```
 ├── berean-mcp/           # Cloudflare Edge & Stdio MCP Server (TypeScript)
-│   ├── src/              # Server implementation, 35 tools, prompts & resources
+│   ├── src/              # Server implementation, tools, prompts & resources
 │   │   ├── mcp/          # Tool schemas, prompts, and resource definitions
 │   │   ├── services/     # Bible, commentary, study pack & catalog engines
 │   │   └── ui/           # Bible Study Explorer, Scalar & Swagger Web UIs
