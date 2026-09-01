@@ -69,8 +69,8 @@ For specific queries, the agent can call any of the 18 individual MCP tools:
 - **`character_lookup`**: Biographical details, family lineage, and biblical milestones.
 - **`location_lookup`**: Geographical coordinates, ancient names, and archaeological significance.
 - **`theological_dictionary`**: Query Easton's Bible Dictionary or International Standard Bible Encyclopedia (ISBE).
-- **`book_analysis`**: Historical background, authorial occasion, and structural outlines.
-- **`chapter_summary`**: Section-by-section chapter breakdown.
+- **`book_analysis`**: Source-attributed Tyndale Open Study Notes book summaries and full introductions.
+- **`chapter_summary`**: Source-attributed Adam Clarke chapter-opening synopsis.
 - **`biblical_promises`**: Thematic promises categorized by spiritual need.
 - **`bible_names`**: Etymological meanings and origins of biblical names.
 - **`chronology`**: Biblical timelines, kings chronology, and historical genealogies.

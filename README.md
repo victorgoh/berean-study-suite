@@ -1,5 +1,19 @@
 # Berean Study Suite
 
+## Try the Bible Study Explorer
+
+[Open the Berean Bible Study Explorer](https://berean-mcp.victorgoh.workers.dev/)
+
+Berean Study Suite is a place to explore Bible passages alongside helpful study resources. Enter a passage, choose a commentary or research tool, and view related material such as cross-references, word meanings, historical notes, and other reference sources.
+
+It is most useful when you want to look more closely at a passage, compare a few sources, or gather material for further reflection and study. The Explorer is designed to make these resources easier to browse in one place.
+
+This tool is not meant to replace reading Scripture for yourself, personal devotional time, or wise guidance from your faith community. It is a research companion that helps you find and review available source material.
+
+## For developers and self-hosters
+
+The remainder of this README introduces the project for people who want to run it locally, connect it to an AI client, customize its resources, or deploy it on Cloudflare.
+
 Berean Study Suite is a Bible research and reference platform. It provides Scripture texts and related resources through a local or Cloudflare-based Model Context Protocol (MCP) server, together with a human-oriented web Explorer.
 
 It helps users retrieve and examine configured Bible translations, commentaries, lexicons, dictionaries, morphology, and cross-references. Results should be evaluated against the underlying source and the user's own study context. The project does not replace personal Bible reading, devotional time, or professional judgment.
@@ -24,10 +38,6 @@ Study Packs are intended for convenient human reading and can return substantial
 - [Data Sources and Provenance](docs/data-sources-and-provenance.md) — Review origins, licenses, and storage.
 
 AI programming-agent documents use the `agent-` prefix and contain implementation-oriented details.
-
-## Try the demo
-
-Try the [Berean Bible Study Explorer](https://berean-mcp.victorgoh.workers.dev/) to explore the available Scripture and reference tools in the browser.
 
 ## Quick start: local use
 

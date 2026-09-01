@@ -810,8 +810,8 @@ export function getOpenApiSpec(serverUrl: string = "https://berean-mcp.victorgoh
       "/tools/book_analysis": {
         post: {
           tags: ["📜 Historical & Cultural Context"],
-          summary: "Book Overview, Authorship & Purpose",
-          description: "Authorship, dating, historical background, and theological themes for all 66 books of the Bible.",
+          summary: "Tyndale Book Guide",
+          description: "Source-attributed concise or full book introductions from Tyndale Open Study Notes.",
           requestBody: {
             required: true,
             content: {
@@ -819,21 +819,22 @@ export function getOpenApiSpec(serverUrl: string = "https://berean-mcp.victorgoh
                 schema: {
                   type: "object",
                   properties: {
-                    book: { type: "string", example: "Romans", description: "Book name" }
+                    book: { type: "string", example: "Romans", description: "Book name" },
+                    detail: { type: "string", enum: ["summary", "full"], default: "summary", description: "Concise summary or full introduction" }
                   },
                   required: ["book"]
                 }
               }
             }
           },
-          responses: { "200": { description: "Book overview" } }
+          responses: { "200": { description: "Source-attributed Tyndale book guide" } }
         }
       },
       "/tools/chapter_summary": {
         post: {
           tags: ["📜 Historical & Cultural Context"],
-          summary: "Chapter Summaries & Key Verses",
-          description: "Structural outline, major themes, and central points for any chapter.",
+          summary: "Adam Clarke Chapter Summary",
+          description: "Source-attributed chapter-opening synopsis from Adam Clarke's Commentary on the Bible.",
           requestBody: {
             required: true,
             content: {

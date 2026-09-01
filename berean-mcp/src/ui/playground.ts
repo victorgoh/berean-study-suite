@@ -754,7 +754,7 @@ export function renderPlaygroundHtml(): string {
               <option value="biblical_promises">biblical_promises (Categorized covenant promises)</option>
               <option value="character_lookup">character_lookup (Biblical biographies & trees)</option>
               <option value="location_lookup">location_lookup (Biblical geography & coordinates)</option>
-              <option value="book_analysis">book_analysis (Author, date, themes, structure)</option>
+              <option value="book_analysis">book_analysis (Tyndale source-attributed book guide)</option>
               <option value="chapter_summary">chapter_summary (Chapter breakdown & key verses)</option>
               <option value="bible_names">bible_names (Etymology & meanings of names)</option>
               <option value="chronology">chronology (Biblical timelines & historical epochs)</option>

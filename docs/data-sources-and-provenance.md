@@ -10,7 +10,11 @@ The authoritative resource inventory is maintained in [shared-academic-datasets.
 
 Every deployed resource should have a source, edition or release identifier, license, conversion method, and storage location. If the origin is uncertain, mark it as unknown rather than inferring it.
 
+The Book Guide uses the concise `BookIntroSummaries.xml` and full `BookIntros.xml` from the Tyndale Open Study Notes distribution. They are imported unchanged into `data/tyndale_book_intros.data`, identified in each result as Tyndale Open Study Notes, Tyndale House Publishers, CC BY-SA 4.0.
+
 The project consumes these resources in read-only fashion. R2 stores larger SQLite objects; D1 stores selected indexed tables. The storage location can differ between local and Cloudflare deployments.
+
+Some runtime resources are source-preserving normalized derivatives. They retain the source schema and content while decoding display-only typographic entities and composing Unicode diacritics. The original source database remains unchanged; the derivative records its source checksum and normalizer metadata in `NormalizationMetadata`.
 
 ## Resource categories
 

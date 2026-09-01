@@ -344,7 +344,8 @@ export default {
 
     if (url.pathname === "/tools/book_analysis" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupBookAnalysis(env, body.book || body.query || "", body.section);
+      const detail = body.detail === "full" ? "full" : "summary";
+      const res = await lookupBookAnalysis(env, body.book || body.query || "", detail);
       return restServiceResponse(res, corsHeaders);
     }
 

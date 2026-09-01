@@ -215,12 +215,11 @@ export const ChronologySchema = {
 
 export const BookAnalysisSchema = {
   book: z.string().describe("Bible book name or abbreviation, e.g. 'Romans', 'Genesis', 'Hebrews', 'Ezra'"),
-  section: z.number().optional().describe("Optional section index (0: Overview, 1: Author, 2: Date, 3: Background, 4: Recipients, 5: Themes, 7: Outline)")
+  detail: z.enum(["summary", "full"]).default("summary").describe("Use 'summary' for the concise Tyndale book guide or 'full' for the complete Tyndale introduction.")
 };
 
 export const ChapterSummarySchema = {
   book: z.string().describe("Bible book name, e.g. 'Genesis', 'John', 'Romans'"),
   chapter: z.number().default(1).describe("Chapter number (e.g. 1, 3, 8)")
 };
-
 

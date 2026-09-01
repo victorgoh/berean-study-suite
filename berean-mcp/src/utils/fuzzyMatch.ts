@@ -25,17 +25,37 @@ export function levenshteinDistance(s1: string, s2: string): number {
   return previousRow[previousRow.length - 1];
 }
 
+const HTML_ENTITIES: Record<string, string> = {
+  amp: "&", apos: "'", quot: '"', lt: "<", gt: ">", nbsp: " ",
+  lsquo: "‘", rsquo: "’", sbquo: "‚", ldquo: "“", rdquo: "”", bdquo: "„",
+  mdash: "—", ndash: "–", hellip: "…", middot: "·", bull: "•",
+  laquo: "«", raquo: "»", oelig: "œ", aelig: "æ", szlig: "ß", yuml: "ÿ",
+  copy: "©", reg: "®", trade: "™",
+  deg: "°", plusmn: "±", times: "×", divide: "÷", para: "¶", sect: "§"
+};
+
+const LEGACY_WINDOWS_1252: Record<string, string> = {
+  "\u0085": "…", "\u0091": "‘", "\u0092": "’", "\u0093": "“", "\u0094": "”",
+  "\u0095": "•", "\u0096": "–", "\u0097": "—"
+};
+
+function decodeCodePoint(value: string, radix: number, original: string): string {
+  const codePoint = Number.parseInt(value, radix);
+  if (!Number.isInteger(codePoint) || codePoint < 0 || codePoint > 0x10ffff || (codePoint >= 0xd800 && codePoint <= 0xdfff)) {
+    return original;
+  }
+  return String.fromCodePoint(codePoint);
+}
+
+/** Decode source HTML entities, then compose combining Greek/Hebrew diacritics. */
 export function decodeHtmlEntities(str: string): string {
   return str
-    .replace(/&gt;/g, ">")
-    .replace(/&lt;/g, "<")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&nbsp;/g, " ")
-    .replace(/&#146;/g, "'")
-    .replace(/&#145;/g, "'")
-    .replace(/&#147;/g, '"')
-    .replace(/&#148;/g, '"');
+    .replace(/&#x([0-9a-f]+);/gi, (original, value) => decodeCodePoint(value, 16, original))
+    .replace(/&#(\d+);/g, (original, value) => decodeCodePoint(value, 10, original))
+    .replace(/&([a-z][a-z0-9]+);/gi, (original, name) => HTML_ENTITIES[name.toLowerCase()] ?? original)
+    .replace(/[\u0085\u0091-\u0097]/g, (character) => LEGACY_WINDOWS_1252[character] ?? character)
+    .replace(/\u00a0/g, " ")
+    .normalize("NFC");
 }
 
 export function findBestMatch(

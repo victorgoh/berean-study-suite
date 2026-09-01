@@ -595,13 +595,13 @@ export function createMcpServer(env: Env) {
     }
   );
 
-  // 34. Book Analysis
+  // 34. Source-attributed Book Guide
   server.tool(
     "book_analysis",
-    "Retrieve comprehensive introductory overviews of a Bible book (Authorship, Date, Background, Recipients, Themes, Outline).",
+    "Retrieve a source-attributed Tyndale Open Study Notes book summary or full introduction.",
     BookAnalysisSchema,
-    async ({ book, section }) => {
-      const res = await lookupBookAnalysis(env, book, section);
+    async ({ book, detail }) => {
+      const res = await lookupBookAnalysis(env, book, detail);
       if (res.error) {
         return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
       }
@@ -609,10 +609,10 @@ export function createMcpServer(env: Env) {
     }
   );
 
-  // 35. Chapter Summary
+  // 35. Source-attributed Chapter Summary
   server.tool(
     "chapter_summary",
-    "Retrieve structural outlines and theological summaries for any chapter in the Bible.",
+    "Retrieve Adam Clarke's source-attributed chapter-opening synopsis for any Bible chapter.",
     ChapterSummarySchema,
     async ({ book, chapter }) => {
       const res = await lookupChapterSummary(env, book, chapter);

@@ -152,7 +152,7 @@ For AI-facing MCP use, request one commentary at a time and specify the preferre
 31. **`convert_ancient_units`**: Convert ancient biblical weights, measures, distances, and currencies into modern metric, imperial, and labor purchasing power.
 32. **`bible_names`**: Etymological meanings and origins of biblical names.
 33. **`chronology`**: Biblical timelines and historical genealogies.
-34. **`book_analysis`**: Historical background, authorship, and date for all 66 books.
+34. **`book_analysis`**: Source-attributed Tyndale Open Study Notes book summaries and full introductions.
 35. **`chapter_summary`**: Structural summaries and central themes for any chapter.
 
 ---

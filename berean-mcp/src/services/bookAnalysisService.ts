@@ -3,23 +3,25 @@ import { resolveBookNumber, OFFICIAL_BOOK_NAMES } from "../mcp/constants.js";
 import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { Env, BookAnalysisResult } from "../types.js";
 
-const SECTION_NAMES: Record<number, string> = {
-  0: "Overview & Introduction",
-  1: "Author",
-  2: "Date of Writing",
-  3: "Historical Background",
-  4: "Recipients & Audience",
-  5: "Key Themes & Theological Message",
-  6: "Literary Structure & Purpose",
-  7: "Comprehensive Outline",
-  8: "Practical Application",
-  9: "Christ in the Book"
-};
+function formatBookGuideContent(content: string, detail: "summary" | "full"): string {
+  const markdown = cleanHtmlToMarkdown(content || "");
+  if (detail !== "summary") return markdown;
+
+  const blocks = markdown.split(/\n\n+/);
+  return blocks.map((block, index) => {
+    // The summary source alternates a title, field heading, and field value.
+    // Add display punctuation only to descriptive values, not bare author names.
+    if (index === 0 || index % 2 === 1 || /[.!?…]$/.test(block) || /^[A-Z][A-Za-z.'’-]*(?:\s+[A-Z][A-Za-z.'’-]*){0,3}$/.test(block)) {
+      return block;
+    }
+    return `${block}.`;
+  }).join("\n\n");
+}
 
 export async function lookupBookAnalysis(
   env: Env,
   bookName: string,
-  section?: number
+  detail: "summary" | "full" = "summary"
 ): Promise<{ error?: string; formattedText?: string; result?: BookAnalysisResult }> {
   const bookNum = resolveBookNumber(bookName);
   if (!bookNum) {
@@ -27,43 +29,27 @@ export async function lookupBookAnalysis(
   }
 
   const officialName = OFFICIAL_BOOK_NAMES[bookNum] || bookName;
-  const { db, error: dbError } = await getDatabase(env, "data/book_analysis.data");
+  const { db, error: dbError } = await getDatabase(env, "data/tyndale_book_intros.data");
   if (!db) {
-    return { error: dbError || "Book analysis database (book_analysis.data) not found in R2." };
+    return { error: dbError || "Tyndale Book Guide database (tyndale_book_intros.data) not found in storage." };
   }
 
   try {
-    let sql = "";
-    let params: any[] = [];
-
-    if (section !== undefined) {
-      sql = "SELECT Section, Content FROM Introduction WHERE Book = ? AND Section = ?";
-      params = [bookNum, section];
-    } else {
-      sql = "SELECT Section, Content FROM Introduction WHERE Book = ? ORDER BY Section ASC";
-      params = [bookNum];
-    }
-
-    const stmt = db.prepare(sql);
-    stmt.bind(params);
-
+    const stmt = db.prepare("SELECT Title, Content FROM BookGuide WHERE Book = ? AND Detail = ? LIMIT 1");
+    stmt.bind([bookNum, detail]);
     const sections: { title: string; content: string }[] = [];
-    while (stmt.step()) {
-      const row = stmt.getAsObject() as { Section: number; Content: string };
-      const title = SECTION_NAMES[row.Section] || `Section ${row.Section}`;
-      sections.push({
-        title,
-        content: cleanHtmlToMarkdown(row.Content || "")
-      });
+    if (stmt.step()) {
+      const row = stmt.getAsObject() as { Title: string; Content: string };
+      sections.push({ title: row.Title, content: formatBookGuideContent(row.Content, detail) });
     }
     stmt.free();
 
     if (sections.length === 0) {
-      return { error: `No book analysis records found for ${officialName}.` };
+      return { error: `No Tyndale ${detail} book guide found for ${officialName}.` };
     }
 
-    const mdBlocks = sections.map((s) => `## ${s.title}\n\n${s.content}`);
-    const formattedText = `# Book Analysis & Introduction: ${officialName}\n\n` + mdBlocks.join("\n\n---\n\n");
+    const label = detail === "full" ? "Full Introduction" : "Book Summary";
+    const formattedText = `# Book Guide: ${officialName}\n\n## ${label}\n\n${sections[0].content}\n\n---\n*Source: Tyndale Open Study Notes, Tyndale House Publishers (CC BY-SA 4.0)*`;
 
     return {
       formattedText,

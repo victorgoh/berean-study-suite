@@ -82,8 +82,12 @@ export async function lookupCommentary(
   }
 
   const meta = resolveCommentary(version);
-  let cleanVer = meta ? meta.key : version.trim();
-  let storagePath = meta ? meta.getStoragePath(parsed.bookNumber) : `commentaries/c${cleanVer}.commentary`;
+  if (!meta) {
+    return { error: `Unknown commentary '${version}'. Choose a registered commentary from get_available_resources.` };
+  }
+
+  const cleanVer = meta.key;
+  let storagePath = meta.getStoragePath(parsed.bookNumber);
 
   let { db, error: dbError } = await getDatabase(env, storagePath);
   

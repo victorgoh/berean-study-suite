@@ -654,6 +654,66 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       color: var(--accent-gold-hover);
       text-decoration: underline;
     }
+
+    /* First-draft light, results-first Explorer redesign. */
+    :root {
+      --bg: #f7f7f5;
+      --surface: #ffffff;
+      --surface-border: #deded8;
+      --surface-hover: #f1f1ed;
+      --accent-gold: #30302d;
+      --accent-gold-hover: #111110;
+      --accent-gold-bg: #eeeeea;
+      --accent-gold-border: #bdbdb6;
+      --text-main: #242421;
+      --text-muted: #666660;
+      --text-dim: #85857e;
+      --input-bg: #ffffff;
+      --card-radius: 10px;
+    }
+
+    body { background: var(--bg); background-image: none; color: var(--text-main); }
+    header { background: rgba(255,255,255,.94); border-color: var(--surface-border); box-shadow: none; }
+    .brand-logo { font-size: 1.25rem; filter: grayscale(1); }
+    .brand-title h1, .hero-title h2, .results-body h1, .results-body h3 { color: var(--text-main); }
+    .brand-title p, .hero-title p { color: var(--text-muted); }
+    .nav-btn, .nav-btn.github-btn { background: transparent; border-color: var(--surface-border); color: var(--text-muted); box-shadow: none; }
+    .nav-btn:hover, .nav-btn.github-btn:hover { color: var(--text-main); background: var(--surface-hover); border-color: var(--accent-gold-border); }
+    main { max-width: 1040px; padding-top: 2.5rem; }
+    .hero-card { background: var(--surface); border-color: var(--surface-border); box-shadow: 0 4px 18px rgba(0,0,0,.04); backdrop-filter: none; padding: 1.5rem; gap: 1rem; }
+    .hero-title { text-align: left; max-width: none; }
+    .hero-title h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.15rem; }
+    .category-tabs { position: relative; justify-content: flex-start; border-bottom: 0; padding-bottom: 0; gap: .35rem; }
+    .cat-tab { color: var(--text-muted); border-color: transparent; border-radius: 6px; padding: .45rem .7rem; font-weight: 600; }
+    .cat-tab:hover, .cat-tab.active { color: var(--text-main); background: var(--surface-hover); border-color: var(--surface-border); }
+    .mode-pills { display: none !important; }
+    .tool-popover { display: none; position: absolute; z-index: 20; top: calc(100% + .35rem); left: 0; min-width: 230px; max-width: min(440px, 94vw); padding: .35rem; background: #fff; border: 1px solid var(--surface-border); border-radius: 8px; box-shadow: 0 10px 24px rgba(0,0,0,.10); opacity: 0; transform: translateY(-4px); transition: opacity .16s ease, transform .16s ease; }
+    .tool-popover.open { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); opacity: 1; transform: translateY(0); }
+    .tool-option { border: 0; background: transparent; color: var(--text-muted); text-align: left; padding: .55rem .65rem; border-radius: 5px; font: 500 .78rem/1.25 'Plus Jakarta Sans', sans-serif; cursor: pointer; }
+    .tool-option:hover, .tool-option.active { background: var(--surface-hover); color: var(--text-main); }
+    .search-row { margin-top: .3rem; }
+    .search-input-wrapper input, .sub-select { color: var(--text-main); border-color: var(--surface-border); background: var(--input-bg); border-radius: 7px; }
+    .search-input-wrapper input:focus { border-color: #777770; box-shadow: 0 0 0 3px rgba(48,48,45,.10); }
+    .sub-select option { background: #fff; color: var(--text-main); }
+    .btn-study { background: #30302d; color: #fff; border-radius: 7px; box-shadow: none; }
+    .btn-study:hover { background: #111110; box-shadow: none; transform: none; }
+    .card-footer { border-color: var(--surface-border); }
+    .pref-version-wrapper, .sample-tag { background: transparent; border-color: var(--surface-border); color: var(--text-muted); }
+    .pref-version-select { color: var(--text-main); }
+    .pref-version-select option { background: #fff; color: var(--text-main); }
+    .sample-tag:hover { background: var(--surface-hover); border-color: var(--accent-gold-border); color: var(--text-main); }
+    .results-card { background: #fff; border-color: var(--surface-border); box-shadow: 0 4px 18px rgba(0,0,0,.04); backdrop-filter: none; }
+    .results-header { background: #fafaf8; border-color: var(--surface-border); }
+    .results-title, .results-body { color: var(--text-main); }
+    .action-btn { background: transparent; border-color: var(--surface-border); color: var(--text-muted); }
+    .action-btn:hover { color: var(--text-main); background: var(--surface-hover); border-color: var(--accent-gold-border); }
+    .results-body h2, .results-body th, .verse-badge { color: var(--text-main); }
+    .results-body blockquote, .verse-badge { background: var(--surface-hover); border-color: var(--accent-gold-border); }
+    .results-body th, .results-body td { border-color: var(--surface-border); }
+    .site-footer { background: #f1f1ed; border-color: var(--surface-border); }
+    .footer-col h4 { color: var(--text-main); }
+    .footer-links a { color: var(--text-muted); }
+    @media (max-width: 640px) { .tool-popover.open { grid-template-columns: 1fr; } .hero-card { padding: 1rem; } .search-row { align-items: stretch; } .btn-study { justify-content: center; } }
   </style>
 </head>
 <body>
@@ -686,17 +746,17 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     <!-- Hero Search & Action Card -->
     <div class="hero-card">
       <div class="hero-title">
-        <h2>A Companion for Studying & Praying Through God’s Word</h2>
-        <p>Explore Scripture texts, trusted classical study notes, word meanings, and guided prayers for daily reflection and growth.</p>
-        <p style="font-size:0.82rem; color:var(--text-dim); margin-top:0.45rem;">Human-oriented research interface: compare multiple sources and use comprehensive Study Packs in one readable workspace.</p>
+        <h2>Explore a passage</h2>
+        <p>Choose a starting point, then open more tools only when you need them.</p>
       </div>
 
-      <!-- Category Filter Tabs (4 Simple Journeys) -->
+      <!-- Categories reveal their tools on hover, focus, or click. -->
       <div class="category-tabs" id="category-tabs">
-        <button class="cat-tab active" data-cat="read">📖 Read & Search (5)</button>
-        <button class="cat-tab" data-cat="devotion">🕊️ Prayer & Devotion (3)</button>
-        <button class="cat-tab" data-cat="study">💡 Study & Teaching (10)</button>
-        <button class="cat-tab" data-cat="history">🏛️ Original Words & History (17)</button>
+        <button class="cat-tab active" data-cat="read" aria-expanded="false">Scripture</button>
+        <button class="cat-tab" data-cat="devotion" aria-expanded="false">Reflection</button>
+        <button class="cat-tab" data-cat="study" aria-expanded="false">Commentary</button>
+        <button class="cat-tab" data-cat="history" aria-expanded="false">Words & Context</button>
+        <div class="tool-popover" id="tool-popover" role="menu" aria-label="Study tools"></div>
       </div>
 
       <!-- Study Mode Pills -->
@@ -722,7 +782,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         <div class="mode-pill" data-cat="study" data-mode="covenant" style="display:none;">👑 Themes Across Scripture</div>
         <div class="mode-pill" data-cat="study" data-mode="topic_pack" style="display:none;">📑 Topical Study Pack</div>
         <div class="mode-pill" data-cat="study" data-mode="topic" style="display:none;">🏷️ Nave's Bible Topics</div>
-        <div class="mode-pill" data-cat="study" data-mode="book_analysis" style="display:none;">📚 Book Overview</div>
+        <div class="mode-pill" data-cat="study" data-mode="book_analysis" style="display:none;">📚 Book Guide</div>
         <div class="mode-pill" data-cat="study" data-mode="chapter_summary" style="display:none;">📋 Chapter Summary</div>
 
         <!-- 4. Original Words & History -->
@@ -1100,7 +1160,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       book_analysis: {
         endpoint: "/tools/book_analysis",
         icon: "📚",
-        btnLabel: "Read Book Overview",
+        btnLabel: "Read Book Guide",
         placeholder: "Book name: e.g. Romans, Genesis, Hebrews, Ephesians, Psalms",
         defaultQuery: "Romans",
         samples: [
@@ -1109,12 +1169,12 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
           { label: "Genesis", query: "Genesis" },
           { label: "Hebrews", query: "Hebrews" }
         ],
-        buildPayload: (q) => ({ book: q })
+        buildPayload: (q) => ({ book: q, detail: "summary" })
       },
       chapter_summary: {
         endpoint: "/tools/chapter_summary",
         icon: "📋",
-        btnLabel: "Get Chapter Summary",
+        btnLabel: "Read Chapter Summary",
         placeholder: "Book and Chapter: e.g. Genesis 1, Romans 8, John 3",
         defaultQuery: "Romans 8",
         samples: [
@@ -1369,6 +1429,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     const btnText = document.getElementById("btn-text");
     const catTabs = document.querySelectorAll(".cat-tab");
     const modePills = document.querySelectorAll(".mode-pill");
+    const toolPopover = document.getElementById("tool-popover");
     const resultsCard = document.getElementById("results-card");
     const resultsBody = document.getElementById("results-body");
     const resultsHeading = document.getElementById("results-heading");
@@ -1412,41 +1473,52 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       }
     }
 
-    // Category Tabs Filter
+    function closeToolPopover() {
+      toolPopover.classList.remove("open");
+      catTabs.forEach(tab => tab.setAttribute("aria-expanded", "false"));
+    }
+
+    function selectMode(mode, category) {
+      activeMode = mode;
+      activeCat = category;
+      catTabs.forEach(tab => tab.classList.toggle("active", tab.getAttribute("data-cat") === category));
+      modePills.forEach(p => p.classList.toggle("active", p.getAttribute("data-mode") === mode));
+      queryInput.value = (TOOL_CONFIG[activeMode] || {}).defaultQuery || "";
+      updateContextualControls();
+      closeToolPopover();
+    }
+
+    function openToolPopover(category, tab) {
+      const choices = Array.from(modePills).filter(pill => pill.getAttribute("data-cat") === category);
+      toolPopover.innerHTML = "";
+      choices.forEach(pill => {
+        const mode = pill.getAttribute("data-mode");
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = "tool-option" + (mode === activeMode ? " active" : "");
+        option.setAttribute("role", "menuitem");
+        option.textContent = pill.textContent.replace(/^[^\\w]+\\s*/, "").replace(/\\s*\\([^)]*\\)/g, "").trim();
+        option.addEventListener("click", () => selectMode(mode, category));
+        toolPopover.appendChild(option);
+      });
+      catTabs.forEach(item => item.setAttribute("aria-expanded", item === tab ? "true" : "false"));
+      toolPopover.classList.add("open");
+    }
+
     catTabs.forEach(tab => {
+      const category = tab.getAttribute("data-cat");
+      tab.addEventListener("mouseenter", () => openToolPopover(category, tab));
+      tab.addEventListener("focus", () => openToolPopover(category, tab));
       tab.addEventListener("click", () => {
-        catTabs.forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
-        activeCat = tab.getAttribute("data-cat");
-
-        let firstPill = null;
-        modePills.forEach(pill => {
-          const pcat = pill.getAttribute("data-cat");
-          const visible = pcat === activeCat;
-          pill.style.display = visible ? "inline-flex" : "none";
-          if (visible && !firstPill) firstPill = pill;
-        });
-
-        if (firstPill) {
-          modePills.forEach(p => p.classList.remove("active"));
-          firstPill.classList.add("active");
-          activeMode = firstPill.getAttribute("data-mode");
-          queryInput.value = (TOOL_CONFIG[activeMode] || {}).defaultQuery || "";
-          updateContextualControls();
-        }
+        if (toolPopover.classList.contains("open") && tab.getAttribute("aria-expanded") === "true") closeToolPopover();
+        else openToolPopover(category, tab);
       });
     });
 
-    // Switch Mode Pill
-    modePills.forEach(pill => {
-      pill.addEventListener("click", () => {
-        modePills.forEach(p => p.classList.remove("active"));
-        pill.classList.add("active");
-        activeMode = pill.getAttribute("data-mode");
-        queryInput.value = (TOOL_CONFIG[activeMode] || {}).defaultQuery || "";
-        updateContextualControls();
-      });
+    document.addEventListener("click", (event) => {
+      if (!document.getElementById("category-tabs").contains(event.target)) closeToolPopover();
     });
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeToolPopover(); });
 
     // Execute Study Request
     async function executeStudy() {

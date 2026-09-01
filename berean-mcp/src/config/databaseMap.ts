@@ -68,7 +68,7 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     scope: "Whole Bible",
     description: "Classic Puritan exposition rich in practical pastoral insights and spiritual aphorisms.",
     aliases: ["henry", "chenry", "matthew henry"],
-    getStoragePath: () => "commentaries/cHenry.commentary"
+    getStoragePath: () => "commentaries/normalized/cHenry.commentary"
   },
   {
     key: "JFB",
@@ -77,7 +77,7 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     scope: "Whole Bible",
     description: "Concise, balanced grammatical and historical exposition of every verse in Scripture.",
     aliases: ["jfb", "cjfb", "jamieson", "fausset", "brown"],
-    getStoragePath: () => "commentaries/cJFB.commentary"
+    getStoragePath: () => "commentaries/normalized/cJFB.commentary"
   },
   {
     key: "Calvin",
@@ -86,7 +86,7 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     scope: "Whole Bible",
     description: "Reformational exegesis with crystalline theological precision and Christocentric covenant focus.",
     aliases: ["calvin", "ccalvin", "john calvin"],
-    getStoragePath: () => "commentaries/cCalvin.commentary"
+    getStoragePath: () => "commentaries/normalized/cCalvin.commentary"
   },
   {
     key: "Gill",
@@ -95,7 +95,7 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     scope: "Whole Bible",
     description: "Exhaustive Reformed Baptist commentary featuring deep Second Temple rabbinic context.",
     aliases: ["gill", "cgill", "john gill"],
-    getStoragePath: () => "commentaries/cGill.commentary"
+    getStoragePath: () => "commentaries/normalized/cGill.commentary"
   },
   {
     key: "Barnes",
@@ -104,7 +104,7 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     scope: "Whole Bible",
     description: "Clear verse-by-verse notes specifically highlighting practical lessons for teaching.",
     aliases: ["barnes", "cbarnes", "albert barnes"],
-    getStoragePath: () => "commentaries/cBarnes.commentary"
+    getStoragePath: () => "commentaries/normalized/cBarnes.commentary"
   },
   {
     key: "Benson",
@@ -113,7 +113,7 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     scope: "Whole Bible",
     description: "Early Methodist commentary focusing on holy living, personal examination, and pastoral devotion.",
     aliases: ["benson", "cbenson", "joseph benson"],
-    getStoragePath: () => "commentaries/cBenson.commentary"
+    getStoragePath: () => "commentaries/normalized/cBenson.commentary"
   },
   {
     key: "Clarke",
@@ -122,7 +122,7 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     scope: "Whole Bible",
     description: "Scholarly commentary with deep insights into Semitic customs, linguistics, and archaeology.",
     aliases: ["clarke", "cclarke", "adam clarke"],
-    getStoragePath: () => "commentaries/cClarke.commentary"
+    getStoragePath: () => "commentaries/normalized/cClarke.commentary"
   },
   {
     key: "MacL",
@@ -149,7 +149,7 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     scope: "New Testament",
     description: "Detailed critical and grammatical commentary on the Greek text of the New Testament.",
     aliases: ["egnt", "cegnt", "expositors greek", "expositor greek"],
-    getStoragePath: () => "commentaries/cEGNT.commentary"
+    getStoragePath: () => "commentaries/normalized/cEGNT.commentary"
   },
   {
     key: "CECNT",
@@ -176,7 +176,7 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     scope: "New Testament",
     description: "World-renowned Koine Greek syntax, idiomatic nuances, and vivid word-level analysis.",
     aliases: ["rob", "crob", "robertson", "word pictures"],
-    getStoragePath: () => "commentaries/cRob.commentary"
+    getStoragePath: () => "commentaries/normalized/cRob.commentary"
   },
   {
     key: "Vincent",
@@ -185,7 +185,7 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     scope: "New Testament",
     description: "Deep exploration of Greek etymology, cultural imagery, and literary nuances in the NT.",
     aliases: ["vincent", "cvincent", "word studies"],
-    getStoragePath: () => "commentaries/cVincent.commentary"
+    getStoragePath: () => "commentaries/normalized/cVincent.commentary"
   },
   {
     key: "Wesley",
@@ -194,7 +194,7 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     scope: "Whole Bible",
     description: "Pithy, direct notes focused on heart holiness, grace, and practical obedience.",
     aliases: ["wesley", "cwesley", "john wesley"],
-    getStoragePath: () => "commentaries/cWesley.commentary"
+    getStoragePath: () => "commentaries/normalized/cWesley.commentary"
   },
   {
     key: "Whedon",
@@ -212,7 +212,7 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     scope: "Whole Bible",
     description: "Clear, lay-accessible commentary synthesizing critical scholarship with reverent faith.",
     aliases: ["ecer", "cecer", "ellicott", "charles ellicott"],
-    getStoragePath: () => "commentaries/cECER.commentary"
+    getStoragePath: () => "commentaries/normalized/cECER.commentary"
   },
   {
     key: "EBC",
@@ -230,7 +230,7 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     scope: "Old Testament",
     description: "Gold standard classical academic commentary on Biblical Hebrew grammar, syntax, and Ancient Near East history.",
     aliases: ["kd", "ckd", "keil", "delitzsch", "keil delitzsch"],
-    getStoragePath: () => "commentaries/cKD.commentary"
+    getStoragePath: () => "commentaries/normalized/cKD.commentary"
   },
   {
     key: "Lange",
@@ -239,7 +239,7 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     scope: "Whole Bible",
     description: "Comprehensive tri-fold analysis covering Exegetical/Critical, Doctrinal/Ethical, and Homiletical/Pastoral.",
     aliases: ["lange", "clange", "john peter lange"],
-    getStoragePath: () => "commentaries/cLange.commentary"
+    getStoragePath: () => "commentaries/normalized/cLange.commentary"
   },
   {
     key: "BI",
@@ -249,10 +249,10 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     description: "Massive repository of thousands of sermons, sermon anecdotes, illustrations, and expository notes.",
     aliases: ["bi", "cbi", "biblical illustrator", "illustrator"],
     getStoragePath: (bookNumber: number) => {
-      if (bookNumber <= 17) return "commentaries/cBI_1.commentary";
-      if (bookNumber <= 39) return "commentaries/cBI_2.commentary";
-      if (bookNumber <= 44) return "commentaries/cBI_3.commentary";
-      return "commentaries/cBI_4.commentary";
+      if (bookNumber <= 17) return "commentaries/normalized/cBI_1.commentary";
+      if (bookNumber <= 39) return "commentaries/normalized/cBI_2.commentary";
+      if (bookNumber <= 44) return "commentaries/normalized/cBI_3.commentary";
+      return "commentaries/normalized/cBI_4.commentary";
     }
   },
   {
