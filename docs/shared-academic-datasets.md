@@ -57,17 +57,16 @@ All 23 commentary sets listed below are **fully deployed, verified, and live** o
 
 ---
 
-## 🏛️ 3. Original Language Lexicons (7 Datasets)
+## 🏛️ 3. Original Language Lexicons (6 Datasets)
 
-| Lexicon Code | Title & Authority | Target Language | Features & Scope |
-| :--- | :--- | :--- | :--- |
-| **`TBESG`** | **Tyndale Brief Extended Strong's Greek Lexicon**<br>*(STEPBible / Tyndale House)* | Koine Greek | Context-tagged definitions, sub-lemma disambiguation, and modern semantic domains keyed to Strong's numbers. |
-| **`TBESH`** | **Tyndale Brief Extended Strong's Hebrew Lexicon**<br>*(STEPBible / Tyndale House)* | Biblical Hebrew & Aramaic | Contextual definitions, root morphology, and modern semantic domains for Old Testament vocabulary. |
-| **`Thayer`** | **Thayer's Greek-English Lexicon of the New Testament** | Koine Greek | Comprehensive classic New Testament Greek lexicon keyed to Strong's numbers. |
-| **`BDB`** | **Brown-Driver-Briggs Hebrew and English Lexicon** | Biblical Hebrew & Aramaic | Standard authoritative academic lexicon for Old Testament Hebrew and Aramaic. |
-| **`LSJ`** | **Liddell-Scott-Jones Greek-English Lexicon** | Classical & Koine Greek | Exhaustive vocabulary resource spanning Classical, Hellenistic, and Biblical Greek. |
-| **`MCGED`** | **Morphological Concordance & Greek Expository** | Koine Greek | Syntactic and inflectional mapping of New Testament Greek forms. |
-| **`TBESH-D`** | **Theological & Biblical Expository Dictionary** | Biblical Hebrew | Concise theological summaries for Old Testament key terms. |
+| Lexicon Code | Title & Authority | Target Language | Features & Scope | Current Storage |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TBESG`** | **Tyndale Brief Extended Strong's Greek Lexicon**<br>*(STEPBible / Tyndale House)* | Koine Greek | Context-tagged definitions, sub-lemma disambiguation, and modern semantic domains keyed to Strong's numbers. | D1 / R2 fallback |
+| **`TBESH`** | **Tyndale Brief Extended Strong's Hebrew Lexicon**<br>*(STEPBible / Tyndale House)* | Biblical Hebrew & Aramaic | Contextual definitions, root morphology, and modern semantic domains for Old Testament vocabulary. | D1 / R2 fallback |
+| **`Thayer`** | **Thayer's Greek-English Lexicon of the New Testament** | Koine Greek | Comprehensive classic New Testament Greek lexicon keyed to Strong's numbers. | R2 fallback |
+| **`BDB`** | **Brown-Driver-Briggs Hebrew and English Lexicon** | Biblical Hebrew & Aramaic | Standard authoritative academic lexicon for Old Testament Hebrew and Aramaic. | Reference D1 (`lexicon_bdb`); no current R2 object |
+| **`LSJ`** | **Liddell-Scott-Jones Greek-English Lexicon** | Classical & Koine Greek | Exhaustive vocabulary resource spanning Classical, Hellenistic, and Biblical Greek. | R2: `lexicons/LSJ.lexicon` |
+| **`MCGED`** | **Morphological Concordance & Greek Expository** | Koine Greek | Syntactic and inflectional mapping of New Testament Greek forms. | D1 / R2 fallback |
 
 ---
 
