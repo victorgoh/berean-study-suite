@@ -4,6 +4,16 @@ A Model Context Protocol (MCP) Server for retrieving Bible texts, commentary, le
 
 Designed to run **100% free on Cloudflare Workers** with data hosted in **Cloudflare R2** and **Cloudflare D1**.
 
+## Documentation
+
+- [Project overview](../README.md)
+- [Human User Guide](../docs/human-user-guide.md)
+- [MCP Client Integration](../docs/human-mcp-client-integration.md)
+- [Local Deployment](../docs/local-deployment.md)
+- [Cloudflare Deployment](../docs/cloudflare-deployment.md)
+- [Customization and Extension](../docs/customization-and-extension.md)
+- [Data Sources and Provenance](../docs/data-sources-and-provenance.md)
+
 ---
 
 ## 🌐 Live Demo & Interactive Explorers

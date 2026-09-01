@@ -29,6 +29,19 @@ The **Berean Study Suite** provides an open way to retrieve and examine Bible te
 
 ## 🌐 Live Demo & Interactive Explorers
 
+## Documentation
+
+Start here to understand the project, then choose the path that matches your use:
+
+- [Human User Guide](docs/human-user-guide.md) — Explore Scripture and reference resources.
+- [MCP Client Integration](docs/human-mcp-client-integration.md) — Connect AI clients and discover tools.
+- [Local Deployment](docs/local-deployment.md) — Run the server locally or offline.
+- [Cloudflare Deployment](docs/cloudflare-deployment.md) — Deploy the Worker with R2 and D1.
+- [Customization and Extension](docs/customization-and-extension.md) — Add resources and modify features.
+- [Data Sources and Provenance](docs/data-sources-and-provenance.md) — Review origins, licenses, and storage.
+
+AI programming-agent documents are labeled with the `agent-` prefix; they contain implementation details rather than a general project introduction.
+
 > **AI usage note:** The Explorer and composite Study Packs are designed for comprehensive human study. A Study Pack may include several commentaries, Scripture text, cross-references, and language resources in one response. This is convenient for a human reader, but can increase AI context usage, latency, and token cost. When using an AI client, request a focused single-engine lookup or a narrower passage when possible.
 
 ### Human Explorer and AI MCP usage
