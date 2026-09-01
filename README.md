@@ -4,9 +4,9 @@
 
 [Open the Berean Bible Study Explorer](https://berean-mcp.victorgoh.workers.dev/)
 
-Berean Study Suite is a place to explore Bible passages alongside helpful study resources. Enter a passage, choose a commentary or research tool, and view related material such as cross-references, word meanings, historical notes, and other reference sources.
+Berean Study Suite is a place to explore Bible passages alongside helpful study resources. Choose Passage, Reflection, Commentary, Original Words, or Background; then enter a passage or subject and review related material from the selected source.
 
-It is most useful when you want to look more closely at a passage, compare a few sources, or gather material for further reflection and study. The Explorer is designed to make these resources easier to browse in one place.
+It is most useful when you want to look more closely at a passage, compare a few sources, or gather material for further reflection and study. Long and multi-source results provide contents or expandable sections so you can concentrate on one part at a time.
 
 This tool is not meant to replace reading Scripture for yourself, personal devotional time, or wise guidance from your faith community. It is a research companion that helps you find and review available source material.
 

@@ -23,7 +23,9 @@ See:
 
 ## Extend the interface
 
-Update the Explorer configuration when exposing a new endpoint to human users. Avoid hard-coded tool counts; clients should discover the active catalog through MCP `tools/list` or `get_available_resources`.
+Update the Explorer configuration when exposing a new endpoint to human users. Assign the tool to a reader-oriented category and mark specialist tools for the secondary **More study tools** list. Keep payload construction, contextual guidance, URL-state restoration, and missing-result behavior consistent with existing tools.
+
+Run `npm run test:explorer` after changing Explorer structure, tool metadata, request handling, result controls, or print behavior. Avoid hard-coded tool counts in documentation; clients should discover the active catalog through MCP `tools/list` or `get_available_resources`.
 
 ## Ideas for optional extensions
 

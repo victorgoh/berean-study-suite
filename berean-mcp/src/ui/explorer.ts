@@ -17,21 +17,19 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
   ${analyticsSnippet ? `\n  ${analyticsSnippet}\n` : ""}
   <style>
     :root {
-      --bg: #0e131f;
-      --surface: rgba(20, 27, 41, 0.75);
-      --surface-border: rgba(255, 255, 255, 0.09);
-      --surface-hover: rgba(255, 255, 255, 0.13);
-      --accent-gold: #e5a93c;
-      --accent-gold-hover: #f5b74f;
-      --accent-gold-bg: rgba(229, 169, 60, 0.12);
-      --accent-gold-border: rgba(229, 169, 60, 0.35);
-      --accent-blue: #60a5fa;
-      --accent-sage: #68a67d;
-      --text-main: #f1f5f9;
-      --text-muted: #94a3b8;
-      --text-dim: #64748b;
-      --input-bg: rgba(11, 16, 26, 0.85);
-      --card-radius: 14px;
+      --bg: #f7f7f5;
+      --surface: #ffffff;
+      --surface-border: #deded8;
+      --surface-hover: #f1f1ed;
+      --accent-gold: #30302d;
+      --accent-gold-hover: #111110;
+      --accent-gold-bg: #eeeeea;
+      --accent-gold-border: #bdbdb6;
+      --text-main: #242421;
+      --text-muted: #666660;
+      --text-dim: #85857e;
+      --input-bg: #ffffff;
+      --card-radius: 10px;
     }
 
     * {
@@ -40,14 +38,21 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       padding: 0;
     }
 
+    .sr-only {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: var(--bg);
-      background-image: 
-        radial-gradient(at 15% 0%, rgba(229, 169, 60, 0.08) 0px, transparent 45%),
-        radial-gradient(at 85% 0%, rgba(96, 165, 250, 0.08) 0px, transparent 45%),
-        radial-gradient(at 50% 100%, rgba(104, 166, 125, 0.06) 0px, transparent 55%);
-      background-attachment: fixed;
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
@@ -57,8 +62,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     /* Top Navigation Header */
     header {
       border-bottom: 1px solid var(--surface-border);
-      background: rgba(14, 19, 31, 0.92);
-      backdrop-filter: blur(16px);
+      background: rgba(255,255,255,.94);
       position: sticky;
       top: 0;
       z-index: 50;
@@ -84,9 +88,9 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     }
 
     .brand-logo {
-      font-size: 1.6rem;
       display: flex;
       align-items: center;
+      color: var(--text-main);
     }
 
     .brand-title h1 {
@@ -94,20 +98,13 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       font-size: 1.2rem;
       font-weight: 700;
       letter-spacing: 0.01em;
-      color: #ffffff;
+      color: var(--text-main);
     }
 
     .brand-title p {
       font-size: 0.74rem;
       color: var(--text-muted);
       letter-spacing: 0.01em;
-    }
-
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.65rem;
-      flex-wrap: wrap;
     }
 
     /* Global Setting: Preferred Bible Version in Top Bar */
@@ -138,40 +135,6 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       color: #ffffff;
     }
 
-    .nav-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.4rem 0.85rem;
-      border-radius: 8px;
-      font-size: 0.76rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-decoration: none;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--surface-border);
-      transition: all 0.2s ease;
-    }
-
-    .nav-btn:hover {
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    .nav-btn.github-btn {
-      background: var(--accent-gold-bg);
-      border-color: var(--accent-gold-border);
-      color: var(--accent-gold);
-      font-weight: 700;
-    }
-
-    .nav-btn.github-btn:hover {
-      background: rgba(229, 169, 60, 0.22);
-      border-color: var(--accent-gold-hover);
-      color: #ffffff;
-    }
-
     /* Main Container */
     main {
       max-width: 1200px;
@@ -198,9 +161,10 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     }
 
     .hero-title {
-      text-align: center;
-      max-width: 740px;
-      margin: 0 auto;
+      text-align: left;
+      max-width: none;
+      margin: 0;
+      width: 100%;
     }
 
     .hero-title h2 {
@@ -400,6 +364,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       padding: 0.25rem 0.6rem;
       color: var(--text-muted);
       cursor: pointer;
+      font: inherit;
       transition: all 0.15s ease;
     }
 
@@ -419,6 +384,22 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       overflow: hidden;
       display: none;
     }
+
+    .query-summary {
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--card-radius);
+      color: var(--text-muted);
+      display: none;
+      font-size: 0.84rem;
+      gap: 1rem;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+    }
+
+    .query-summary.visible { display: flex; }
+    .query-summary strong { color: var(--text-main); font-weight: 700; }
 
     .results-header {
       padding: 1rem 1.5rem;
@@ -444,6 +425,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      flex-wrap: wrap;
     }
 
     .action-btn {
@@ -464,6 +446,9 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       border-color: rgba(255, 255, 255, 0.2);
     }
 
+    .section-action { display: none; }
+    .section-action.visible { display: inline-flex; }
+
     .results-body {
       padding: 2rem;
       font-family: 'Lora', Georgia, serif;
@@ -471,6 +456,66 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       line-height: 1.8;
       color: #e2e8f0;
     }
+
+    .results-body > p,
+    .results-body > blockquote,
+    .study-pack-section-content {
+      max-width: 76ch;
+    }
+
+    .result-contents {
+      background: var(--surface-hover);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0 0 1.5rem;
+      max-width: 76ch;
+      padding: 0.7rem 0.9rem;
+    }
+
+    .result-contents summary {
+      color: var(--text-main);
+      cursor: pointer;
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .result-contents nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-top: 0.7rem;
+    }
+
+    .result-contents a {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      line-height: 1.4;
+      text-decoration: none;
+    }
+
+    .result-contents a:hover { color: var(--text-main); text-decoration: underline; }
+
+    .result-message {
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0 auto;
+      max-width: 680px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+
+    .result-message h2 { margin: 0 0 0.45rem; }
+    .result-message p { color: var(--text-muted); margin-bottom: 0.9rem; }
+
+    .results-bottom-actions {
+      display: none;
+      justify-content: center;
+      padding: 0 2rem 1.5rem;
+    }
+
+    .results-bottom-actions.visible { display: flex; }
 
     .results-body h1 {
       font-family: 'Lora', Georgia, serif;
@@ -565,14 +610,6 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
 
     /* Study packs can combine several independent resources. Keep each one
        navigable without discarding the complete source material. */
-    .study-pack-controls {
-      display: flex;
-      gap: 0.5rem;
-      justify-content: flex-end;
-      margin: 0.75rem 0;
-    }
-
-    .study-pack-control,
     .study-pack-toggle {
       background: transparent;
       border: 1px solid var(--surface-border);
@@ -582,8 +619,6 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       font: 600 0.76rem/1 'Plus Jakarta Sans', sans-serif;
     }
 
-    .study-pack-control { padding: 0.45rem 0.65rem; }
-    .study-pack-control:hover,
     .study-pack-toggle:hover { background: var(--surface-hover); color: var(--text-main); }
 
     .study-pack-section {
@@ -615,6 +650,22 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     .study-pack-section-content > :first-child { margin-top: 0.9rem; }
     .study-pack-section-content h1,
     .study-pack-section-content h2 { display: none; }
+
+    .cat-tab:focus-visible,
+    .tool-option:focus-visible,
+    .tool-more-toggle:focus-visible,
+    .sample-tag:focus-visible,
+    .search-input-wrapper input:focus-visible,
+    .sub-select:focus-visible,
+    .pref-version-select:focus-visible,
+    .btn-study:focus-visible,
+    .action-btn:focus-visible,
+    .study-pack-toggle:focus-visible,
+    .footer-links a:focus-visible,
+    .result-contents a:focus-visible {
+      outline: 3px solid #555550;
+      outline-offset: 2px;
+    }
 
     .verse-badge {
       font-family: 'Plus Jakarta Sans', sans-serif;
@@ -704,42 +755,24 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       color: var(--text-dim);
     }
 
-    /* First-draft light, results-first Explorer redesign. */
-    :root {
-      --bg: #f7f7f5;
-      --surface: #ffffff;
-      --surface-border: #deded8;
-      --surface-hover: #f1f1ed;
-      --accent-gold: #30302d;
-      --accent-gold-hover: #111110;
-      --accent-gold-bg: #eeeeea;
-      --accent-gold-border: #bdbdb6;
-      --text-main: #242421;
-      --text-muted: #666660;
-      --text-dim: #85857e;
-      --input-bg: #ffffff;
-      --card-radius: 10px;
-    }
-
-    body { background: var(--bg); background-image: none; color: var(--text-main); }
-    header { background: rgba(255,255,255,.94); border-color: var(--surface-border); box-shadow: none; }
-    .brand-logo { font-size: 1.25rem; filter: grayscale(1); }
+    /* Results-first Explorer presentation. */
+    .brand-logo { color: var(--text-main); }
     .brand-title h1, .hero-title h2, .results-body h1, .results-body h3 { color: var(--text-main); }
     .brand-title p, .hero-title p { color: var(--text-muted); }
-    .nav-btn, .nav-btn.github-btn { background: transparent; border-color: var(--surface-border); color: var(--text-muted); box-shadow: none; }
-    .nav-btn:hover, .nav-btn.github-btn:hover { color: var(--text-main); background: var(--surface-hover); border-color: var(--accent-gold-border); }
     main { max-width: 1040px; padding-top: 2.5rem; }
     .hero-card { background: var(--surface); border-color: var(--surface-border); box-shadow: 0 4px 18px rgba(0,0,0,.04); backdrop-filter: none; padding: 1.5rem; gap: 1rem; }
-    .hero-title { text-align: left; max-width: none; }
+    .hero-title { text-align: left; max-width: none; margin: 0; width: 100%; }
     .hero-title h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.15rem; }
     .category-tabs { position: relative; justify-content: flex-start; border-bottom: 0; padding-bottom: 0; gap: .35rem; }
     .cat-tab { color: var(--text-muted); border-color: transparent; border-radius: 6px; padding: .45rem .7rem; font-weight: 600; }
     .cat-tab:hover, .cat-tab.active { color: var(--text-main); background: var(--surface-hover); border-color: var(--surface-border); }
     .mode-pills { display: none !important; }
-    .tool-popover { display: none; position: absolute; z-index: 20; top: calc(100% + .35rem); left: 0; min-width: 230px; max-width: min(440px, 94vw); padding: .35rem; background: #fff; border: 1px solid var(--surface-border); border-radius: 8px; box-shadow: 0 10px 24px rgba(0,0,0,.10); opacity: 0; transform: translateY(-4px); transition: opacity .16s ease, transform .16s ease; }
+    .tool-popover { display: none; position: absolute; z-index: 20; top: calc(100% + .35rem); left: 0; min-width: 250px; max-width: min(500px, 94vw); padding: .35rem; background: #fff; border: 1px solid var(--surface-border); border-radius: 8px; box-shadow: 0 10px 24px rgba(0,0,0,.10); opacity: 0; transform: translateY(-4px); transition: opacity .16s ease, transform .16s ease; }
     .tool-popover.open { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); opacity: 1; transform: translateY(0); }
-    .tool-option { border: 0; background: transparent; color: var(--text-muted); text-align: left; padding: .55rem .65rem; border-radius: 5px; font: 500 .78rem/1.25 'Plus Jakarta Sans', sans-serif; cursor: pointer; }
-    .tool-option:hover, .tool-option.active { background: var(--surface-hover); color: var(--text-main); }
+    .tool-option, .tool-more-toggle { border: 0; background: transparent; color: var(--text-muted); text-align: left; padding: .55rem .65rem; border-radius: 5px; font: 500 .78rem/1.25 'Plus Jakarta Sans', sans-serif; cursor: pointer; }
+    .tool-option:hover, .tool-option.active, .tool-more-toggle:hover { background: var(--surface-hover); color: var(--text-main); }
+    .tool-more-toggle { border-top: 1px solid var(--surface-border); border-radius: 0; font-weight: 700; grid-column: 1 / -1; margin-top: .2rem; padding-top: .7rem; }
+    .tool-help { color: var(--text-muted); font-size: .79rem; line-height: 1.5; min-height: 1.2em; }
     .search-row { margin-top: .3rem; }
     .search-input-wrapper input, .sub-select { color: var(--text-main); border-color: var(--surface-border); background: var(--input-bg); border-radius: 7px; }
     .search-input-wrapper input:focus { border-color: #777770; box-shadow: 0 0 0 3px rgba(48,48,45,.10); }
@@ -762,7 +795,34 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     .site-footer { background: #f1f1ed; border-color: var(--surface-border); }
     .footer-title { color: var(--text-main); }
     .footer-links a { color: var(--text-muted); }
-    @media (max-width: 640px) { .tool-popover.open { grid-template-columns: 1fr; } .hero-card { padding: 1rem; } .search-row { align-items: stretch; } .btn-study { justify-content: center; } }
+    @media (max-width: 640px) {
+      .category-tabs { position: static; }
+      .tool-popover {
+        border-radius: 12px 12px 0 0;
+        bottom: 0;
+        box-shadow: 0 -12px 36px rgba(0,0,0,.18);
+        left: 0;
+        max-height: 72vh;
+        max-width: none;
+        overflow-y: auto;
+        padding: .75rem;
+        position: fixed;
+        right: 0;
+        top: auto;
+        transform: translateY(8px);
+        width: 100%;
+        z-index: 100;
+      }
+      .tool-popover.open { grid-template-columns: 1fr; transform: translateY(0); }
+      .hero-card { padding: 1rem; }
+      .search-row { align-items: stretch; }
+      .search-input-wrapper { min-width: 100%; }
+      .sub-select, .btn-study { width: 100%; }
+      .btn-study { justify-content: center; }
+      .query-summary { align-items: flex-start; flex-direction: column; }
+      .results-header { align-items: flex-start; }
+      .results-body { padding: 1.25rem; }
+    }
 
     @media print {
       @page { margin: 16mm; }
@@ -775,9 +835,11 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
 
       body > header,
       body > main > .hero-card,
+      body > main > .query-summary,
       body > footer,
       .results-actions,
-      .study-pack-controls,
+      .results-bottom-actions,
+      .result-contents,
       .study-pack-toggle {
         display: none !important;
       }
@@ -857,21 +919,17 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
   <header>
     <div class="header-container">
       <a href="/study" class="brand">
-        <div class="brand-logo">📖</div>
+        <div class="brand-logo" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H11v17H6.5A2.5 2.5 0 0 0 4 21.5z"/>
+            <path d="M20 4.5A2.5 2.5 0 0 0 17.5 2H13v17h4.5a2.5 2.5 0 0 1 2.5 2.5z"/>
+          </svg>
+        </div>
         <div class="brand-title">
           <h1>Berean Bible Study Explorer</h1>
           <p>A Companion for Spiritual Growth, Daily Reflection & Learning God's Word</p>
         </div>
       </a>
-      <div class="nav-actions">
-        <a href="https://github.com/victorgoh/berean-study-suite" class="nav-btn github-btn" target="_blank" rel="noopener noreferrer">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: -2px; margin-right: 2px;">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-          </svg>
-          Get Code on GitHub
-        </a>
-        <a href="/docs" class="nav-btn">⚡ API & Docs</a>
-      </div>
     </div>
   </header>
 
@@ -879,7 +937,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
   <main>
     
     <!-- Hero Search & Action Card -->
-    <div class="hero-card">
+    <div class="hero-card" id="search-panel">
       <div class="hero-title">
         <h2>Explore a passage</h2>
         <p>Choose a starting point, then open more tools only when you need them.</p>
@@ -887,68 +945,75 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
 
       <!-- Categories reveal their tools on hover, focus, or click. -->
       <div class="category-tabs" id="category-tabs">
-        <button class="cat-tab active" data-cat="read" aria-expanded="false">Scripture</button>
-        <button class="cat-tab" data-cat="devotion" aria-expanded="false">Reflection</button>
-        <button class="cat-tab" data-cat="study" aria-expanded="false">Commentary</button>
-        <button class="cat-tab" data-cat="history" aria-expanded="false">Words & Context</button>
+        <button class="cat-tab active" data-cat="passage" aria-expanded="false" aria-haspopup="menu" aria-controls="tool-popover">Passage</button>
+        <button class="cat-tab" data-cat="reflection" aria-expanded="false" aria-haspopup="menu" aria-controls="tool-popover">Reflection</button>
+        <button class="cat-tab" data-cat="study" aria-expanded="false" aria-haspopup="menu" aria-controls="tool-popover">Commentary</button>
+        <button class="cat-tab" data-cat="words" aria-expanded="false" aria-haspopup="menu" aria-controls="tool-popover">Original Words</button>
+        <button class="cat-tab" data-cat="background" aria-expanded="false" aria-haspopup="menu" aria-controls="tool-popover">Background</button>
         <div class="tool-popover" id="tool-popover" role="menu" aria-label="Study tools"></div>
       </div>
 
+      <p class="tool-help" id="tool-help">Enter a verse or passage to read it in your preferred translation.</p>
+
       <!-- Study Mode Pills -->
       <div class="mode-pills" id="mode-pills">
-        <!-- 1. Read & Search -->
-        <div class="mode-pill active" data-cat="read" data-mode="scripture">📜 Read Scripture</div>
-        <div class="mode-pill" data-cat="read" data-mode="search">🔍 Search the Bible</div>
-        <div class="mode-pill" data-cat="read" data-mode="parallels">⚖️ Gospel Parallels</div>
-        <div class="mode-pill" data-cat="read" data-mode="xref">🔗 Cross References</div>
-        <div class="mode-pill" data-cat="read" data-mode="daily_reading">📅 Daily Reading Plan</div>
+        <!-- Passage -->
+        <div class="mode-pill active" data-cat="passage" data-mode="scripture">Read Scripture</div>
+        <div class="mode-pill" data-cat="passage" data-mode="search">Search the Bible</div>
+        <div class="mode-pill" data-cat="passage" data-mode="xref">Cross References</div>
+        <div class="mode-pill" data-cat="passage" data-mode="parallels">Gospel Parallels</div>
+        <div class="mode-pill" data-cat="passage" data-mode="daily_reading" data-tier="more">Daily Reading Plan</div>
 
-        <!-- 2. Prayer & Devotion -->
-        <div class="mode-pill" data-cat="devotion" data-mode="devotional" style="display:none;">🕊️ Daily Devotional</div>
-        <div class="mode-pill" data-cat="devotion" data-mode="prayer" style="display:none;">🙏 Scripture Prayer Guide</div>
-        <div class="mode-pill" data-cat="devotion" data-mode="promises" style="display:none;">🌈 Promises for Life</div>
+        <!-- Reflection -->
+        <div class="mode-pill" data-cat="reflection" data-mode="devotional">Daily Devotional</div>
+        <div class="mode-pill" data-cat="reflection" data-mode="prayer">Scripture Prayer Guide</div>
+        <div class="mode-pill" data-cat="reflection" data-mode="promises">Promises for Life</div>
 
-        <!-- 3. Study & Teaching -->
-        <div class="mode-pill" data-cat="study" data-mode="exegesis" style="display:none;">🔬 Verse-by-Verse Study</div>
-        <div class="mode-pill" data-cat="study" data-mode="sermon" style="display:none;">🎙️ Teaching & Sermon Helper</div>
-        <div class="mode-pill" data-cat="study" data-mode="illustrations" style="display:none;">💡 Sermon Illustrations</div>
-        <div class="mode-pill" data-cat="study" data-mode="lesson" style="display:none;">🏫 Small Group & Sunday School</div>
-        <div class="mode-pill" data-cat="study" data-mode="commentary_pack" style="display:none;">💬 Compare Commentaries</div>
-        <div class="mode-pill" data-cat="study" data-mode="commentary_single" style="display:none;">✍️ Single Commentary</div>
-        <div class="mode-pill" data-cat="study" data-mode="covenant" style="display:none;">👑 Themes Across Scripture</div>
-        <div class="mode-pill" data-cat="study" data-mode="topic_pack" style="display:none;">📑 Topical Study Pack</div>
-        <div class="mode-pill" data-cat="study" data-mode="topic" style="display:none;">🏷️ Nave's Bible Topics</div>
-        <div class="mode-pill" data-cat="study" data-mode="book_analysis" style="display:none;">📚 Book Guide</div>
-        <div class="mode-pill" data-cat="study" data-mode="chapter_summary" style="display:none;">📋 Chapter Summary</div>
+        <!-- Commentary and study -->
+        <div class="mode-pill" data-cat="study" data-mode="exegesis">Verse-by-Verse Study</div>
+        <div class="mode-pill" data-cat="study" data-mode="commentary_single">Single Commentary</div>
+        <div class="mode-pill" data-cat="study" data-mode="commentary_pack">Compare Commentaries</div>
+        <div class="mode-pill" data-cat="study" data-mode="book_analysis">Book Guide</div>
+        <div class="mode-pill" data-cat="study" data-mode="chapter_summary">Chapter Summary</div>
+        <div class="mode-pill" data-cat="study" data-mode="lesson" data-tier="more">Small Group & Sunday School</div>
+        <div class="mode-pill" data-cat="study" data-mode="sermon" data-tier="more">Teaching & Sermon Helper</div>
+        <div class="mode-pill" data-cat="study" data-mode="illustrations" data-tier="more">Sermon Illustrations</div>
+        <div class="mode-pill" data-cat="study" data-mode="covenant" data-tier="more">Themes Across Scripture</div>
+        <div class="mode-pill" data-cat="study" data-mode="topic_pack" data-tier="more">Topical Study Pack</div>
+        <div class="mode-pill" data-cat="study" data-mode="topic" data-tier="more">Bible Topics</div>
 
-        <!-- 4. Original Words & History -->
-        <div class="mode-pill" data-cat="history" data-mode="word_pack" style="display:none;">🔤 Original Word Meaning</div>
-        <div class="mode-pill" data-cat="history" data-mode="lexicon" style="display:none;">🏛️ Lexicon (BDB / Thayer / STEP)</div>
-        <div class="mode-pill" data-cat="history" data-mode="morphology" style="display:none;">🧩 Grammar & Syntax</div>
-        <div class="mode-pill" data-cat="history" data-mode="interlinear_pack" style="display:none;">📜 Word-by-Word Interlinear</div>
-        <div class="mode-pill" data-cat="history" data-mode="interlinear_lookup" style="display:none;">🔍 Inline Interlinear</div>
-        <div class="mode-pill" data-cat="history" data-mode="septuagint_pack" style="display:none;">🏛️ Greek Septuagint & Hebrew MT</div>
-        <div class="mode-pill" data-cat="history" data-mode="septuagint_lookup" style="display:none;">📜 Septuagint Text</div>
-        <div class="mode-pill" data-cat="history" data-mode="ot_in_nt_pack" style="display:none;">🔗 Old Testament in the New</div>
-        <div class="mode-pill" data-cat="history" data-mode="ot_quotations" style="display:none;">🔎 OT Quotes & Allusions</div>
-        <div class="mode-pill" data-cat="history" data-mode="entities" style="display:none;">👤 Who is Who? (People & Places)</div>
-        <div class="mode-pill" data-cat="history" data-mode="units" style="display:none;">⚖️ Coins, Weights & Measures</div>
-        <div class="mode-pill" data-cat="history" data-mode="character" style="display:none;">👤 Bible Characters & Family Trees</div>
-        <div class="mode-pill" data-cat="history" data-mode="location" style="display:none;">📍 Geography & Maps</div>
-        <div class="mode-pill" data-cat="history" data-mode="names" style="display:none;">🏷️ Name Meanings</div>
-        <div class="mode-pill" data-cat="history" data-mode="chronology" style="display:none;">⏳ Biblical Timeline</div>
-        <div class="mode-pill" data-cat="history" data-mode="dictionary" style="display:none;">📖 Bible Dictionary</div>
-        <div class="mode-pill" data-cat="history" data-mode="resources" style="display:none;">📋 Resource Catalog</div>
+        <!-- Original words -->
+        <div class="mode-pill" data-cat="words" data-mode="word_pack">Original Word Meaning</div>
+        <div class="mode-pill" data-cat="words" data-mode="lexicon">Lexicon Lookup</div>
+        <div class="mode-pill" data-cat="words" data-mode="morphology">Grammar & Syntax</div>
+        <div class="mode-pill" data-cat="words" data-mode="interlinear_pack">Word-by-Word Interlinear</div>
+        <div class="mode-pill" data-cat="words" data-mode="interlinear_lookup" data-tier="more">Inline Interlinear</div>
+        <div class="mode-pill" data-cat="words" data-mode="septuagint_pack" data-tier="more">Greek Septuagint & Hebrew MT</div>
+        <div class="mode-pill" data-cat="words" data-mode="septuagint_lookup" data-tier="more">Septuagint Text</div>
+
+        <!-- Historical and cultural background -->
+        <div class="mode-pill" data-cat="background" data-mode="dictionary">Bible Dictionary</div>
+        <div class="mode-pill" data-cat="background" data-mode="entities">People & Places</div>
+        <div class="mode-pill" data-cat="background" data-mode="character">Bible Characters</div>
+        <div class="mode-pill" data-cat="background" data-mode="location">Biblical Places</div>
+        <div class="mode-pill" data-cat="background" data-mode="chronology">Biblical Timeline</div>
+        <div class="mode-pill" data-cat="background" data-mode="ot_in_nt_pack" data-tier="more">Old Testament in the New</div>
+        <div class="mode-pill" data-cat="background" data-mode="ot_quotations" data-tier="more">OT Quotes & Allusions</div>
+        <div class="mode-pill" data-cat="background" data-mode="units" data-tier="more">Coins, Weights & Measures</div>
+        <div class="mode-pill" data-cat="background" data-mode="names" data-tier="more">Name Meanings</div>
+        <div class="mode-pill" data-cat="background" data-mode="resources" data-tier="more">Resource Catalog</div>
       </div>
 
       <!-- Clean Unified Search Input Row -->
       <div class="search-row">
         <div class="search-input-wrapper">
-          <input type="text" id="query-input" placeholder="Passage: e.g. John 3:16, Romans 8:28, Psalm 23" value="John 3:16" />
+          <label class="sr-only" id="query-label" for="query-input">Passage, word, topic, person, or place</label>
+          <input type="text" id="query-input" aria-labelledby="query-label" placeholder="Passage: e.g. John 3:16, Romans 8:28, Psalm 23" autocomplete="off" />
         </div>
 
         <!-- Commentary Selector -->
-        <select id="commentary-select" class="sub-select" style="display:none;">
+        <label class="sr-only" for="commentary-select">Preferred commentary</label>
+        <select id="commentary-select" class="sub-select" aria-label="Preferred commentary" style="display:none;">
           <option value="TNotes" selected>Tyndale Open Study Notes (Modern / Contextual)</option>
           <option value="Henry">Matthew Henry (Devotional)</option>
           <option value="Spur">Charles Spurgeon (Treasury of David)</option>
@@ -966,7 +1031,8 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         </select>
 
         <!-- Dictionary Selector -->
-        <select id="dict-select" class="sub-select" style="display:none;">
+        <label class="sr-only" for="dict-select">Dictionary collection</label>
+        <select id="dict-select" class="sub-select" aria-label="Dictionary collection" style="display:none;">
           <optgroup label="General Bible Dictionaries">
             <option value="tyndale" selected>Tyndale Open Bible Dictionary</option>
             <option value="easton">Easton's Bible Dictionary</option>
@@ -986,7 +1052,6 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         </select>
 
         <button class="btn-study" id="btn-study">
-          <span id="btn-icon">📖</span>
           <span id="btn-text">Read Scripture</span>
         </button>
       </div>
@@ -994,13 +1059,13 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       <!-- Panel Footer: Sample Queries on Left, Preferred Translation on Right -->
       <div class="card-footer">
         <div class="inspiration-bar" id="inspiration-bar">
-          <span id="inspiration-label">Sample passages:</span>
+          <span id="inspiration-label">Try:</span>
           <div id="sample-tags-container" style="display:inline-flex; gap:0.4rem; flex-wrap:wrap;"></div>
         </div>
 
         <div class="pref-version-wrapper" title="Default Bible translation used across queries">
-          <span>📖 Translation:</span>
-          <select id="pref-version-select" class="pref-version-select">
+          <label for="pref-version-select">Translation:</label>
+          <select id="pref-version-select" class="pref-version-select" aria-label="Preferred Bible translation">
             <option value="BSB" selected>Berean Standard Bible (BSB)</option>
             <option value="NET">New English Translation (NET)</option>
             <option value="KJV">King James Version (KJV)</option>
@@ -1012,21 +1077,31 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       </div>
     </div>
 
+    <div class="query-summary" id="query-summary" aria-live="polite">
+      <span id="query-summary-text"></span>
+      <button type="button" class="action-btn" id="btn-change-search">Change search</button>
+    </div>
+
     <!-- Results Display Card -->
-    <div class="results-card" id="results-card">
+    <div class="results-card" id="results-card" role="region" aria-labelledby="results-heading" aria-busy="false">
       <div class="results-header">
         <div class="results-title">
-          <span id="results-icon">📖</span>
           <span id="results-heading">Study Results</span>
         </div>
         <div class="results-actions">
-          <span id="latency-tag" style="font-size: 0.74rem; color: var(--text-dim); margin-right: 0.5rem;">—</span>
-          <button class="action-btn" id="btn-copy">📋 Copy Study Notes</button>
-          <button class="action-btn" onclick="window.print()">🖨️ Print</button>
+          <button type="button" class="action-btn section-action" id="btn-expand-all">Expand all</button>
+          <button type="button" class="action-btn section-action" id="btn-collapse-all">Collapse all</button>
+          <button type="button" class="action-btn" id="btn-copy">Copy results</button>
+          <button type="button" class="action-btn" id="btn-share">Copy link</button>
+          <button type="button" class="action-btn" id="btn-print">Print</button>
         </div>
       </div>
-      <div class="results-body" id="results-body">
+      <div class="sr-only" id="result-status" role="status" aria-live="polite"></div>
+      <div class="results-body" id="results-body" tabindex="-1">
         <!-- Rendered Biblical Content -->
+      </div>
+      <div class="results-bottom-actions" id="results-bottom-actions">
+        <button type="button" class="action-btn" id="btn-result-top">Back to results top</button>
       </div>
     </div>
 
@@ -1551,26 +1626,60 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       }
     };
 
+    const TOOL_HELP = {
+      scripture: "Enter a verse or passage to read it in your preferred translation.",
+      search: "Enter a word or phrase to find where it appears in Scripture.",
+      xref: "Enter a verse to find related passages and biblical connections.",
+      devotional: "Enter a passage to gather concise material for reflection and prayer.",
+      prayer: "Enter a passage to build a Scripture-centered prayer guide.",
+      exegesis: "Enter a passage for a structured verse-by-verse study.",
+      commentary_single: "Enter a passage and choose one commentary source.",
+      commentary_pack: "Enter a passage to compare selected commentary perspectives.",
+      book_analysis: "Enter a Bible book name for its summary, themes, and introduction.",
+      chapter_summary: "Enter a chapter such as Romans 8 for a concise guide.",
+      word_pack: "Enter a verse to examine important words in their original-language context.",
+      lexicon: "Enter a Strong's number such as G26 or H2617.",
+      morphology: "Enter a verse to inspect the grammatical form of its original words.",
+      interlinear_pack: "Enter a verse or short passage for word-by-word language study.",
+      dictionary: "Enter a person, place, practice, object, or theological term.",
+      entities: "Enter a name or place to distinguish related biblical people and locations.",
+      character: "Enter a person's name to explore their biblical background.",
+      location: "Enter a biblical place to explore its setting and significance.",
+      chronology: "Enter a person or event to place it in its biblical period."
+    };
+
     let activeMode = "scripture";
-    let activeCat = "read";
     let lastRenderedMarkdown = "";
+    let currentCategoryTab = null;
+    let activeRequestController = null;
+    let requestSequence = 0;
+    const REQUEST_TIMEOUT_MS = 60000;
 
     const queryInput = document.getElementById("query-input");
     const prefVersionSelect = document.getElementById("pref-version-select");
     const commentarySelect = document.getElementById("commentary-select");
     const dictSelect = document.getElementById("dict-select");
     const btnStudy = document.getElementById("btn-study");
-    const btnIcon = document.getElementById("btn-icon");
     const btnText = document.getElementById("btn-text");
     const catTabs = document.querySelectorAll(".cat-tab");
     const modePills = document.querySelectorAll(".mode-pill");
     const toolPopover = document.getElementById("tool-popover");
+    const searchPanel = document.getElementById("search-panel");
+    const querySummary = document.getElementById("query-summary");
+    const querySummaryText = document.getElementById("query-summary-text");
+    const toolHelp = document.getElementById("tool-help");
     const resultsCard = document.getElementById("results-card");
     const resultsBody = document.getElementById("results-body");
     const resultsHeading = document.getElementById("results-heading");
-    const resultsIcon = document.getElementById("results-icon");
-    const latencyTag = document.getElementById("latency-tag");
+    const resultStatus = document.getElementById("result-status");
     const btnCopy = document.getElementById("btn-copy");
+    const btnShare = document.getElementById("btn-share");
+    const btnPrint = document.getElementById("btn-print");
+    const btnExpandAll = document.getElementById("btn-expand-all");
+    const btnCollapseAll = document.getElementById("btn-collapse-all");
+    const btnChangeSearch = document.getElementById("btn-change-search");
+    const btnResultTop = document.getElementById("btn-result-top");
+    const resultsBottomActions = document.getElementById("results-bottom-actions");
     const sampleTagsContainer = document.getElementById("sample-tags-container");
 
     // Load / Save Preferred Bible Version from localStorage
@@ -1582,13 +1691,60 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       localStorage.setItem("berean_preferred_version", prefVersionSelect.value);
     });
 
+    function setSelectValue(select, value) {
+      if (!value) return;
+      const exists = Array.from(select.options).some(option => option.value === value);
+      if (exists) select.value = value;
+    }
+
+    function categoryForMode(mode) {
+      const pill = Array.from(modePills).find(item => item.getAttribute("data-mode") === mode);
+      return pill ? pill.getAttribute("data-cat") : "passage";
+    }
+
+    function restoreUrlState() {
+      const params = new URLSearchParams(window.location.search);
+      const requestedMode = params.get("tool");
+      if (requestedMode && TOOL_CONFIG[requestedMode]) activeMode = requestedMode;
+      queryInput.value = params.get("q") || "";
+      setSelectValue(prefVersionSelect, params.get("translation"));
+      setSelectValue(commentarySelect, params.get("commentary"));
+      setSelectValue(dictSelect, params.get("dictionary"));
+
+      const category = categoryForMode(activeMode);
+      catTabs.forEach(tab => tab.classList.toggle("active", tab.getAttribute("data-cat") === category));
+      modePills.forEach(pill => pill.classList.toggle("active", pill.getAttribute("data-mode") === activeMode));
+    }
+
+    function updateUrlState(query = queryInput.value.trim()) {
+      const url = new URL(window.location.href);
+      url.search = "";
+      url.searchParams.set("tool", activeMode);
+      if (query) url.searchParams.set("q", query);
+      url.searchParams.set("translation", prefVersionSelect.value || "BSB");
+      const config = TOOL_CONFIG[activeMode] || TOOL_CONFIG.scripture;
+      if (config.hasCommentarySelect) url.searchParams.set("commentary", commentarySelect.value);
+      if (config.hasDictSelect) url.searchParams.set("dictionary", dictSelect.value);
+      window.history.replaceState(null, "", url);
+      return url.toString();
+    }
+
+    function cancelActiveRequest() {
+      requestSequence += 1;
+      if (activeRequestController) activeRequestController.abort();
+      activeRequestController = null;
+      resultsCard.setAttribute("aria-busy", "false");
+      btnStudy.disabled = false;
+      btnText.textContent = (TOOL_CONFIG[activeMode] || TOOL_CONFIG.scripture).btnLabel;
+    }
+
     // Update Contextual UI Controls & Samples for the Active Mode
     function updateContextualControls() {
       const cfg = TOOL_CONFIG[activeMode] || TOOL_CONFIG.scripture;
 
       queryInput.placeholder = cfg.placeholder;
       btnText.textContent = cfg.btnLabel;
-      btnIcon.textContent = cfg.icon;
+      toolHelp.textContent = TOOL_HELP[activeMode] || ("Use the field below to " + cfg.btnLabel.toLowerCase() + ".");
 
       commentarySelect.style.display = cfg.hasCommentarySelect ? "inline-block" : "none";
       dictSelect.style.display = cfg.hasDictSelect ? "inline-block" : "none";
@@ -1596,7 +1752,8 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       sampleTagsContainer.innerHTML = "";
       if (cfg.samples && cfg.samples.length > 0) {
         cfg.samples.forEach(s => {
-          const tag = document.createElement("span");
+          const tag = document.createElement("button");
+          tag.type = "button";
           tag.className = "sample-tag";
           tag.textContent = s.label;
           tag.addEventListener("click", () => {
@@ -1608,36 +1765,91 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       }
     }
 
-    function closeToolPopover() {
+    function closeToolPopover(returnFocus = false) {
       toolPopover.classList.remove("open");
       catTabs.forEach(tab => tab.setAttribute("aria-expanded", "false"));
+      if (returnFocus && currentCategoryTab) currentCategoryTab.focus();
     }
 
     function selectMode(mode, category) {
+      cancelActiveRequest();
       activeMode = mode;
-      activeCat = category;
       catTabs.forEach(tab => tab.classList.toggle("active", tab.getAttribute("data-cat") === category));
       modePills.forEach(p => p.classList.toggle("active", p.getAttribute("data-mode") === mode));
-      queryInput.value = (TOOL_CONFIG[activeMode] || {}).defaultQuery || "";
       updateContextualControls();
       closeToolPopover();
+      queryInput.focus();
     }
 
-    function openToolPopover(category, tab) {
+    function createToolOption(pill, category, hidden = false) {
+      const mode = pill.getAttribute("data-mode");
+      const option = document.createElement("button");
+      option.type = "button";
+      option.className = "tool-option" + (mode === activeMode ? " active" : "");
+      option.setAttribute("role", "menuitem");
+      option.textContent = pill.textContent.trim();
+      option.hidden = hidden;
+      option.addEventListener("click", () => selectMode(mode, category));
+      toolPopover.appendChild(option);
+      return option;
+    }
+
+    function visibleToolMenuItems() {
+      return Array.from(toolPopover.querySelectorAll(".tool-option:not([hidden]), .tool-more-toggle:not([hidden])"));
+    }
+
+    function positionToolPopover(tab) {
+      if (!tab) return;
+      if (window.matchMedia("(max-width: 640px)").matches) {
+        toolPopover.style.left = "0px";
+        toolPopover.style.right = "0px";
+        return;
+      }
+
+      const parent = tab.parentElement;
+      const panelWidth = toolPopover.offsetWidth;
+      const availableWidth = parent.clientWidth;
+      const alignedLeft = tab.offsetLeft;
+      const constrainedLeft = Math.max(0, Math.min(alignedLeft, availableWidth - panelWidth));
+      toolPopover.style.left = constrainedLeft + "px";
+      toolPopover.style.right = "auto";
+    }
+
+    function openToolPopover(category, tab, focusFirst = false) {
       const choices = Array.from(modePills).filter(pill => pill.getAttribute("data-cat") === category);
+      const primaryChoices = choices.filter(pill => pill.getAttribute("data-tier") !== "more");
+      const moreChoices = choices.filter(pill => pill.getAttribute("data-tier") === "more");
+      const showMoreInitially = moreChoices.some(pill => pill.getAttribute("data-mode") === activeMode);
       toolPopover.innerHTML = "";
-      choices.forEach(pill => {
-        const mode = pill.getAttribute("data-mode");
-        const option = document.createElement("button");
-        option.type = "button";
-        option.className = "tool-option" + (mode === activeMode ? " active" : "");
-        option.setAttribute("role", "menuitem");
-        option.textContent = pill.textContent.replace(/^[^\\w]+\\s*/, "").replace(/\\s*\\([^)]*\\)/g, "").trim();
-        option.addEventListener("click", () => selectMode(mode, category));
-        toolPopover.appendChild(option);
-      });
+      currentCategoryTab = tab;
+      primaryChoices.forEach(pill => createToolOption(pill, category));
+
+      if (moreChoices.length > 0) {
+        const moreToggle = document.createElement("button");
+        moreToggle.type = "button";
+        moreToggle.className = "tool-more-toggle";
+        moreToggle.setAttribute("role", "menuitem");
+        moreToggle.setAttribute("aria-expanded", String(showMoreInitially));
+        moreToggle.textContent = "More study tools";
+        moreToggle.hidden = showMoreInitially;
+        toolPopover.appendChild(moreToggle);
+
+        const moreOptions = moreChoices.map(pill => createToolOption(pill, category, !showMoreInitially));
+        moreToggle.addEventListener("click", () => {
+          moreToggle.setAttribute("aria-expanded", "true");
+          moreToggle.hidden = true;
+          moreOptions.forEach(option => { option.hidden = false; });
+          if (moreOptions[0]) moreOptions[0].focus();
+        });
+      }
+
       catTabs.forEach(item => item.setAttribute("aria-expanded", item === tab ? "true" : "false"));
       toolPopover.classList.add("open");
+      positionToolPopover(tab);
+      if (focusFirst) {
+        const firstItem = visibleToolMenuItems()[0];
+        if (firstItem) firstItem.focus();
+      }
     }
 
     catTabs.forEach(tab => {
@@ -1648,51 +1860,181 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         if (toolPopover.classList.contains("open") && tab.getAttribute("aria-expanded") === "true") closeToolPopover();
         else openToolPopover(category, tab);
       });
+      tab.addEventListener("keydown", event => {
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          openToolPopover(category, tab, true);
+        }
+        if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+          event.preventDefault();
+          const tabs = Array.from(catTabs);
+          const direction = event.key === "ArrowRight" ? 1 : -1;
+          const nextIndex = (tabs.indexOf(tab) + direction + tabs.length) % tabs.length;
+          tabs[nextIndex].focus();
+        }
+      });
+    });
+
+    toolPopover.addEventListener("keydown", event => {
+      const items = visibleToolMenuItems();
+      const currentIndex = items.indexOf(document.activeElement);
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeToolPopover(true);
+        return;
+      }
+      if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key) || items.length === 0) return;
+      event.preventDefault();
+      let nextIndex = currentIndex;
+      if (event.key === "Home") nextIndex = 0;
+      if (event.key === "End") nextIndex = items.length - 1;
+      if (event.key === "ArrowDown") nextIndex = (currentIndex + 1 + items.length) % items.length;
+      if (event.key === "ArrowUp") nextIndex = (currentIndex - 1 + items.length) % items.length;
+      items[nextIndex].focus();
     });
 
     document.addEventListener("click", (event) => {
       if (!document.getElementById("category-tabs").contains(event.target)) closeToolPopover();
     });
-    document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeToolPopover(); });
+    window.addEventListener("resize", () => {
+      if (toolPopover.classList.contains("open")) positionToolPopover(currentCategoryTab);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && toolPopover.classList.contains("open")) closeToolPopover(true);
+    });
+
+    function setStatus(message) {
+      resultStatus.textContent = "";
+      window.setTimeout(() => { resultStatus.textContent = message; }, 10);
+    }
+
+    function selectedOptionText(select) {
+      const option = select.options[select.selectedIndex];
+      return option ? option.textContent.trim() : "";
+    }
+
+    function requestSummary(config, q, payload) {
+      const parts = [config.btnLabel];
+      if (q) parts.push(q);
+      if (config.hasCommentarySelect) parts.push(selectedOptionText(commentarySelect));
+      if (config.hasDictSelect) parts.push(selectedOptionText(dictSelect));
+      if (Object.prototype.hasOwnProperty.call(payload, "version") && payload.version === prefVersionSelect.value) {
+        parts.push(prefVersionSelect.value);
+      }
+      return parts.filter(Boolean).join(" · ");
+    }
+
+    function showSearchPanel() {
+      searchPanel.hidden = false;
+      querySummary.classList.remove("visible");
+      window.setTimeout(() => {
+        searchPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+        queryInput.focus();
+      }, 10);
+    }
+
+    function showResultsView(summary) {
+      querySummaryText.textContent = summary;
+      querySummary.classList.add("visible");
+      searchPanel.hidden = true;
+    }
+
+    function showResultError(title, message) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "result-message";
+      const heading = document.createElement("h2");
+      heading.textContent = title;
+      const detail = document.createElement("p");
+      detail.textContent = message;
+      const retry = document.createElement("button");
+      retry.type = "button";
+      retry.className = "action-btn";
+      retry.textContent = "Try again";
+      retry.addEventListener("click", executeStudy);
+      wrapper.append(heading, detail, retry);
+      resultsBody.replaceChildren(wrapper);
+      resultsBottomActions.classList.remove("visible");
+      btnExpandAll.classList.remove("visible");
+      btnCollapseAll.classList.remove("visible");
+      setStatus(title + ". " + message);
+    }
+
+    function classifyError(error) {
+      const message = error && error.message ? error.message : "The request could not be completed.";
+      if (error && error.status === 404 || /not found|no entry|no matching/i.test(message)) {
+        return ["No matching result", "Check the passage or spelling, choose another source, and try again."];
+      }
+      if (error && error.status === 400 || /invalid|required|reference/i.test(message)) {
+        return ["Check your search", message];
+      }
+      if (error && error.status >= 500) {
+        return ["Resource temporarily unavailable", "This study resource could not be reached. Please try again shortly."];
+      }
+      return ["Unable to load results", "Please check your connection and try again."];
+    }
 
     // Execute Study Request
     async function executeStudy() {
       const q = queryInput.value.trim();
-      if (!q && activeMode !== "daily_reading" && activeMode !== "resources") return;
+      if (!q && activeMode !== "daily_reading" && activeMode !== "resources") {
+        setStatus("Enter a passage, word, topic, person, or place to continue.");
+        queryInput.focus();
+        return;
+      }
 
       const v = prefVersionSelect.value || "BSB";
       const c = commentarySelect.value;
       const d = dictSelect.value;
       const config = TOOL_CONFIG[activeMode] || TOOL_CONFIG.scripture;
       const payload = config.buildPayload(q, v, c, d);
+      cancelActiveRequest();
+      const requestId = ++requestSequence;
+      const controller = new AbortController();
+      activeRequestController = controller;
+      let requestTimedOut = false;
+      const timeoutId = window.setTimeout(() => {
+        requestTimedOut = true;
+        controller.abort();
+      }, REQUEST_TIMEOUT_MS);
 
       btnStudy.disabled = true;
-      btnIcon.innerHTML = '<div class="spinner"></div>';
       btnText.textContent = "Loading...";
       
       resultsCard.style.display = "block";
-      resultsBody.innerHTML = '<div style="text-align:center; padding:3rem; color:var(--text-muted);"><div class="spinner" style="margin:0 auto 1rem auto; width:24px; height:24px; border-width:3px;"></div>Loading Scripture & Study Notes...</div>';
+      resultsCard.setAttribute("aria-busy", "true");
+      resultsBody.innerHTML = '<div class="result-message"><div class="spinner" style="margin:0 auto 1rem; width:24px; height:24px; border-width:3px;"></div><p>Gathering your study results…</p></div>';
       resultsHeading.textContent = config.btnLabel + (q ? ": " + q : "");
-      resultsIcon.textContent = config.icon;
-
-      const startTime = performance.now();
+      resultsBottomActions.classList.remove("visible");
+      btnExpandAll.classList.remove("visible");
+      btnCollapseAll.classList.remove("visible");
+      setStatus("Loading " + config.btnLabel.toLowerCase() + " results.");
 
       try {
         const res = await fetch(config.endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          signal: controller.signal
         });
 
-        const duration = Math.round(performance.now() - startTime);
-        latencyTag.textContent = duration + " ms";
+        if (requestId !== requestSequence) return;
 
         const text = await res.text();
+        if (requestId !== requestSequence) return;
         let parsed = null;
         try {
           parsed = JSON.parse(text);
         } catch {
           parsed = { text: text };
+        }
+
+        const responseError = parsed && parsed.error
+          ? (typeof parsed.error === "string" ? parsed.error : (parsed.error.message || parsed.error.code || JSON.stringify(parsed.error)))
+          : "";
+        if (!res.ok || responseError) {
+          const requestError = new Error(responseError || "The request returned status " + res.status + ".");
+          requestError.status = res.status;
+          throw requestError;
         }
 
         let md = "";
@@ -1706,11 +2048,6 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
           md = "# Scripture: " + q + " (" + v + ")\\n\\n" + parsed.verses.map(x => "[" + x.book + " " + x.chapter + ":" + x.verse + " (" + v + ")] " + x.text).join("\\n\\n");
         } else if (parsed.matches) {
           md = "# Search Results for: " + q + " (" + parsed.totalCount + " matches)\\n\\n" + parsed.matches.map(x => "[" + x.book + " " + x.chapter + ":" + x.verse + " (" + v + ")] " + x.text).join("\\n\\n");
-        } else if (parsed.error) {
-          const errorMessage = typeof parsed.error === "string"
-            ? parsed.error
-            : (parsed.error.message || parsed.error.code || JSON.stringify(parsed.error));
-          md = "**Error**: " + errorMessage;
         } else {
           md = JSON.stringify(parsed, null, 2);
         }
@@ -1724,15 +2061,72 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
           ? formatStudyPackMarkdown(md)
           : formatMarkdown(md);
 
+        enhanceResultNavigation(isSectionedResult, md);
+        showResultsView(requestSummary(config, q, payload));
+        updateUrlState(q);
+        setStatus("Results loaded for " + (q || config.btnLabel) + ".");
+
         resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        resultsBody.focus({ preventScroll: true });
 
       } catch (err) {
-        resultsBody.innerHTML = '<div style="color:#ef4444; font-weight:bold;">Error fetching study data: ' + err.message + '</div>';
+        if (requestId !== requestSequence) return;
+        if (err && err.name === "AbortError" && requestTimedOut) {
+          showResultError("Request took too long", "This resource did not respond within one minute. Try again or choose a more focused lookup.");
+          return;
+        }
+        const errorDisplay = classifyError(err);
+        showResultError(errorDisplay[0], errorDisplay[1]);
       } finally {
+        window.clearTimeout(timeoutId);
+        if (requestId !== requestSequence) return;
+        activeRequestController = null;
+        resultsCard.setAttribute("aria-busy", "false");
         btnStudy.disabled = false;
-        btnIcon.textContent = config.icon;
         btnText.textContent = config.btnLabel;
       }
+    }
+
+    function enhanceResultNavigation(isSectionedResult, markdown) {
+      const sections = resultsBody.querySelectorAll(".study-pack-section");
+      const hasSections = isSectionedResult && sections.length > 0;
+      btnExpandAll.classList.toggle("visible", hasSections);
+      btnCollapseAll.classList.toggle("visible", hasSections);
+
+      if (!hasSections && markdown.length >= 4000) {
+        const headings = Array.from(resultsBody.querySelectorAll("h2, h3, h4"))
+          .filter(heading => heading.textContent.trim())
+          .slice(0, 16);
+        if (headings.length >= 3) {
+          const contents = document.createElement("details");
+          contents.className = "result-contents";
+          const summary = document.createElement("summary");
+          summary.textContent = "Contents";
+          const nav = document.createElement("nav");
+          nav.setAttribute("aria-label", "Result contents");
+          headings.forEach((heading, index) => {
+            const id = "result-section-" + (index + 1);
+            heading.id = id;
+            const link = document.createElement("a");
+            link.href = "#" + id;
+            link.textContent = heading.textContent.trim();
+            nav.appendChild(link);
+          });
+          contents.append(summary, nav);
+          resultsBody.insertBefore(contents, resultsBody.firstChild);
+        }
+      }
+
+      resultsBottomActions.classList.toggle("visible", markdown.length >= 5000 || sections.length >= 4);
+    }
+
+    function escapeAttribute(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
     }
 
     // Markdown Formatter
@@ -1743,10 +2137,6 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
 
       const leading = md.slice(0, matches[0].index).trim();
       let html = leading ? formatMarkdown(leading) : "";
-      html += '<div class="study-pack-controls" aria-label="Study pack sections">' +
-        '<button type="button" class="study-pack-control" onclick="setAllStudyPackSections(true)">Expand all</button>' +
-        '<button type="button" class="study-pack-control" onclick="setAllStudyPackSections(false)">Collapse all</button>' +
-        '</div>';
 
       matches.forEach((match, index) => {
         const title = match[1].trim();
@@ -1763,7 +2153,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         html += '<div class="study-pack-section ' + stateClass + '">' +
           '<div class="study-pack-section-header">' +
           '<span>' + formatMarkdown(title).replace(/^<p>|<\\/p>$/g, "") + '</span>' +
-          '<button type="button" class="study-pack-toggle" aria-expanded="' + expandedState + '" aria-label="Toggle ' + title.replace(/&/g, "and").replace(/\"/g, "") + '" onclick="toggleStudyPackSection(this)">' + icon + '</button>' +
+          '<button type="button" class="study-pack-toggle" data-action="toggle-section" aria-expanded="' + expandedState + '" aria-label="' + escapeAttribute("Toggle " + title) + '">' + icon + '</button>' +
           '</div>' +
           '<div class="study-pack-section-content">' + formatMarkdown(content) + '</div>' +
           '</div>';
@@ -1786,10 +2176,17 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         section.classList.toggle("is-expanded", expanded);
         section.classList.toggle("is-collapsed", !expanded);
         const button = section.querySelector(".study-pack-toggle");
-        button.setAttribute("aria-expanded", String(expanded));
-        button.textContent = expanded ? "−" : "+";
+        if (button) {
+          button.setAttribute("aria-expanded", String(expanded));
+          button.textContent = expanded ? "−" : "+";
+        }
       });
     }
+
+    resultsBody.addEventListener("click", event => {
+      const toggle = event.target.closest('[data-action="toggle-section"]');
+      if (toggle && resultsBody.contains(toggle)) toggleStudyPackSection(toggle);
+    });
 
     function renderMarkdownTables(markdown) {
       const lines = markdown.split("\\n");
@@ -1867,7 +2264,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       // Lists
       html = html.replace(/^• (.*$)/gim, '<li>$1</li>');
       html = html.replace(/^- (.*$)/gim, '<li>$1</li>');
-      html = html.replace(/(<li>.*<\\/li>)/s, '<ul>$1</ul>');
+      html = html.replace(/(?:^<li>.*<\\/li>\\n?)+/gim, match => '<ul>' + match.replace(/\\n/g, '') + '</ul>\\n');
 
       // Code blocks
       const bt = String.fromCharCode(96);
@@ -1885,13 +2282,40 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       return '<p>' + html + '</p>';
     }
 
-    // Copy Button
-    btnCopy.addEventListener("click", () => {
-      navigator.clipboard.writeText(lastRenderedMarkdown);
+    // Result actions
+    btnCopy.addEventListener("click", async () => {
+      if (!lastRenderedMarkdown) return;
       const orig = btnCopy.textContent;
-      btnCopy.textContent = "✅ Copied Notes!";
+      try {
+        await navigator.clipboard.writeText(lastRenderedMarkdown);
+        btnCopy.textContent = "Copied";
+        setStatus("Results copied to the clipboard.");
+      } catch {
+        btnCopy.textContent = "Copy failed";
+        setStatus("The results could not be copied. Select the text and copy it manually.");
+      }
       setTimeout(() => { btnCopy.textContent = orig; }, 1800);
     });
+
+    btnShare.addEventListener("click", async () => {
+      const original = btnShare.textContent;
+      const shareUrl = updateUrlState();
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        btnShare.textContent = "Link copied";
+        setStatus("A link to this search setup was copied.");
+      } catch {
+        btnShare.textContent = "Copy failed";
+        setStatus("The link could not be copied. Copy it from the browser address bar.");
+      }
+      window.setTimeout(() => { btnShare.textContent = original; }, 1800);
+    });
+
+    btnPrint.addEventListener("click", () => window.print());
+    btnExpandAll.addEventListener("click", () => setAllStudyPackSections(true));
+    btnCollapseAll.addEventListener("click", () => setAllStudyPackSections(false));
+    btnChangeSearch.addEventListener("click", showSearchPanel);
+    btnResultTop.addEventListener("click", () => resultsCard.scrollIntoView({ behavior: "smooth", block: "start" }));
 
     // Enter Key to Study
     queryInput.addEventListener("keydown", (e) => {
@@ -1903,9 +2327,19 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
 
     btnStudy.addEventListener("click", executeStudy);
 
+    window.addEventListener("popstate", () => {
+      cancelActiveRequest();
+      restoreUrlState();
+      updateContextualControls();
+      searchPanel.hidden = false;
+      querySummary.classList.remove("visible");
+      resultsCard.style.display = "none";
+      lastRenderedMarkdown = "";
+    });
+
     // Initial setup on load
+    restoreUrlState();
     updateContextualControls();
-    executeStudy();
   </script>
 </body>
 </html>`;

@@ -16,8 +16,9 @@
     "data:validate": "python3 scripts/resource_data.py validate",
     "data:upload-plan": "python3 scripts/resource_data.py upload-plan",
     "test:phase4": "tsx scripts/test_phase4.ts",
-    "test:smoke": "npm run test:phase4",
-    "test": "npm run test:phase4"
+    "test:explorer": "tsx scripts/test_explorer_ui.ts",
+    "test:smoke": "npm run test:phase4 && npm run test:explorer",
+    "test": "npm run test:smoke"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.1",
