@@ -79,7 +79,7 @@ These need an explicit source record before being treated as either source:
 
 | Resource | Why flagged |
 |---|---|
-| Classic commentaries (`cHenry`, `cCalvin`, `cGill`, `cBarnes`, `cMacL`, `cLange`, etc.) | The code lists them as public-domain works, but the exact digital edition/source and transformation history are not recorded |
+| Classic commentaries (`cHenry`, `cCalvin`, `cGill`, `cBarnes`, `cMacL`, `cLange`, etc.) | Most exact digital edition/source and transformation histories are not recorded. Exception: `cHenry` is now the STEP Bible MHM modern-English arrangement, with CC BY 4.0 attribution recorded in its `Details` table. |
 | `Thayer`, `BDB`, `LSJ`, `MCGED`, `TBESH-D` | Registry entries do not establish which upstream editions produced the deployed files; several are not STEPBible datasets |
 | `TNotes` | It is associated with STEPBible/Tyndale in documentation, but must be separated from unrelated BibleMateData package files and documented with its exact upstream release |
 | LXX, Brenton, OHGB, OHGBi, morphology and cross-reference databases | Current code/docs do not give a complete source manifest for each artifact |

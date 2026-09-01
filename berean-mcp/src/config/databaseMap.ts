@@ -63,10 +63,10 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
 
   {
     key: "Henry",
-    name: "Matthew Henry's Commentary on the Whole Bible",
-    author: "Matthew Henry",
+    name: "Matthew Henry's Modern English Commentary on the Whole Bible",
+    author: "Matthew Henry; modern-English rearrangement by STEPBible.org",
     scope: "Whole Bible",
-    description: "Classic Puritan exposition rich in practical pastoral insights and spiritual aphorisms.",
+    description: "Modern-English, verse-by-verse arrangement of Matthew Henry's full commentary (STEP Bible, CC BY 4.0).",
     aliases: ["henry", "chenry", "matthew henry"],
     getStoragePath: () => "commentaries/normalized/cHenry.commentary"
   },

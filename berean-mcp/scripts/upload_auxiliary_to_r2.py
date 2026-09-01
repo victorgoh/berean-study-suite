@@ -28,7 +28,7 @@ files_to_sync = [
     "data/book_analysis.data",
     "data/chapter_summary.data",
     "collections3.sqlite",
-    "commentaries/cHenry.commentary",
+    "commentaries/normalized/cHenry.commentary",
     "commentaries/cJFB.commentary",
     "commentaries/cCalvin.commentary",
     "commentaries/cGill.commentary",

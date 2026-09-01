@@ -27,7 +27,7 @@ export const SermonStudyPackSchema = {
   reference: z.string().describe("Scripture passage reference to prepare a sermon on, e.g. 'Romans 8:1-11', 'Ephesians 2:1-10'"),
   version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
   include_xrefs: z.boolean().default(true).describe("Whether to include key cross-references"),
-  extra_commentators: z.array(z.string()).optional().describe("Optional additional public domain commentators to bundle dynamically, e.g. ['MacL', 'HH', 'Calvin', 'Henry', 'Barnes', 'Spur']")
+  extra_commentators: z.array(z.string()).optional().describe("Optional additional available commentators to bundle dynamically, e.g. ['MacL', 'HH', 'Calvin', 'Henry', 'Barnes', 'Spur']")
 };
 
 export const IllustrationStudyPackSchema = {
@@ -39,19 +39,19 @@ export const IllustrationStudyPackSchema = {
 export const LessonCreatorStudyPackSchema = {
   reference: z.string().describe("Scripture passage reference for Sunday School or small group lesson planning, e.g. 'Luke 15:11-32', 'Acts 2:42-47'"),
   version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
-  extra_commentators: z.array(z.string()).optional().describe("Optional additional public domain commentators to bundle dynamically, e.g. ['Barnes', 'ECER', 'Henry']")
+  extra_commentators: z.array(z.string()).optional().describe("Optional additional available commentators to bundle dynamically, e.g. ['Barnes', 'ECER', 'Henry']")
 };
 
 export const DevotionalStudyPackSchema = {
   reference: z.string().describe("Scripture passage reference for devotional reflection, e.g. 'Psalm 23', 'John 15:1-8'"),
   version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
-  extra_commentators: z.array(z.string()).optional().describe("Optional additional public domain commentators to bundle dynamically, e.g. ['Spur', 'MacL', 'Henry']")
+  extra_commentators: z.array(z.string()).optional().describe("Optional additional available commentators to bundle dynamically, e.g. ['Spur', 'MacL', 'Henry']")
 };
 
 export const PrayerGuideStudyPackSchema = {
   reference: z.string().describe("Scripture passage reference for prayer and intercession, e.g. 'Psalm 51', 'Ephesians 3:14-21'"),
   version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
-  extra_commentators: z.array(z.string()).optional().describe("Optional additional public domain commentators to bundle dynamically, e.g. ['Spur', 'Henry', 'Benson']")
+  extra_commentators: z.array(z.string()).optional().describe("Optional additional available commentators to bundle dynamically, e.g. ['Spur', 'Henry', 'Benson']")
 };
 
 // --- Scholarly Exegesis & Original Languages ---
@@ -93,7 +93,7 @@ export const OtInNtStudyPackSchema = {
 export const CovenantTheologyPackSchema = {
   reference: z.string().describe("Scripture passage reference for redemptive-historical covenant synthesis, e.g. 'Genesis 15', 'Hebrews 8'"),
   version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
-  extra_commentators: z.array(z.string()).optional().describe("Optional additional public domain commentators to bundle dynamically, e.g. ['Calvin', 'Gill', 'Henry']")
+  extra_commentators: z.array(z.string()).optional().describe("Optional additional available commentators to bundle dynamically, e.g. ['Calvin', 'Gill', 'Henry']")
 };
 
 export const CommentaryStudyPackSchema = {
@@ -179,7 +179,7 @@ export const OtQuotationsLookupSchema = {
 
 export const TheologicalDictionarySchema = {
   term: z.string().describe("Theological or biblical term to look up, e.g. 'Atonement', 'Covenant', 'Grace', 'Justification', 'Sanctification'"),
-  source: z.enum(["tyndale", "isbe", "easton", "smith"]).default("tyndale").describe("Source: 'tyndale' (Tyndale Open Bible Dictionary - default), 'isbe' (ISBE Encyclopedia), 'easton' (Easton's Bible Dict), 'smith' (Smith's Bible Dict)")
+  source: z.enum(["tyndale", "isbe", "easton", "smith", "fausset", "morrish", "vine", "collection"]).default("tyndale").describe("Source: 'tyndale' (default), 'isbe', 'easton', 'smith', 'fausset', 'morrish', 'vine', or 'collection' (combined classic references)")
 };
 
 export const TopicStudySchema = {

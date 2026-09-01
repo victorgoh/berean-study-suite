@@ -500,6 +500,20 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       margin-bottom: 0.45rem;
     }
 
+    .results-body h4,
+    .results-body h5,
+    .results-body h6 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--text-main);
+      margin-top: 1.1rem;
+      margin-bottom: 0.4rem;
+      line-height: 1.45;
+    }
+
+    .results-body h4 { font-size: 0.94rem; font-weight: 700; }
+    .results-body h5 { font-size: 0.9rem; font-weight: 650; }
+    .results-body h6 { font-size: 0.86rem; font-weight: 600; color: var(--text-muted); }
+
     .results-body p {
       margin-bottom: 1.2rem;
     }
@@ -890,10 +904,22 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
 
         <!-- Dictionary Selector -->
         <select id="dict-select" class="sub-select" style="display:none;">
-          <option value="tyndale" selected>Tyndale Open Bible Dictionary (6,000+ Articles)</option>
-          <option value="isbe">ISBE Encyclopedia</option>
-          <option value="easton">Easton's Bible Dictionary</option>
-          <option value="smith">Smith's Bible Dictionary</option>
+          <optgroup label="General Bible Dictionaries">
+            <option value="tyndale" selected>Tyndale Open Bible Dictionary</option>
+            <option value="easton">Easton's Bible Dictionary</option>
+            <option value="smith">Smith's Bible Dictionary</option>
+            <option value="fausset">Fausset's Bible Dictionary</option>
+            <option value="morrish">Morrish Bible Dictionary</option>
+          </optgroup>
+          <optgroup label="Word Studies">
+            <option value="vine">Vine's New Testament Words</option>
+          </optgroup>
+          <optgroup label="Encyclopedias">
+            <option value="isbe">ISBE Encyclopedia</option>
+          </optgroup>
+          <optgroup label="Combined Search">
+            <option value="collection">Classic Bible Dictionary Collection</option>
+          </optgroup>
         </select>
 
         <button class="btn-study" id="btn-study">
@@ -1461,7 +1487,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       dictionary: {
         endpoint: "/tools/theological_dictionary",
         icon: "📖",
-        btnLabel: "Look Up in Bible Dictionary",
+        btnLabel: "Look Up in Bible Dictionary Collection",
         placeholder: "Term: e.g. Justification, Covenant, Atonement, Grace, Sanctification",
         defaultQuery: "Justification",
         hasDictSelect: true,
@@ -1655,8 +1681,9 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         lastRenderedMarkdown = md;
         // Treat every Explorer tool whose endpoint is a study pack as a
         // sectioned result, even if an HTTP adapter omits optional metadata.
-        const isStudyPack = config.endpoint.includes("_pack");
-        resultsBody.innerHTML = isStudyPack
+        const isSectionedResult = config.endpoint.includes("_pack") ||
+          (activeMode === "dictionary" && d === "collection");
+        resultsBody.innerHTML = isSectionedResult
           ? formatStudyPackMarkdown(md)
           : formatMarkdown(md);
 
@@ -1691,7 +1718,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
           ? (matches[index + 1].index || md.length)
           : md.length;
         const content = md.slice(contentStart, contentEnd).trim();
-        const expanded = /(^|\\s)1\\.|scripture/i.test(title);
+        const expanded = index === 0 || /(^|\\s)1\\.|scripture/i.test(title);
         const stateClass = expanded ? "is-expanded" : "is-collapsed";
         const icon = expanded ? "−" : "+";
         const expandedState = expanded ? "true" : "false";
@@ -1787,9 +1814,13 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       });
 
       // Headers
+      html = html.replace(/^###### +(.*$)/gim, '<h6>$1</h6>');
+      html = html.replace(/^##### +(.*$)/gim, '<h5>$1</h5>');
+      html = html.replace(/^#### +(.*$)/gim, '<h4>$1</h4>');
       html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
       html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
       html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+      html = html.replace(/^#{4,6} *$/gim, '');
 
       // Bold & Italic
       html = html.replace(new RegExp(B + "\\\\*\\\\*\\\\*(.*?)\\\\*\\\\*\\\\*", "gim"), '<strong><em>$1</em></strong>');

@@ -156,11 +156,11 @@ human Explorer for complete long-form articles.
 
 - **`bible_lookup`**: Retrieve full passages from BSB, NET, KJV, or OHGB (Original Hebrew/Greek).
 - **`bible_search`**: High-speed keyword search with book/testament filters and wildcards.
-- **`commentary_lookup`**: Query any of the active public domain commentaries in `biblematedata` (e.g. `Henry`, `JFB`, `Calvin`, `Gill`, `MacL`, `Barnes`, `Spur`, `Clarke`, `Wesley`, `Benson`, `Pulpit`, `EGNT`, `CECNT`, `ECER`, `EBC`, `KD`, `Lange`, `Rob`, `Vincent`, `Whedon`, `CBSC`, `Brooks`, `PHC`, `HH`, `BI`).
+- **`commentary_lookup`**: Query any active commentary resource in `biblematedata` (e.g. `Henry`, `JFB`, `Calvin`, `Gill`, `MacL`, `Barnes`, `Spur`, `Clarke`, `Wesley`, `Benson`, `Pulpit`, `EGNT`, `CECNT`, `ECER`, `EBC`, `KD`, `Lange`, `Rob`, `Vincent`, `Whedon`, `CBSC`, `Brooks`, `PHC`, `HH`, `BI`). Check each resource's recorded source and licence before redistribution.
 - **`cross_references`**: Retrieve Treasury of Scripture Knowledge (TSK) cross-references ranked by relevance votes.
 - **`morphology_lookup`**: Word-by-word grammatical tagging, lemma roots, transliterations, and glosses for any Old or New Testament verse.
 - **`lexicon_lookup`**: Comprehensive lexical definitions from Strong's, Brown-Driver-Briggs (BDB), and Thayer's Greek Lexicon.
-- **`theological_dictionary`**: Query Easton's Bible Dictionary or International Standard Bible Encyclopedia (ISBE).
+- **`theological_dictionary`**: Query Tyndale, ISBE, Easton's, Smith's, Fausset's, Morrish, Vine's, or the source-labelled Classic Bible Dictionary Collection. Explicit source requests do not silently fall back to another source.
 - **`parallel_passages`**: Side-by-side Gospel parallels, Old Testament synoptic parallels, and quote fulfillments.
 - **`daily_reading`**: Daily Bible reading plan with scripture retrieval.
 - **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, and study packs.

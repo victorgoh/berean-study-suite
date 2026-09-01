@@ -16,6 +16,8 @@ The full Tyndale source set is imported as separate resources: `StudyNotes.xml` 
 
 Matthew Henry's Concise Commentary is imported from the locally supplied `MHCC.cmt.mybible` module by `berean-mcp/scripts/prepare_mhcc.py`. The importer preserves its commentary text and original verse-range records, then records CCEL attribution and public-domain provenance in the output database's `Details` table. The derived `cMHCC.commentary` must be uploaded to R2 at `commentaries/cMHCC.commentary` before a Cloudflare deployment can serve it.
 
+The `Henry` commentary is the full **Matthew Henry's Modern English Commentary on the Whole Bible** (MHM), imported from the locally supplied STEPBible `Eng_MHM.zip` SWORD module by `berean-mcp/scripts/prepare_step_mhm.py`. It replaces the older `cHenry.commentary` derived database at `commentaries/normalized/cHenry.commentary`. The historic Matthew Henry source text is public domain; the modern-English, verse-by-verse rearrangement is supplied by **STEP Bible / STEPBible.org under CC BY 4.0**. Attribute the resource to STEP Bible and link to [STEPBible-Data](https://stepbible.github.io/STEPBible-Data/) whenever it is redistributed or presented as a source.
+
 The project consumes these resources in read-only fashion. R2 stores larger SQLite objects; D1 stores selected indexed tables. The storage location can differ between local and Cloudflare deployments.
 
 Some runtime resources are source-preserving normalized derivatives. They retain the source schema and content while decoding display-only typographic entities and composing Unicode diacritics. The original source database remains unchanged; the derivative records its source checksum and normalizer metadata in `NormalizationMetadata`.

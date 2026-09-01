@@ -477,7 +477,7 @@ export function createMcpServer(env: Env) {
   // 25. Theological Dictionary & Encyclopedia
   server.tool(
     "theological_dictionary",
-    "Look up encyclopedic articles and definitions for theological terms (ISBE Encyclopedia, Easton's Bible Dictionary, Smith's).",
+    "Look up source-labelled articles and definitions from Tyndale, ISBE, Easton's, Smith's, Fausset's, Morrish, Vine's, or the combined classic reference collection.",
     TheologicalDictionarySchema,
     async ({ term, source }) => {
       let res;

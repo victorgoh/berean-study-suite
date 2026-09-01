@@ -632,7 +632,7 @@ export function getOpenApiSpec(serverUrl: string = "https://berean-mcp.victorgoh
         post: {
           tags: ["🏷️ Theology & Doctrinal Reference"],
           summary: "Theological Dictionary & Encyclopedia",
-          description: "Search Tyndale Open Bible Dictionary, ISBE Encyclopedia, Easton's Bible Dictionary, and Smith's.",
+          description: "Search Tyndale, ISBE, Easton's, Smith's, Fausset's, Morrish, Vine's, or the combined classic reference collection. Explicit source requests do not silently fall back to another source.",
           requestBody: {
             required: true,
             content: {
@@ -641,7 +641,7 @@ export function getOpenApiSpec(serverUrl: string = "https://berean-mcp.victorgoh
                   type: "object",
                   properties: {
                     term: { type: "string", example: "Covenant", description: "Theological term or concept" },
-                    source: { type: "string", enum: ["tyndale", "isbe", "easton", "smith"], default: "tyndale" }
+                    source: { type: "string", enum: ["tyndale", "isbe", "easton", "smith", "fausset", "morrish", "vine", "collection"], default: "tyndale" }
                   },
                   required: ["term"]
                 }

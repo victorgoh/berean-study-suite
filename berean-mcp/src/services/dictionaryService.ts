@@ -3,6 +3,31 @@ import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { findBestMatch } from "../utils/fuzzyMatch.js";
 import { Env } from "../types.js";
 
+const LEGACY_DICTIONARY_SOURCES: Record<string, { prefix: string; label: string }> = {
+  easton: { prefix: "EAS", label: "Easton's Illustrated Bible Dictionary" },
+  smith: { prefix: "SBD", label: "Smith's Bible Dictionary" },
+  fausset: { prefix: "FAU", label: "Fausset's Bible Dictionary" },
+  morrish: { prefix: "MOR", label: "Morrish Bible Dictionary" },
+  vine: { prefix: "VNT", label: "Vine's Expository Dictionary of New Testament Words" }
+};
+
+const LEGACY_PREFIX_LABELS: Record<string, string> = {
+  AMT: "American Tract Society Bible Dictionary",
+  BBD: "Bridgeway Bible Dictionary",
+  BMC: "Handbook of Bible Manners and Customs",
+  BUC: "Buck's Theological Dictionary",
+  CBA: "Companion Bible Appendices",
+  DRE: "Dictionary of Religion and Ethics",
+  EAS: "Easton's Illustrated Bible Dictionary",
+  FAU: "Fausset's Bible Dictionary",
+  FOS: "Figures of Speech Used in the Bible",
+  MOR: "Morrish Bible Dictionary",
+  PMD: "Poor Man's Dictionary",
+  SBD: "Smith's Bible Dictionary",
+  USS: "Ussher Chronology",
+  VNT: "Vine's Expository Dictionary of New Testament Words"
+};
+
 export async function lookupDictionary(
   env: Env,
   term: string,
@@ -13,9 +38,10 @@ export async function lookupDictionary(
   }
 
   const cleanTerm = term.trim();
+  const cleanSource = (source || "tyndale").toLowerCase();
 
   // 1. Try Tyndale Open Bible Dictionary from R2 (Tyndale.dictionary SQLite)
-  if (source === "tyndale" || source === "all" || !source) {
+  if (cleanSource === "tyndale") {
     try {
       let { db } = await getDatabase(env, "dictionaries/Tyndale.dictionary");
       if (!db) {
@@ -48,25 +74,43 @@ export async function lookupDictionary(
     } catch (err) {
       console.warn("Tyndale dictionary SQLite query error:", err);
     }
+
+    return { error: `No entry found for '${term}' in the Tyndale Open Bible Dictionary.` };
   }
 
-  // 2. Fallback to Legacy / Easton Dictionary Index if not found in Tyndale
+  // 2. Query the combined legacy collection, filtering its stable source prefixes.
+  const sourceMeta = LEGACY_DICTIONARY_SOURCES[cleanSource];
+  const isCollection = cleanSource === "collection" || cleanSource === "all";
+  if (!sourceMeta && !isCollection) {
+    return { error: `Unsupported Bible dictionary source: '${source}'.` };
+  }
+
   const index = await getJsonFromR2<Record<string, string[]>>(env, "data/lookup/dictionaries_index.json");
   if (!index) {
     return { error: `No Bible dictionary entry found matching '${term}'.` };
   }
 
-  const bestMatch = findBestMatch(cleanTerm, Object.keys(index));
+  const availableTerms = isCollection
+    ? Object.keys(index)
+    : Object.keys(index).filter((key) => index[key]?.some((path) => path.startsWith(sourceMeta.prefix)));
+  const bestMatch = findBestMatch(cleanTerm, availableTerms);
   if (!bestMatch) {
-    return { error: `No Bible dictionary entry found matching '${term}'.` };
+    const label = isCollection ? "the Classic Bible Dictionary Collection" : sourceMeta.label;
+    return { error: `No entry found for '${term}' in ${label}.` };
   }
 
-  const paths = index[bestMatch];
+  const paths = isCollection
+    ? index[bestMatch]
+    : index[bestMatch].filter((path) => path.startsWith(sourceMeta.prefix));
   if (!paths || paths.length === 0) {
-    return { error: `No dictionary records found for '${bestMatch}'.` };
+    const label = isCollection ? "the Classic Bible Dictionary Collection" : sourceMeta.label;
+    return { error: `No entry found for '${bestMatch}' in ${label}.` };
   }
 
-  const results: string[] = [];
+  const results: Array<{ content: string; sourceLabel: string }> = [];
+  const localDictionary = !env.REFERENCE_DB
+    ? (await getDatabase(env, "data/dictionary.data")).db
+    : null;
 
   for (const path of paths) {
     let content: string | null = null;
@@ -83,8 +127,25 @@ export async function lookupDictionary(
       }
     }
 
+    if (!content && localDictionary) {
+      try {
+        const stmt = localDictionary.prepare("SELECT content FROM Dictionary WHERE path = ? LIMIT 1");
+        stmt.bind([path]);
+        if (stmt.step()) {
+          const row = stmt.getAsObject() as { content?: string };
+          content = row.content || null;
+        }
+        stmt.free();
+      } catch (localErr) {
+        console.warn("Local dictionary query error:", localErr);
+      }
+    }
+
     if (content) {
-      results.push(cleanHtmlToMarkdown(content));
+      results.push({
+        content: cleanHtmlToMarkdown(content),
+        sourceLabel: LEGACY_PREFIX_LABELS[path.slice(0, 3)] || `Legacy dictionary source ${path.slice(0, 3)}`
+      });
     }
   }
 
@@ -92,6 +153,10 @@ export async function lookupDictionary(
     return { error: `Could not retrieve dictionary content for '${bestMatch}'.` };
   }
 
-  const formattedText = `# Bible Dictionary: ${bestMatch}\n\n` + results.join("\n\n---\n\n");
+  const formattedText = isCollection
+    ? `# Classic Bible Dictionary Collection: ${bestMatch}\n\n` + results
+        .map((result) => `## ${result.sourceLabel}\n\n${result.content}\n\n*Source: ${result.sourceLabel}*`)
+        .join("\n\n---\n\n")
+    : `# ${sourceMeta.label}: ${bestMatch}\n\n${results.map((result) => result.content).join("\n\n---\n\n")}\n\n---\n*Source: ${sourceMeta.label}*`;
   return { title: bestMatch, formattedText };
 }

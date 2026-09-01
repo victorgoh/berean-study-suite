@@ -1,24 +1,24 @@
-# Berean MCP Server (Cloudflare Edge Edition)
+# Berean MCP Server
 
 A Model Context Protocol (MCP) Server for retrieving Bible texts, commentary, lexicon entries, original-language morphology, and related reference data.
 
-Designed to run **100% free on Cloudflare Workers** with data hosted in **Cloudflare R2** and **Cloudflare D1**.
+It runs locally with SQLite resource files, or optionally as a hosted service on Cloudflare Workers using R2 and D1. Local use does not require a Cloudflare account.
 
 ## Documentation
 
 - [Project overview](../README.md)
 - [Human User Guide](../docs/human-user-guide.md)
 - [MCP Client Integration](../docs/human-mcp-client-integration.md)
-- [Local Deployment](../docs/local-deployment.md)
-- [Cloudflare Deployment](../docs/cloudflare-deployment.md)
+- [Run Locally](../docs/local-deployment.md)
+- [Deploy to Cloudflare (optional)](../docs/cloudflare-deployment.md)
 - [Customization and Extension](../docs/customization-and-extension.md)
 - [Data Sources and Provenance](../docs/data-sources-and-provenance.md)
 
 ---
 
-## 🌐 Live Demo & Interactive Explorers
+## Try the Public Demo
 
-Try out the live public instance hosted on Cloudflare Workers:
+The public demo lets you explore the available tools before running your own local or hosted copy:
 
 | Resource | URL | Description |
 | :--- | :--- | :--- |
@@ -30,20 +30,17 @@ Try out the live public instance hosted on Cloudflare Workers:
 
 ---
 
-## ⚡ Architecture & Performance
+## How It Runs
 
-- **Focused MCP tools and Composite Study Packs**: Provides granular single-engine tools for AI-assisted research and composite Study Packs for convenient, comprehensive human research. Some packs can return substantial content in a single round-trip.
-- **Edge Cloudflare Execution**: Sub-50ms cold start, multi-tier LRU caching, and streaming JSON-RPC / Streamable HTTP transports.
-- **Hybrid Storage**:
-  - **Cloudflare D1 (Serverless SQLite)**: Ultra-fast indexing for Strong's Hebrew Lexicon (BDB), ISBE/Easton's Encyclopedias, and OT/NT Morphological datasets.
-  - **Cloudflare R2 (Object Storage)**: High-capacity storage for 23 classical & modern commentary sets (including *The Pulpit Commentary* and *The Biblical Illustrator*), BSB/NET/KJV/OHGB Bible databases, and cross-reference collections.
-- **Token Optimization**: Reclaims **33,000+ tokens of context window** on every turn.
+- **Local use:** Run the Node server against your local SQLite Bible and reference resources. This is the simplest way to explore, test, and customize the project.
+- **Optional hosted use:** Deploy the same service to Cloudflare Workers when you want a public or shared endpoint. R2 stores larger read-only resource files; D1 supports the configured reference indexes and morphology data.
+- **Focused and composite tools:** Use focused lookups for a specific question. Study Packs combine several sources for convenient human reading and can return more content.
 
 ---
 
-## 🔒 Security & Authentication
+## Optional Cloudflare Authentication
 
-Authentication is deployment-specific. The repository's public demonstration Worker is intentionally unauthenticated. A private/custom deployment can add API-key or Bearer-token authorization at the Worker or Cloudflare edge; configure and document that protection for the deployment before sharing its URL.
+Authentication is deployment-specific. The public demo is intentionally unauthenticated. A private Cloudflare deployment can add API-key or Bearer-token authorization before its URL is shared.
 
 ### 1. Set Secret in Cloudflare
 ```bash
@@ -87,7 +84,7 @@ npx wrangler secret put API_KEY
 
 The Berean Study Suite is strictly built on **100% Public Domain** classical historical works and **Open-Access (CC BY-SA 4.0)** academic datasets:
 
-* **23 Deployed Commentary Sets (Cloudflare R2)**: Expository, grammatical, homiletical, and historical commentaries by Matthew Henry, John Calvin, John Gill, Albert Barnes, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, The Pulpit Commentary, and the Tyndale Open Study Notes.
+* **24 Deployed Commentary Sets (Cloudflare R2)**: Expository, grammatical, homiletical, and historical commentaries including STEPBible's modern-English Matthew Henry arrangement, John Calvin, John Gill, Albert Barnes, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, H. A. W. Meyer, Charles Simeon, The Pulpit Commentary, and the Tyndale Open Study Notes.
 * **8 Bible Translations & Manuscript Editions**: BSB, NET, KJV, ASV, WEB, Open Hebrew & Greek Bible (OHGB), Septuagint (LXX), and OHGB Word-by-Word Interlinear.
 * **7 Original Language Lexicons**: STEPBible TBESG/TBESH, Thayer Greek, BDB Hebrew, LSJ, and morphological concordances.
 * **Academic Reference & Dictionaries**: Tyndale Open Bible Dictionary (6,010 articles), ISBE Encyclopedia, Easton's, Smith's, Nave's Topical, and TSK Cross-References.
@@ -142,7 +139,7 @@ For AI-facing MCP use, request one commentary at a time and specify the preferre
 24. **`ot_quotations_lookup`**: Look up Old Testament quotations, citations, allusions, and Septuagint bridge references for any NT or OT passage.
 
 #### Theology, Doctrines & Devotional Tools
-25. **`theological_dictionary`**: Easton's Bible Dictionary and ISBE Encyclopedia entries.
+25. **`theological_dictionary`**: Source-specific Tyndale, ISBE, Easton's, Smith's, Fausset's, Morrish, and Vine's articles, plus an explicitly labelled Classic Bible Dictionary Collection option.
 26. **`topic_study`**: Topical concordance lookups (Nave's & Torrey's).
 27. **`biblical_promises`**: Topic-indexed biblical promises for faith and prayer.
 
@@ -158,72 +155,11 @@ For AI-facing MCP use, request one commentary at a time and specify the preferre
 
 ---
 
-## 🚀 Deployment Options
+## Run Locally or Deploy to Cloudflare
 
-### Option 1: Deploy to Cloudflare Workers (Serverless Edge)
+### Run Locally
 
-Cloudflare Workers provides sub-50ms cold starts on Cloudflare's global edge network.
-
-**Prerequisite**: A free [Cloudflare Account](https://dash.cloudflare.com/sign-up) (authenticated via `npx wrangler login`).
-
-> [!TIP]
-> **🤖 Automated AI-Agent Deployment (Recommended)**:
-> The entire Cloudflare deployment process—including creating R2 buckets, uploading databases, provisioning D1 databases, updating database IDs in `wrangler.jsonc`, and deploying the worker—**is designed to be orchestrated directly by your AI coding agent** (Antigravity IDE, Claude Code, Cursor, or Windsurf). You do **not** need to manually execute these terminal commands one-by-one.
-> 
-> Simply open this project in your AI coding assistant and prompt:
-> > *"Please deploy my Berean MCP server to Cloudflare Workers. Create the R2 bucket, upload the databases from biblematedata using the sync scripts, provision the D1 databases for morphology and references, update wrangler.jsonc, and deploy the live worker."*
-
-#### ⚠️ Critical Storage Architecture Warnings:
-> [!IMPORTANT]
-> **Cloudflare D1 (Serverless Relational SQLite)** vs **Cloudflare R2 (Object Storage)**:
-> 
-> - **Use Cloudflare D1 for Index & Morphology Databases**:
->   - D1 is specifically designed for high-frequency, row-level SQL queries (e.g. `morphology.sqlite` for word-by-word Greek/Hebrew grammatical parsing and `berean-reference` for topic/dictionary indexes).
->   - **Warning**: D1 has strict database size constraints (500 MB on the free tier, 10 GB on paid) and batch execution limits. **Never** attempt to dump raw multi-gigabyte commentary collections or audio blobs into D1.
-> 
-> - **Use Cloudflare R2 for Large Commentary & Bible Files**:
->   - R2 is designed for zero-egress-fee, high-capacity object storage. It holds individual commentary files (e.g. `cHenry.commentary`, `cMacL.commentary`, `cBI.commentary`), entire Bible translation files (`BSB.bible`, `NET.bible`), and auxiliary index JSONs.
->   - **Warning**: R2 stores static read-only database files. Cloudflare Workers stream or query these via SQLite WASM in-memory. Do not attempt to write live transactions to R2 objects during query execution.
-
-#### Reference Execution Flow (Handled by AI Agent):
-
-```bash
-# 1. Install dependencies & typecheck
-cd berean-mcp
-npm install
-npm run typecheck
-
-# 2. Initialize Wrangler Configuration from Template
-# (wrangler.jsonc is in .gitignore to keep your private D1 Database IDs safe)
-cp wrangler.jsonc.example wrangler.jsonc
-
-# 3. Setup Cloudflare R2 Bucket & Upload Commentary/Bible Files
-# (Ensures local data is downloaded: pip install biblematedata && biblematedata)
-npx wrangler r2 bucket create biblemate-data
-python3 scripts/sync_data_to_r2.py --bucket biblemate-data
-
-# 4. Setup Cloudflare D1 Databases & Import Morphology/Reference Indexes
-npx wrangler d1 create berean-morphology
-npx wrangler d1 create berean-reference
-# Paste the resulting database_id UUIDs into your local wrangler.jsonc
-python3 scripts/import_to_d1.py
-
-# 5. Deploy Worker to Cloudflare Global Edge
-npm run deploy
-
-# 6. Set Private API Key Secret for Authentication
-npx wrangler secret put API_KEY
-```
-
-> [!NOTE]
-> **Database ID & Secret Privacy**:
-> `wrangler.jsonc` and `wrangler.toml` are explicitly ignored in `.gitignore`. Production Cloudflare D1 Database IDs and R2 bucket configurations stay strictly on your local machine / CI environment and are never pushed to public Git repositories. The repository tracks the sanitized template `wrangler.jsonc.example`.
-
----
-
-### Option 2: Run 100% Locally (Offline Node.js / Stdio & Local HTTP)
-
-Zero internet required. Runs directly on your machine using your local `~/.biblemate/data` databases:
+Local use is fully supported. Run the Node server against your local Bible and reference databases; no Cloudflare account is needed.
 
 #### 1. Stdio Mode (Standard for AI Coding Assistants & Desktop MCP Clients):
 ```bash
@@ -246,3 +182,7 @@ npm run start:http
     -H "Content-Type: application/json" \
     -d '{"version":"BSB","reference":"John 3:16"}'
   ```
+
+### Optional Cloudflare Deployment
+
+Cloudflare is useful when you want a hosted endpoint or a shared Explorer. It uses R2 for larger read-only resource files and D1 for the configured indexes. See [Cloudflare Deployment](../docs/cloudflare-deployment.md) for the complete, separate setup guide.

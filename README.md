@@ -60,3 +60,17 @@ npm run start:stdio
 The project is designed for a single user or small group. It favors a straightforward read-only resource model and redeployment when recovery is needed. Enterprise storage versioning and automated rollback are intentionally outside the current scope.
 
 Preserve source attribution and licensing information when adding resources, and validate changes locally before deployment.
+
+## Ongoing Improvements
+
+Current work focuses on making the project dependable, clear, and useful in everyday study:
+
+- **Testing and bug fixing:** Verify major tools, passage ranges, missing-resource handling, and local or deployed storage access.
+- **Fine-tuning content output and formatting:** Keep responses readable and relevant, with study-pack sections, tables, and source material presented clearly.
+- **Source content formatting cleanup:** Normalize imported resources so HTML entities, markup, line breaks, and original-language text display correctly.
+- **Resource reliability and coverage:** Check that every enabled Bible, commentary, dictionary, and language resource is available and behaves predictably when content is missing.
+- **Regression testing:** Maintain representative checks for ranges, cross-chapter passages, large sources, and common Explorer workflows as resources and services change.
+- **Source licensing and provenance:** Record each resource's source, licence, attribution, import process, and storage path.
+- **Output relevance and size:** Keep default responses focused; make larger sources and fuller study material explicit choices.
+- **Explorer usability and accessibility:** Improve desktop and mobile navigation, keyboard use, clear errors, readable tables, and expandable sections.
+- **Operational diagnostics:** Keep health and resource checks useful for identifying local or deployment-specific configuration problems.

@@ -13,7 +13,7 @@ All 23 commentary sets listed below are **fully deployed, verified, and live** o
 | Commentary Key | Title & Author | Historical Era | Theological / Methodological Scope | Status & License | Cloudflare R2 Storage Object |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **`TNotes`** | **Tyndale Open Study Notes**<br>*Tyndale House, Cambridge / STEPBible.org* | Modern (2020s) | Verse-by-verse historical-grammatical, Ancient Near Eastern (ANE) context, and Greek/Hebrew textual background across all 66 books. | **CC BY-SA 4.0** | `commentaries/TNotes.commentary` |
-| **`Henry`** | **Matthew Henry's Commentary on the Whole Bible**<br>*Matthew Henry* | 1662–1714 | Classic Puritan devotional exposition rich in practical pastoral insights, aphorisms, and heart application. | **Public Domain** | `commentaries/cHenry.commentary` |
+| **`Henry`** | **Matthew Henry's Modern English Commentary on the Whole Bible**<br>*Matthew Henry; modern-English rearrangement by STEPBible.org* | 1662–1714 | Modern-English, verse-by-verse arrangement of Matthew Henry's full pastoral exposition. | **CC BY 4.0** — attribute STEP Bible / STEPBible.org | `commentaries/normalized/cHenry.commentary` |
 | **`Calvin`** | **John Calvin's Commentaries**<br>*John Calvin* | 1509–1564 | Reformational exegesis with crystalline theological precision, grammatical rigor, and Christocentric covenant focus. | **Public Domain** | `commentaries/cCalvin.commentary` |
 | **`Gill`** | **An Exposition of the Old and New Testaments**<br>*John Gill* | 1697–1771 | Exhaustive Reformed Baptist commentary featuring deep Second Temple rabbinic, Targumic, and Talmudic context. | **Public Domain** | `commentaries/cGill.commentary` |
 | **`JFB`** | **Jamieson-Fausset-Brown Bible Commentary**<br>*Robert Jamieson, A. R. Fausset, David Brown* | 1871 | Balanced, verse-by-verse grammatical and historical critical exposition across the entire canon. | **Public Domain** | `commentaries/cJFB.commentary` |
@@ -87,6 +87,6 @@ All 23 commentary sets listed below are **fully deployed, verified, and live** o
 
 ## ⚖️ 5. Licensing & Open-Access Attribution
 
-1. **Public Domain Works**: All classical commentaries (Matthew Henry, John Calvin, John Gill, Albert Barnes, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, Meyer, etc.) were authored prior to 1928 and reside in the worldwide public domain.
+1. **Historic works and modern editions**: Many classical authors (John Calvin, John Gill, Albert Barnes, Alexander Maclaren, Charles Spurgeon, Keil & Delitzsch, Meyer, etc.) wrote public-domain works. Digital editions and modern transformations can carry separate licences. In particular, the active `Henry` resource is STEPBible's CC BY 4.0 modern-English arrangement and must be attributed to STEP Bible / STEPBible.org.
 2. **Creative Commons Works**: Datasets from **Tyndale House, Cambridge** and **STEPBible.org** (Tyndale Open Study Notes, Tyndale Open Bible Dictionary, TBESG/TBESH Lexicons, and Entity Disambiguation data) are licensed under **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**.
 3. **Software & MCP Server**: The Berean Study Suite and Berean MCP Server are open-source software licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
