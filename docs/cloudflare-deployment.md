@@ -20,4 +20,10 @@ npm run deploy
 
 The Worker is read-only with respect to study content. Authentication, health results, resource availability, and response behavior are deployment-specific. Do not commit private Wrangler configuration, credentials, `.wrangler/`, or resource data files.
 
+## Operating model
+
+The project is intended for a single user or small group. Validate changes before deployment and redeploy the complete Worker when recovery is needed. Storage-level versioning, staged promotion, and automated rollback are deliberately outside the current scope.
+
+Before a consequential action such as uploading data, changing D1, deploying, or deleting a resource, an AI assistant should explain the effect and obtain the operator's approval.
+
 For storage inventory and provenance, see [shared academic datasets](shared-academic-datasets.md) and the AI-oriented [resource runbook](agent-resource-data-runbook.md).

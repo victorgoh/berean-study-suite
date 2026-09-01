@@ -24,3 +24,11 @@ See:
 ## Extend the interface
 
 Update the Explorer configuration when exposing a new endpoint to human users. Avoid hard-coded tool counts; clients should discover the active catalog through MCP `tools/list` or `get_available_resources`.
+
+## Ideas for optional extensions
+
+Possible extensions include custom Bible versions or commentaries, additional MCP tools, semantic search, presentation-generation workflows, audio generation, or personal-notes integration. Each extension should be scoped separately, respect source licensing, and avoid turning the retrieval server into the AI composition layer.
+
+Example request for a custom commentary:
+
+> Convert this permitted source into the project's commentary SQLite schema, record its provenance and license, register it in the resource catalog, add a focused lookup test, and prepare it for local use before proposing any Cloudflare upload.
