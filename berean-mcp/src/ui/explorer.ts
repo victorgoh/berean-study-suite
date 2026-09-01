@@ -644,45 +644,36 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       100% { transform: rotate(360deg); }
     }
 
-    /* Open Source Site Footer */
+    /* Simple, reader-focused footer */
     .site-footer {
       border-top: 1px solid var(--surface-border);
       background: rgba(10, 14, 22, 0.96);
       backdrop-filter: blur(16px);
-      padding: 3rem 1.5rem 2rem 1.5rem;
+      padding: 2.25rem 1.5rem 1.5rem;
       margin-top: auto;
       font-size: 0.85rem;
       color: var(--text-dim);
     }
 
     .footer-container {
-      max-width: 1200px;
+      max-width: 760px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 2rem;
+      gap: 1rem;
     }
 
-    .footer-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2.5rem;
-    }
-
-    .footer-col h4 {
-      font-size: 0.85rem;
+    .footer-title {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1rem;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
       color: var(--text-main);
-      margin-bottom: 1rem;
     }
 
     .footer-links {
-      list-style: none;
       display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
+      flex-wrap: wrap;
+      gap: 0.6rem 1.1rem;
     }
 
     .footer-links a {
@@ -696,35 +687,21 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     }
 
     .footer-desc {
-      font-size: 0.82rem;
+      font-size: 0.86rem;
       color: var(--text-dim);
       line-height: 1.6;
     }
 
+    .footer-guidance {
+      border-left: 3px solid var(--accent-gold-border);
+      padding-left: 0.8rem;
+    }
+
     .footer-bottom {
       border-top: 1px solid var(--surface-border);
-      padding-top: 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
+      padding-top: 1rem;
       font-size: 0.78rem;
       color: var(--text-dim);
-    }
-
-    .github-link-highlight {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      color: var(--accent-gold);
-      font-weight: 700;
-      text-decoration: none;
-    }
-
-    .github-link-highlight:hover {
-      color: var(--accent-gold-hover);
-      text-decoration: underline;
     }
 
     /* First-draft light, results-first Explorer redesign. */
@@ -783,9 +760,95 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     .results-body blockquote, .verse-badge { background: var(--surface-hover); border-color: var(--accent-gold-border); }
     .results-body th, .results-body td { border-color: var(--surface-border); }
     .site-footer { background: #f1f1ed; border-color: var(--surface-border); }
-    .footer-col h4 { color: var(--text-main); }
+    .footer-title { color: var(--text-main); }
     .footer-links a { color: var(--text-muted); }
     @media (max-width: 640px) { .tool-popover.open { grid-template-columns: 1fr; } .hero-card { padding: 1rem; } .search-row { align-items: stretch; } .btn-study { justify-content: center; } }
+
+    @media print {
+      @page { margin: 16mm; }
+
+      body {
+        display: block;
+        background: #fff;
+        color: #000;
+      }
+
+      body > header,
+      body > main > .hero-card,
+      body > footer,
+      .results-actions,
+      .study-pack-controls,
+      .study-pack-toggle {
+        display: none !important;
+      }
+
+      main {
+        display: block;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .results-card {
+        display: block !important;
+        margin: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: #fff;
+      }
+
+      .results-header {
+        padding: 0 0 0.75rem;
+        border-bottom: 1px solid #bbb;
+        color: #000;
+      }
+
+      .results-body {
+        padding: 1rem 0 0;
+        color: #000;
+      }
+
+      .results-body h1,
+      .results-body h2,
+      .results-body h3,
+      .results-body h4,
+      .results-body h5,
+      .results-body h6,
+      .results-title,
+      .verse-badge {
+        color: #000;
+      }
+
+      .study-pack-section,
+      .study-pack-section.is-expanded,
+      .study-pack-section.is-collapsed {
+        border-color: #bbb;
+        background: #fff;
+        break-inside: auto;
+      }
+
+      .study-pack-section-header,
+      .study-pack-section.is-expanded .study-pack-section-header {
+        background: #f5f5f5;
+        border-bottom: 1px solid #bbb;
+        color: #000;
+      }
+
+      .study-pack-section.is-collapsed .study-pack-section-content {
+        display: block !important;
+      }
+
+      .study-pack-section-content,
+      .results-body blockquote,
+      .verse-badge {
+        background: #fff;
+        border-color: #bbb;
+      }
+
+      .markdown-table-wrap { overflow: visible; }
+      .results-body th, .results-body td { border-color: #999; }
+    }
   </style>
 </head>
 <body>
@@ -969,50 +1032,24 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
 
   </main>
 
-  <!-- Open Source Project Footer -->
+  <!-- Reader-focused project footer -->
   <footer class="site-footer">
     <div class="footer-container">
-      <div class="footer-grid">
-        <!-- Col 1: About the Project -->
-        <div class="footer-col">
-          <h4>About Berean Study Suite</h4>
-          <p class="footer-desc">
-            An open-source study companion designed to remove friction from reading, understanding, and praying through God's Word. Combines public-domain Scripture translations, 26 classical commentary sets, original Greek and Hebrew lexicons, and Model Context Protocol (MCP) server integration.
-          </p>
-          <p style="margin-top: 1rem;">
-            <a href="https://github.com/victorgoh/berean-study-suite" class="github-link-highlight" target="_blank" rel="noopener noreferrer">
-              ⭐ Get the Complete Source Code on GitHub &rarr;
-            </a>
-          </p>
-        </div>
-
-        <!-- Col 2: What Powers This Tool -->
-        <div class="footer-col">
-          <h4>Biblical & Academic Datasets</h4>
-          <ul class="footer-links">
-            <li><strong>Scripture:</strong> BSB, NET, KJV, ASV, WEB, OHGB (Hebrew/Greek), LXX</li>
-            <li><strong>Study Notes & Commentaries:</strong> Tyndale Open Study Notes (15,000+ verses), Matthew Henry, Spurgeon, Maclaren, Calvin, Barnes, JFB, Keil & Delitzsch</li>
-            <li><strong>Original Languages:</strong> STEPBible TBESG/TBESH, Thayer, BDB, LSJ</li>
-            <li><strong>Dictionaries & Reference:</strong> Tyndale Open Bible Dictionary (6,000+ articles), Easton's, ISBE Encyclopedia, Nave's Topical, TSK</li>
-          </ul>
-        </div>
-
-        <!-- Col 3: Source Code & Resources -->
-        <div class="footer-col">
-          <h4>Project Links & Documentation</h4>
-          <ul class="footer-links">
-            <li><a href="https://github.com/victorgoh/berean-study-suite" target="_blank" rel="noopener noreferrer">⭐ GitHub Repository (victorgoh/berean-study-suite)</a></li>
-            <li><a href="/docs">⚡ Scalar API Reference & Playground</a></li>
-            <li><a href="/swagger">📜 Swagger UI Visualizer</a></li>
-            <li><a href="/openapi.json">📋 OpenAPI 3.1 Specification</a></li>
-            <li><a href="/mcp">📡 Model Context Protocol (MCP) Gateway</a></li>
-          </ul>
-        </div>
-      </div>
+      <h2 class="footer-title">About Berean Study Suite</h2>
+      <p class="footer-desc">
+        Explore a Bible passage alongside study notes, commentaries, dictionaries, and original-language helps—all gathered in one place.
+      </p>
+      <p class="footer-desc footer-guidance">
+        This is a study companion, not a replacement for personal Bible reading, prayer, or thoughtful discussion. Read each passage in context and compare the perspectives offered by different sources.
+      </p>
+      <nav class="footer-links" aria-label="Helpful information">
+        <a href="https://github.com/victorgoh/berean-study-suite/blob/main/docs/human-user-guide.md" target="_blank" rel="noopener noreferrer">How to use this study tool</a>
+        <a href="https://github.com/victorgoh/berean-study-suite/blob/main/docs/data-sources-and-provenance.md" target="_blank" rel="noopener noreferrer">Study sources and credits</a>
+        <a href="https://github.com/victorgoh/berean-study-suite" target="_blank" rel="noopener noreferrer">About the project</a>
+      </nav>
 
       <div class="footer-bottom">
-        <p>© 2026 Berean Study Suite. Open-source under the GPL-3.0 License. Biblical texts and commentaries are in the Public Domain or used under open academic licenses.</p>
-        <p><a href="https://github.com/victorgoh/berean-study-suite" class="github-link-highlight" target="_blank" rel="noopener noreferrer">github.com/victorgoh/berean-study-suite</a></p>
+        <p>Study materials remain the work of their original authors and publishers and are credited in the source information.</p>
       </div>
     </div>
   </footer>
