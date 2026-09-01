@@ -1,6 +1,6 @@
 # Berean MCP Server (Cloudflare Edge Edition)
 
-A comprehensive Model Context Protocol (MCP) Server for biblical study, theological exegesis, scripture search, Strong's lexicons, original language morphology, classical commentary sets, and AI study personas.
+A Model Context Protocol (MCP) Server for retrieving Bible texts, commentary, lexicon entries, original-language morphology, and related reference data.
 
 Designed to run **100% free on Cloudflare Workers** with data hosted in **Cloudflare R2** and **Cloudflare D1**.
 

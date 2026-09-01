@@ -3,7 +3,7 @@
 *A comprehensive open-source biblical research suite combining a universal Cloudflare Edge & Stdio MCP Server with an autonomous AI agentic study studio.*
 
 > [!NOTE]
-> **Where Rigorous Scholarship Meets Agentic Power:** The **Berean Study Suite** pairs an ultra-fast edge Model Context Protocol (MCP) server with an autonomous research studio for pastors, theologians, translators, and students of Scripture.
+> **Bible research resources for people and AI tools:** The **Berean Study Suite** combines an edge-capable Model Context Protocol (MCP) server with a local research workspace.
 
 ---
 
@@ -12,16 +12,16 @@
 The **Berean Study Suite** is a unified, local-first research platform featuring:
 
 1. **Berean MCP Server (`berean-mcp`)**: Universal Model Context Protocol server providing focused Bible research tools, optional human-oriented Study Packs, classical & modern commentary sets deployed on Cloudflare R2, Bible translations/manuscript editions, Greek/Hebrew lexicons, and full REST/OpenAPI/Swagger endpoints for MCP clients.
-2. **15 Theological Personas & Autonomous Pipelines**: 15 specialized theological personas, exegesis skills (`berean://skills/...`), universal typography standards (`berean://rules/typography`), and study prompts embedded directly into the MCP server with zero static token overhead.
+2. **Research workflows and prompts**: Optional personas, research skills (`berean://skills/...`), formatting rules, and study prompts for organizing work with AI tools.
 
 ---
 
 ## 💡 Why Berean Study Suite?
 
-The **Berean Study Suite** was developed to provide an open, standardized bridge between historic biblical scholarship and modern AI assistants. By adopting the **Model Context Protocol (MCP)** and high-efficiency composite study pipelines, the suite delivers:
+The **Berean Study Suite** provides an open way to retrieve and examine Bible texts and related reference material with modern AI assistants. By adopting the **Model Context Protocol (MCP)**, the suite delivers:
 
 * **📚 Human-Friendly Study Packs**: Single-turn composite Study Packs bring together original-language morphology, cross-references, and commentaries for convenient human research. Because they intentionally return substantial context, they can consume significant tokens when requested through an AI client.
-* **🎯 Hallucination-Free Exegesis**: Queries verified SQLite databases directly, grounding AI responses in authentic biblical manuscripts and centuries of trusted commentary.
+* **🎯 Source-grounded research**: Queries local or hosted SQLite databases and presents results from the configured Bible and reference datasets. Results should still be checked against the cited source and study context.
 * **🔌 Universal Multi-Client Portability**: Works natively across Google Antigravity, Claude Desktop, Cursor, ChatGPT, and standalone Web Explorers.
 * **🌍 Flexible Edge & Local Deployment**: Runs completely offline on local machines or globally on Cloudflare Workers with sub-50ms latency.
 
@@ -53,9 +53,9 @@ Try out the live public instance hosted globally on Cloudflare Workers:
 Accessible via `berean://skills/berean` and the `berean-study` prompt, this pipeline runs a structured 5-phase research workflow:
 * **Phase 1: Study Planning & Goal Setting** — Generates a master study plan tailored to the user's passage, topic, or sermon seed.
 * **Phase 2: Scripture & Exegetical Data Retrieval** — Queries verified SQLite databases via `berean-mcp` tools, completely eliminating AI scripture hallucinations.
-* **Phase 3: Exegesis & Contextual Analysis** — Engages OT/NT biblical scholars to analyze original Greek/Hebrew syntax, morphology, and historical backgrounds.
+* **Phase 3: Contextual Analysis** — Uses the available language, commentary, and historical reference data to support further analysis.
 * **Phase 4: Systematic & Redemptive-Historical Synthesis** — Evaluates covenantal themes and redemptive trajectories.
-* **Phase 5: Pastoral & Practical Application** — Crafts gospel-centered applications, first-person prayers, and small-group questions.
+* **Phase 5: Optional Application** — Can provide material such as reflection prompts, prayers, or discussion questions when requested by the user.
 * **Iterative Final Manuscript** — Runs an iterative draft-audit-revision loop adopting the *Master Biblical Writer* persona to produce a publication-quality manuscript.
 
 ### 2. `/berean-plus` — Dynamic & Goal-Oriented Research
