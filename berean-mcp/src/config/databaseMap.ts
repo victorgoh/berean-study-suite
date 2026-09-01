@@ -71,6 +71,15 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     getStoragePath: () => "commentaries/normalized/cHenry.commentary"
   },
   {
+    key: "MHCC",
+    name: "Matthew Henry's Concise Commentary on the Whole Bible",
+    author: "Matthew Henry",
+    scope: "Whole Bible",
+    description: "Concise, practical commentary for passage-level reflection and study. Public-domain text; digital-source attribution retained.",
+    aliases: ["mhcc", "mhenry concise", "matthew henry concise", "henry concise"],
+    getStoragePath: () => "commentaries/cMHCC.commentary"
+  },
+  {
     key: "JFB",
     name: "Jamieson-Fausset-Brown Bible Commentary",
     author: "Robert Jamieson, A. R. Fausset, David Brown",

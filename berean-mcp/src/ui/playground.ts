@@ -735,6 +735,7 @@ export function renderPlaygroundHtml(): string {
             </optgroup>
             <optgroup label="⚡ Composite Study Packs" data-cat="packs">
               <option value="sermon_study_pack">sermon_study_pack (Preaching outlines & exegesis)</option>
+              <option value="illustration_study_pack">illustration_study_pack (Biblical Illustrator source material)</option>
               <option value="passage_exegesis_pack">passage_exegesis_pack (Deep morphology & analysis)</option>
               <option value="prayer_guide_study_pack">prayer_guide_study_pack (Scripture-led prayer & ACTS)</option>
               <option value="devotional_study_pack">devotional_study_pack (Spiritual devotion & prayer)</option>
@@ -985,6 +986,18 @@ export function renderPlaygroundHtml(): string {
           { name: "Psalm 23:1 (Good Shepherd)", params: { reference: "Psalm 23:1" } },
           { name: "Ephesians 2:8-10 (Grace & Works)", params: { reference: "Ephesians 2:8-10" } },
           { name: "Isaiah 53:5-6 (The Suffering Servant)", params: { reference: "Isaiah 53:5-6" } }
+        ]
+      },
+      illustration_study_pack: {
+        category: "packs",
+        fields: [
+          { id: "reference", label: "Scripture Reference", type: "text", default: "Romans 8:28" },
+          { id: "include_xrefs", label: "Include Cross-References", type: "checkbox", default: true }
+        ],
+        presets: [
+          { name: "Romans 8:28 (God's Purpose)", params: { reference: "Romans 8:28", include_xrefs: true } },
+          { name: "Psalm 23:1 (The Shepherd)", params: { reference: "Psalm 23:1", include_xrefs: true } },
+          { name: "Luke 15:11-32 (The Prodigal Son)", params: { reference: "Luke 15:11-32", include_xrefs: true } }
         ]
       },
       prayer_guide_study_pack: {

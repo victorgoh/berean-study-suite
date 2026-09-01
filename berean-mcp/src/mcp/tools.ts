@@ -30,6 +30,12 @@ export const SermonStudyPackSchema = {
   extra_commentators: z.array(z.string()).optional().describe("Optional additional public domain commentators to bundle dynamically, e.g. ['MacL', 'HH', 'Calvin', 'Henry', 'Barnes', 'Spur']")
 };
 
+export const IllustrationStudyPackSchema = {
+  reference: z.string().describe("Scripture passage for historical anecdotes and sermon illustrations, e.g. 'Romans 8:28', 'Psalm 23:1'"),
+  version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
+  include_xrefs: z.boolean().default(true).describe("Whether to include a short list of related cross-references")
+};
+
 export const LessonCreatorStudyPackSchema = {
   reference: z.string().describe("Scripture passage reference for Sunday School or small group lesson planning, e.g. 'Luke 15:11-32', 'Acts 2:42-47'"),
   version: z.string().default("BSB").describe("Bible translation version (default: BSB)"),
@@ -222,4 +228,3 @@ export const ChapterSummarySchema = {
   book: z.string().describe("Bible book name, e.g. 'Genesis', 'John', 'Romans'"),
   chapter: z.number().default(1).describe("Chapter number (e.g. 1, 3, 8)")
 };
-

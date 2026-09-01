@@ -108,9 +108,10 @@ The Berean Study Suite is strictly built on **100% Public Domain** classical his
 > **AI usage note:** Composite Study Packs are optimized for human readers who want several related resources together. They are not necessarily token-efficient for AI clients: a single response can contain multiple commentaries, Scripture text, cross-references, and language data. Prefer the granular tools for focused AI requests, and use larger Study Packs only when the additional context is needed.
 
 For AI-facing MCP use, request one commentary at a time and specify the preferred commentary when relevant (for example, `TNotes`, `Henry`, or `JFB`). The human Explorer may use multiple commentaries and Study Packs for comparison and comprehensive research. Study Pack tools are human-oriented and should be omitted from an AI-facing tool set.
-2. **`sermon_study_pack`**: Preaching outlines, Alexander Maclaren homiletics, Charles Simeon outlines (*Horae Homileticae*), The Biblical Illustrator, Matthew Henry, and TSK cross-references.
-3. **`lesson_creator_study_pack`**: Sunday School and small group outlines, Albert Barnes' practical remarks, Charles Ellicott's historical context, and Expositor's Bible notes.
-4. **`devotional_study_pack`**: Pastoral reflection, Charles Spurgeon (*Treasury of David*), Alexander Maclaren, Albert Barnes, Matthew Henry, and Biblical Promises.
+2. **`sermon_study_pack`**: Focused preaching preparation: Scripture, Alexander Maclaren homiletics, Charles Simeon outlines (*Horae Homileticae*), and TSK cross-references.
+3. **`illustration_study_pack`**: Opt-in Biblical Illustrator historical anecdotes and sermon illustrations, kept separate because its source material can be substantial.
+4. **`lesson_creator_study_pack`**: Focused Sunday School and small-group preparation: Scripture, a sourced chapter opening, Charles Ellicott's historical context, and cross-references.
+4. **`devotional_study_pack`**: Concise devotional reflection using Tyndale Open Study Notes, Matthew Henry's Concise Commentary, and supporting cross-references.
 5. **`prayer_guide_study_pack`**: Scripture for prayer, Spurgeon/Benson adoration, Wesley self-examination, and promises for first-person ACTS prayer.
 6. **`passage_exegesis_pack`**: Primary translation, OHGB original Greek/Hebrew, Keil & Delitzsch (OT) / H.A.W. Meyer (NT), Expositor's Greek NT, The Pulpit Commentary, and JFB.
 7. **`word_study_pack`**: Strong's numbers, TBESG/TBESH/Thayer/BDB lexicons, in-context morphology, and A.T. Robertson / Marvin Vincent word studies.

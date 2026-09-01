@@ -19,6 +19,7 @@ import {
   ChronologySchema,
   DailyReadingSchema,
   SermonStudyPackSchema,
+  IllustrationStudyPackSchema,
   DevotionalStudyPackSchema,
   PassageExegesisPackSchema,
   WordStudyPackSchema,
@@ -60,6 +61,7 @@ import { lookupChronology } from "../services/chronologyService.js";
 import { getDailyReading } from "../services/dailyReadService.js";
 import {
   getSermonStudyPack,
+  getIllustrationStudyPack,
   getDevotionalStudyPack,
   getPassageExegesisPack,
   getWordStudyPack,
@@ -158,10 +160,20 @@ export function createMcpServer(env: Env) {
     }
   );
 
+  server.tool(
+    "illustration_study_pack",
+    "Opt-in fuller pack for Biblical Illustrator anecdotes and sermon illustrations, with Scripture and a few cross-references.",
+    IllustrationStudyPackSchema,
+    async ({ reference, version, include_xrefs }) => {
+      const res = await getIllustrationStudyPack(env, reference, version, include_xrefs);
+      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+    }
+  );
+
   // 3. Lesson Creator Study Pack (Sunday School & Small Groups)
   server.tool(
     "lesson_creator_study_pack",
-    "High-speed composite tool that bundles scripture text, Barnes' practical remarks, Ellicott's historical context, Expositor's Bible notes, and chapter summaries for teachers.",
+    "Focused teaching pack with Scripture, a sourced chapter opening, Ellicott's historical context, and cross-references.",
     LessonCreatorStudyPackSchema,
     async ({ reference, version }) => {
       const res = await getLessonCreatorStudyPack(env, reference, version);

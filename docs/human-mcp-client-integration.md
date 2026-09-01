@@ -141,9 +141,10 @@ human Explorer for complete long-form articles.
 | :--- | :--- |
 | **`covenant_theology_pack`** | Redemptive-historical covenant progression, Calvin exegesis, Matthew Henry architecture, Gill prophecy, ISBE encyclopedia, and 12 TSK cross-references. |
 | **`passage_exegesis_pack`** | Detailed academic exegesis: Greek/Hebrew text, morphology, Keil & Delitzsch (`KD`), Expositor's Greek NT (`EGNT`), H. A. W. Meyer (`CECNT`), Clarke, The Pulpit Commentary, and JFB. |
-| **`sermon_study_pack`** | Homiletics & preaching: Scripture, Alexander Maclaren, Charles Simeon (Horae Homileticae), The Biblical Illustrator, Matthew Henry, and TSK cross-references. |
-| **`lesson_creator_study_pack`** | Bible teaching & small groups: Scripture text, chapter summaries, Charles Ellicott, Albert Barnes, and The Expositor's Bible. |
-| **`devotional_study_pack`** | Pastoral meditation: Scripture text, Charles Spurgeon, Alexander Maclaren, Albert Barnes, Matthew Henry, and biblical promises. |
+| **`sermon_study_pack`** | Focused homiletics & preaching: Scripture, Alexander Maclaren, Charles Simeon (Horae Homileticae), and TSK cross-references. |
+| **`illustration_study_pack`** | Opt-in Biblical Illustrator anecdotes and sermon illustrations. This intentionally fuller source is separate from the default sermon pack. |
+| **`lesson_creator_study_pack`** | Focused Bible teaching & small groups: Scripture text, a sourced chapter opening, Charles Ellicott, and cross-references. |
+| **`devotional_study_pack`** | Concise pastoral meditation: Scripture text, Tyndale Open Study Notes, Matthew Henry Concise Commentary, and biblical promises. |
 | **`prayer_guide_study_pack`** | Scriptural intercession: Scripture text, Charles Spurgeon, Joseph Benson, John Wesley, and biblical promises for ACTS prayer. |
 | **`word_study_pack`** | Deep word study: Strong's Concordance, BDB / Thayer lexicons, morphology occurrences, A. T. Robertson, and Marvin Vincent. |
 | **`topic_study_pack`** | Systematic topical study: Easton's Bible Dictionary, Nave's Topical definitions, and biblical promises. |

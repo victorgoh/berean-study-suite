@@ -11,6 +11,7 @@ Source files:
 - cmti/TyndaleOpenBibleDictionary.zip
 """
 
+import argparse
 import os
 import re
 import sys
@@ -134,27 +135,18 @@ def clean_xml_text(elem: ET.Element) -> str:
     cleaned = re.sub(r'•\s*', '\n\n* ', cleaned)
     return cleaned.strip()
 
-def parse_ref_key(ref_str: str) -> Optional[Tuple[int, int, int]]:
-    """Parses a reference string like 'Gen.1.1' or 'Gen.1.1-2.3' into (Book, Chapter, Verse)."""
-    if not ref_str:
+def parse_ref_range(ref_str: str) -> Optional[Tuple[int, int, int, int, int]]:
+    """Parse Tyndale refs such as Gen.1.1, Gen.1.3-13, or Gen.1.1-2.3."""
+    match = re.match(r'^([^.]+)\.(\d+)\.(\d+)(?:-(?:(\d+)\.)?(\d+))?$', ref_str.strip())
+    if not match:
         return None
-    
-    start_ref = ref_str.split('-')[0].strip()
-    parts = start_ref.split('.')
-    if len(parts) < 3:
-        return None
-    
-    book_abbr = parts[0].lower()
-    book_num = BOOK_MAP.get(book_abbr)
+    book_num = BOOK_MAP.get(match.group(1).lower())
     if not book_num:
         return None
-    
-    try:
-        chapter_num = int(parts[1])
-        verse_num = int(parts[2])
-        return (book_num, chapter_num, verse_num)
-    except ValueError:
-        return None
+    start_chapter, start_verse = int(match.group(2)), int(match.group(3))
+    end_chapter = int(match.group(4)) if match.group(4) else start_chapter
+    end_verse = int(match.group(5)) if match.group(5) else start_verse
+    return book_num, start_chapter, start_verse, end_chapter, end_verse
 
 def build_tyndale_studynotes(zip_path: str, out_db_path: str):
     """Parses StudyNotes.xml into TNotes.commentary."""
@@ -171,14 +163,16 @@ def build_tyndale_studynotes(zip_path: str, out_db_path: str):
 
     cur.execute("""
         CREATE TABLE Commentary (
+            Id INTEGER PRIMARY KEY AUTOINCREMENT,
             Book INTEGER NOT NULL,
             Chapter INTEGER NOT NULL,
-            Verse INTEGER NOT NULL,
-            Content TEXT NOT NULL,
-            PRIMARY KEY (Book, Chapter, Verse)
+            VerseStart INTEGER NOT NULL,
+            ChapterEnd INTEGER NOT NULL,
+            VerseEnd INTEGER NOT NULL,
+            Content TEXT NOT NULL
         )
     """)
-    cur.execute("CREATE INDEX idx_commentary_bcv ON Commentary(Book, Chapter, Verse);")
+    cur.execute("CREATE INDEX idx_commentary_range ON Commentary(Book, Chapter, VerseStart, ChapterEnd, VerseEnd);")
 
     cur.execute("""
         CREATE TABLE Details (
@@ -197,7 +191,7 @@ def build_tyndale_studynotes(zip_path: str, out_db_path: str):
         )
     """)
 
-    notes_by_bcv: Dict[Tuple[int, int, int], List[str]] = {}
+    rows = []
 
     with zipfile.ZipFile(zip_path, 'r') as z:
         print("▶ Parsing StudyNotes.xml...")
@@ -207,8 +201,8 @@ def build_tyndale_studynotes(zip_path: str, out_db_path: str):
         count = 0
         for item in root.findall('item'):
             refs = item.findtext('refs') or item.get('name') or ''
-            bcv = parse_ref_key(refs)
-            if not bcv:
+            ref_range = parse_ref_range(refs)
+            if not ref_range:
                 continue
             
             body_elem = item.find('body')
@@ -216,20 +210,12 @@ def build_tyndale_studynotes(zip_path: str, out_db_path: str):
             if not content:
                 continue
 
-            if bcv not in notes_by_bcv:
-                notes_by_bcv[bcv] = []
-            notes_by_bcv[bcv].append(content)
+            rows.append((*ref_range, content))
             count += 1
 
-        print(f"  ✓ Processed {count:,} study notes across {len(notes_by_bcv):,} distinct verses")
+        print(f"  ✓ Processed {count:,} source verse and passage notes")
 
-    # Insert combined notes into Commentary table
-    rows = []
-    for (b, c, v), note_list in notes_by_bcv.items():
-        combined_text = "\n\n---\n\n".join(note_list)
-        rows.append((b, c, v, combined_text))
-
-    cur.executemany("INSERT INTO Commentary (Book, Chapter, Verse, Content) VALUES (?, ?, ?, ?)", rows)
+    cur.executemany("INSERT INTO Commentary (Book, Chapter, VerseStart, ChapterEnd, VerseEnd, Content) VALUES (?, ?, ?, ?, ?, ?)", rows)
     conn.commit()
 
     cur.execute("PRAGMA vacuum;")
@@ -238,7 +224,7 @@ def build_tyndale_studynotes(zip_path: str, out_db_path: str):
     conn.close()
 
     size_mb = os.path.getsize(out_db_path) / (1024 * 1024)
-    print(f"✅ Successfully compiled TNotes.commentary ({total_verses:,} verses, {size_mb:.2f} MB)")
+    print(f"✅ Successfully compiled TNotes.commentary ({total_verses:,} verse and passage notes, {size_mb:.2f} MB)")
 
 def build_tyndale_dictionary(zip_path: str, out_db_path: str):
     """Parses Articles/*.xml from TyndaleOpenBibleDictionary.zip into Tyndale.dictionary."""
@@ -348,11 +334,12 @@ def build_tyndale_dictionary(zip_path: str, out_db_path: str):
     print(f"✅ Successfully compiled Tyndale.dictionary ({total_articles:,} entries, {size_mb:.2f} MB)")
 
 if __name__ == '__main__':
-    notes_zip = '/Users/victorgoh/Projects/my-berean-study-suite/cmti/tyndale_open-studynotes.zip'
-    dict_zip = '/Users/victorgoh/Projects/my-berean-study-suite/cmti/TyndaleOpenBibleDictionary.zip'
-    
-    notes_db = '/Users/victorgoh/Projects/my-berean-study-suite/berean-mcp/data/commentaries/TNotes.commentary'
-    dict_db = '/Users/victorgoh/Projects/my-berean-study-suite/berean-mcp/data/dictionaries/Tyndale.dictionary'
+    parser = argparse.ArgumentParser(description='Build full Tyndale Study Notes and Dictionary SQLite databases from source archives.')
+    parser.add_argument('--study-notes-zip', required=True, help='Path to tyndale_open-studynotes.zip')
+    parser.add_argument('--dictionary-zip', required=True, help='Path to TyndaleOpenBibleDictionary.zip')
+    parser.add_argument('--notes-output', required=True, help='Output path for TNotes.commentary')
+    parser.add_argument('--dictionary-output', required=True, help='Output path for Tyndale.dictionary')
+    args = parser.parse_args()
 
-    build_tyndale_studynotes(notes_zip, notes_db)
-    build_tyndale_dictionary(dict_zip, dict_db)
+    build_tyndale_studynotes(args.study_notes_zip, args.notes_output)
+    build_tyndale_dictionary(args.dictionary_zip, args.dictionary_output)

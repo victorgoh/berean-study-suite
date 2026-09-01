@@ -122,14 +122,27 @@ export async function lookupCommentary(
     }
     tableInfoStmt.free();
 
+    const rangeStartCol = cols.includes("VerseStart")
+      ? "VerseStart"
+      : cols.includes("Verse") && cols.includes("ChapterEnd") && cols.includes("VerseEnd")
+        ? "Verse"
+        : null;
+    const hasVerseRange = Boolean(rangeStartCol && cols.includes("VerseEnd"));
     const hasVerse = cols.includes("Verse");
     const textCol = cols.includes("Content") ? "Content" : cols.includes("Scripture") ? "Scripture" : cols[cols.length - 1];
 
     let sql = "";
     let params: any[] = [];
 
-    if (hasVerse) {
-      sql = `SELECT Chapter, Verse, ${textCol} as Text FROM Commentary WHERE Book = ? AND Chapter = ? AND Verse >= ? AND Verse <= ? ORDER BY Chapter, Verse`;
+    if (hasVerseRange) {
+      const includeChapterIntro = parsed.verseStart === 1 && parsed.verseEnd >= 999;
+      const rangeEndChapter = cols.includes("ChapterEnd") ? "ChapterEnd" : "Chapter";
+      const introClause = includeChapterIntro ? `(${rangeStartCol} = 0 AND ${rangeEndChapter} = Chapter AND VerseEnd = 0) OR ` : "";
+      sql = `SELECT Chapter, ${rangeStartCol} AS VerseStart, ${rangeEndChapter} AS ChapterEnd, VerseEnd, ${textCol} as Text FROM Commentary WHERE Book = ? AND (${introClause}(( ${rangeEndChapter} > ? OR (${rangeEndChapter} = ? AND VerseEnd >= ?)) AND (Chapter < ? OR (Chapter = ? AND ${rangeStartCol} <= ?)))) ORDER BY Chapter, ${rangeStartCol}, ${rangeEndChapter}, VerseEnd`;
+      params = [parsed.bookNumber, parsed.chapterStart, parsed.chapterStart, parsed.verseStart, parsed.chapterEnd, parsed.chapterEnd, parsed.verseEnd];
+    } else if (hasVerse) {
+      const includeChapterIntro = parsed.verseStart === 1 && parsed.verseEnd >= 999;
+      sql = `SELECT Chapter, Verse, ${textCol} as Text FROM Commentary WHERE Book = ? AND Chapter = ? AND ${includeChapterIntro ? "(Verse = 0 OR " : ""}Verse >= ? AND Verse <= ?${includeChapterIntro ? ")" : ""} ORDER BY Chapter, Verse`;
       params = [parsed.bookNumber, parsed.chapterStart, parsed.verseStart, parsed.verseEnd];
     } else {
       sql = `SELECT Chapter, ${textCol} as Text FROM Commentary WHERE Book = ? AND Chapter = ? LIMIT 1`;
@@ -139,7 +152,7 @@ export async function lookupCommentary(
     const stmt = db.prepare(sql);
     stmt.bind(params);
 
-    const rows: { Chapter: number; Verse?: number; Text: string }[] = [];
+    const rows: { Chapter: number; Verse?: number; VerseStart?: number; ChapterEnd?: number; VerseEnd?: number; Text: string }[] = [];
     while (stmt.step()) {
       rows.push(stmt.getAsObject() as any);
     }
@@ -153,7 +166,21 @@ export async function lookupCommentary(
 
     let commentaryOutput = "";
 
-    if (hasVerse) {
+    if (hasVerseRange) {
+      commentaryOutput = rows
+        .map((r) => {
+          const first = r.VerseStart ?? 0;
+          const last = r.VerseEnd ?? first;
+          const endChapter = r.ChapterEnd ?? r.Chapter;
+          const verseLabel = first === 0 && last === 0
+            ? "Introduction"
+            : r.Chapter === endChapter
+              ? first === last ? String(first) : `${first}-${last}`
+              : `${first}-${endChapter}:${last}`;
+          return `### ${parsed.bookName} ${r.Chapter}:${verseLabel}\n\n` + cleanHtmlToMarkdown(r.Text);
+        })
+        .join("\n\n---\n\n");
+    } else if (hasVerse) {
       commentaryOutput = rows
         .map((r) => `### ${parsed.bookName} ${r.Chapter}:${r.Verse}\n\n` + cleanHtmlToMarkdown(r.Text))
         .join("\n\n---\n\n");

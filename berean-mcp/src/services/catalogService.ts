@@ -17,12 +17,13 @@ export async function getAvailableResources(
 
   const studyPacks = [
     { name: "passage_exegesis_pack", description: "Comprehensive verse-by-verse exegesis with Greek/Hebrew, morphology, Keil & Delitzsch / Meyer, Expositor's Greek NT, and JFB." },
-    { name: "sermon_study_pack", description: "Preaching outline, Maclaren homiletics, Charles Simeon, Biblical Illustrator, Matthew Henry, and cross-references." },
-    { name: "devotional_study_pack", description: "Pastoral reflection with Spurgeon, Maclaren, Albert Barnes, Matthew Henry, and 1st-person ACTS prayer." },
+    { name: "sermon_study_pack", description: "Focused preaching preparation with Scripture, Maclaren, Charles Simeon, and cross-references." },
+    { name: "illustration_study_pack", description: "Opt-in fuller collection of Biblical Illustrator anecdotes and sermon illustrations." },
+    { name: "devotional_study_pack", description: "Concise devotional reflection with Tyndale Open Study Notes, Matthew Henry Concise Commentary, and supporting cross-references." },
     { name: "word_study_pack", description: "Lexical definitions (Thayer/BDB/LSJ), syntactic morphology, and A.T. Robertson / Marvin Vincent word studies." },
     { name: "topic_study_pack", description: "Topical concordance, systematic theology definitions, and full scripture passages." },
     { name: "commentary_study_pack", description: "Multi-commentary synthesis across custom subsets of the available commentators." },
-    { name: "lesson_creator_study_pack", description: "Teaching outlines, discussion questions, Albert Barnes, and Ellicott for teachers." },
+    { name: "lesson_creator_study_pack", description: "Focused lesson preparation with Scripture, a sourced chapter opening, Ellicott, and cross-references." },
     { name: "prayer_guide_study_pack", description: "Scriptural adoration, confession, thanksgiving, supplication, and biblical promises." },
     { name: "covenant_theology_pack", description: "Redemptive-historical covenant progression, John Calvin, John Gill, and canonical narrative synthesis." },
     { name: "interlinear_study_pack", description: "Inline Greek/Hebrew word-by-word interlinear with continuous verse layout, morphological tags, and original language glossary." },

@@ -30,6 +30,7 @@ import { getDailyReading } from "./services/dailyReadService.js";
 import { getAvailableResources } from "./services/catalogService.js";
 import {
   getSermonStudyPack,
+  getIllustrationStudyPack,
   getDevotionalStudyPack,
   getPassageExegesisPack,
   getWordStudyPack,
@@ -212,6 +213,7 @@ export default {
             tools: {
               get_available_resources: "/tools/get_available_resources",
               sermon_study_pack: "/tools/sermon_study_pack",
+              illustration_study_pack: "/tools/illustration_study_pack",
               lesson_creator_study_pack: "/tools/lesson_creator_study_pack",
               devotional_study_pack: "/tools/devotional_study_pack",
               prayer_guide_study_pack: "/tools/prayer_guide_study_pack",
@@ -376,6 +378,12 @@ export default {
     if (url.pathname === "/tools/sermon_study_pack" && request.method === "POST") {
       const body = (await request.json().catch(() => ({}))) as any;
       const res = await getSermonStudyPack(env, body.reference || body.passage || "Romans 8:1-4", body.version || "BSB", body.include_xrefs ?? true);
+      return restServiceResponse(res, corsHeaders);
+    }
+
+    if (url.pathname === "/tools/illustration_study_pack" && request.method === "POST") {
+      const body = (await request.json().catch(() => ({}))) as any;
+      const res = await getIllustrationStudyPack(env, body.reference || body.passage || "Romans 8:28", body.version || "BSB", body.include_xrefs ?? true);
       return restServiceResponse(res, corsHeaders);
     }
 

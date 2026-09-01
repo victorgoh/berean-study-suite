@@ -65,7 +65,7 @@ export function getOpenApiSpec(serverUrl: string = "https://berean-mcp.victorgoh
         post: {
           tags: ["⚡ Composite Study Packs"],
           summary: "Sermon & Homiletics Study Pack",
-          description: "Bundles Scripture, Alexander Maclaren, Charles Simeon outlines, Biblical Illustrator, Matthew Henry, and cross-references.",
+          description: "Focused bundle of Scripture, Alexander Maclaren, Charles Simeon outlines, and cross-references. Use illustration_study_pack when fuller Biblical Illustrator material is wanted.",
           requestBody: {
             required: true,
             content: {
@@ -84,11 +84,35 @@ export function getOpenApiSpec(serverUrl: string = "https://berean-mcp.victorgoh
           responses: { "200": { description: "Complete sermon preparation bundle" } }
         }
       },
+      "/tools/illustration_study_pack": {
+        post: {
+          tags: ["⚡ Composite Study Packs"],
+          summary: "Biblical Illustrator Study Pack",
+          description: "An explicit, fuller pack of Biblical Illustrator historical anecdotes and sermon illustrations, with Scripture and a short cross-reference list.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "Romans 8:28", description: "Scripture passage" },
+                    version: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV"], default: "BSB" },
+                    include_xrefs: { type: "boolean", default: true }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Biblical Illustrator source material" } }
+        }
+      },
       "/tools/lesson_creator_study_pack": {
         post: {
           tags: ["⚡ Composite Study Packs"],
           summary: "Lesson Creator & Teaching Study Pack",
-          description: "Bundles Scripture, chapter summaries, Charles Ellicott, Albert Barnes, and Expositor's Bible for teachers.",
+          description: "Focused bundle of Scripture, a sourced chapter opening, Charles Ellicott, and cross-references for teachers.",
           requestBody: {
             required: true,
             content: {

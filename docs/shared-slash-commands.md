@@ -35,10 +35,11 @@ When you execute `/berean`, `/berean-plus`, or ask free-form study questions, th
 | Study Pack | Description & Included Datasets |
 | :--- | :--- |
 | **`passage_exegesis_pack`** | Detailed academic exegesis: Greek/Hebrew text, morphology, Keil & Delitzsch (`KD`), H. A. W. Meyer (`CECNT`), Expositor's Greek NT (`EGNT`), Clarke, The Pulpit Commentary, and JFB. |
-| **`sermon_study_pack`** | Preaching & homiletics: Full Scripture text, Alexander Maclaren, Charles Simeon (Horae Homileticae), The Biblical Illustrator, Matthew Henry, and TSK cross-references. |
+| **`sermon_study_pack`** | Focused preaching & homiletics: Scripture, Alexander Maclaren, Charles Simeon (Horae Homileticae), and TSK cross-references. |
+| **`illustration_study_pack`** | Opt-in Biblical Illustrator historical anecdotes and sermon illustrations. Its fuller source content is kept out of the default sermon pack. |
 | **`covenant_theology_pack`** | Redemptive-historical covenant progression: John Calvin, John Gill prophecy, ISBE Encyclopedia, and 12 TSK cross-references. |
-| **`lesson_creator_study_pack`** | Bible teaching & small groups: Scripture text, chapter summaries, Charles Ellicott, The Expositor's Bible, and Albert Barnes. |
-| **`devotional_study_pack`** | Pastoral meditation: Scripture text, Charles Spurgeon, Alexander Maclaren, Albert Barnes, and Matthew Henry. |
+| **`lesson_creator_study_pack`** | Focused Bible teaching & small groups: Scripture text, a sourced chapter opening, Charles Ellicott, and cross-references. |
+| **`devotional_study_pack`** | Concise pastoral meditation: Scripture text, Tyndale Open Study Notes, Matthew Henry Concise Commentary, and supporting cross-references. |
 | **`prayer_guide_study_pack`** | Scriptural intercession: Scripture text, Charles Spurgeon adoration, Joseph Benson, John Wesley examination, and promises. |
 | **`word_study_pack`** | Deep word study: Strong's Concordance, Brown-Driver-Briggs (BDB), Thayer's Greek Lexicon, A. T. Robertson, and Marvin Vincent. |
 | **`topic_study_pack`** | Systematic topical study: Easton's Bible Dictionary, Nave's Topical definitions, and biblical promises. |

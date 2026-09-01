@@ -544,6 +544,64 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       font-weight: 700;
     }
 
+    .markdown-table-wrap {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    /* Study packs can combine several independent resources. Keep each one
+       navigable without discarding the complete source material. */
+    .study-pack-controls {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      margin: 0.75rem 0;
+    }
+
+    .study-pack-control,
+    .study-pack-toggle {
+      background: transparent;
+      border: 1px solid var(--surface-border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font: 600 0.76rem/1 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .study-pack-control { padding: 0.45rem 0.65rem; }
+    .study-pack-control:hover,
+    .study-pack-toggle:hover { background: var(--surface-hover); color: var(--text-main); }
+
+    .study-pack-section {
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      margin: 0.8rem 0;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .study-pack-section-header {
+      align-items: center;
+      display: flex;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      gap: 0.7rem;
+      justify-content: space-between;
+      padding: 0.8rem 1rem;
+    }
+
+    .study-pack-section.is-expanded .study-pack-section-header {
+      background: var(--surface-hover);
+      border-bottom: 1px solid var(--surface-border);
+    }
+    .study-pack-toggle { min-width: 1.8rem; padding: 0.35rem; }
+    .study-pack-section.is-collapsed .study-pack-section-content { display: none; }
+    .study-pack-section-content { padding: 0.25rem 1rem 0.2rem; }
+    .study-pack-section-content > :first-child { margin-top: 0.9rem; }
+    .study-pack-section-content h1,
+    .study-pack-section-content h2 { display: none; }
+
     .verse-badge {
       font-family: 'Plus Jakarta Sans', sans-serif;
       font-weight: 700;
@@ -776,6 +834,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         <!-- 3. Study & Teaching -->
         <div class="mode-pill" data-cat="study" data-mode="exegesis" style="display:none;">🔬 Verse-by-Verse Study</div>
         <div class="mode-pill" data-cat="study" data-mode="sermon" style="display:none;">🎙️ Teaching & Sermon Helper</div>
+        <div class="mode-pill" data-cat="study" data-mode="illustrations" style="display:none;">💡 Sermon Illustrations</div>
         <div class="mode-pill" data-cat="study" data-mode="lesson" style="display:none;">🏫 Small Group & Sunday School</div>
         <div class="mode-pill" data-cat="study" data-mode="commentary_pack" style="display:none;">💬 Compare Commentaries</div>
         <div class="mode-pill" data-cat="study" data-mode="commentary_single" style="display:none;">✍️ Single Commentary</div>
@@ -1077,6 +1136,19 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         ],
         buildPayload: (q, v) => ({ reference: q, version: v })
       },
+      illustrations: {
+        endpoint: "/tools/illustration_study_pack",
+        icon: "💡",
+        btnLabel: "Find Sermon Illustrations",
+        placeholder: "Passage for illustrations: e.g. Romans 8:28, Psalm 23:1, Luke 15:11-32",
+        defaultQuery: "Romans 8:28",
+        samples: [
+          { label: "Romans 8:28 (God's Purpose)", query: "Romans 8:28" },
+          { label: "Psalm 23:1 (The Shepherd)", query: "Psalm 23:1" },
+          { label: "Luke 15:11-32 (The Prodigal Son)", query: "Luke 15:11-32" }
+        ],
+        buildPayload: (q, v) => ({ reference: q, version: v, include_xrefs: true })
+      },
       lesson: {
         endpoint: "/tools/lesson_creator_study_pack",
         icon: "🏫",
@@ -1101,7 +1173,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
           { label: "John 3:16", query: "John 3:16" },
           { label: "Genesis 1:1", query: "Genesis 1:1" }
         ],
-        buildPayload: (q) => ({ reference: q, commentators: ["TNotes", "Henry", "Calvin", "Spur", "Barnes"] })
+        buildPayload: (q) => ({ reference: q, commentators: ["TNotes", "Henry", "Calvin", "Barnes"] })
       },
       commentary_single: {
         endpoint: "/tools/commentary_lookup",
@@ -1581,7 +1653,12 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         }
 
         lastRenderedMarkdown = md;
-        resultsBody.innerHTML = formatMarkdown(md);
+        // Treat every Explorer tool whose endpoint is a study pack as a
+        // sectioned result, even if an HTTP adapter omits optional metadata.
+        const isStudyPack = config.endpoint.includes("_pack");
+        resultsBody.innerHTML = isStudyPack
+          ? formatStudyPackMarkdown(md)
+          : formatMarkdown(md);
 
         resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -1595,6 +1672,92 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     }
 
     // Markdown Formatter
+    function formatStudyPackMarkdown(md) {
+      const sectionPattern = /^##\\s+(.+)$/gm;
+      const matches = Array.from(md.matchAll(sectionPattern));
+      if (matches.length === 0) return formatMarkdown(md);
+
+      const leading = md.slice(0, matches[0].index).trim();
+      let html = leading ? formatMarkdown(leading) : "";
+      html += '<div class="study-pack-controls" aria-label="Study pack sections">' +
+        '<button type="button" class="study-pack-control" onclick="setAllStudyPackSections(true)">Expand all</button>' +
+        '<button type="button" class="study-pack-control" onclick="setAllStudyPackSections(false)">Collapse all</button>' +
+        '</div>';
+
+      matches.forEach((match, index) => {
+        const title = match[1].trim();
+        const contentStart = (match.index || 0) + match[0].length;
+        const contentEnd = index + 1 < matches.length
+          ? (matches[index + 1].index || md.length)
+          : md.length;
+        const content = md.slice(contentStart, contentEnd).trim();
+        const expanded = /(^|\\s)1\\.|scripture/i.test(title);
+        const stateClass = expanded ? "is-expanded" : "is-collapsed";
+        const icon = expanded ? "−" : "+";
+        const expandedState = expanded ? "true" : "false";
+
+        html += '<div class="study-pack-section ' + stateClass + '">' +
+          '<div class="study-pack-section-header">' +
+          '<span>' + formatMarkdown(title).replace(/^<p>|<\\/p>$/g, "") + '</span>' +
+          '<button type="button" class="study-pack-toggle" aria-expanded="' + expandedState + '" aria-label="Toggle ' + title.replace(/&/g, "and").replace(/\"/g, "") + '" onclick="toggleStudyPackSection(this)">' + icon + '</button>' +
+          '</div>' +
+          '<div class="study-pack-section-content">' + formatMarkdown(content) + '</div>' +
+          '</div>';
+      });
+
+      return html;
+    }
+
+    function toggleStudyPackSection(button) {
+      const section = button.closest(".study-pack-section");
+      const isExpanded = section.classList.contains("is-expanded");
+      section.classList.toggle("is-expanded", !isExpanded);
+      section.classList.toggle("is-collapsed", isExpanded);
+      button.setAttribute("aria-expanded", String(!isExpanded));
+      button.textContent = isExpanded ? "+" : "−";
+    }
+
+    function setAllStudyPackSections(expanded) {
+      document.querySelectorAll(".study-pack-section").forEach(section => {
+        section.classList.toggle("is-expanded", expanded);
+        section.classList.toggle("is-collapsed", !expanded);
+        const button = section.querySelector(".study-pack-toggle");
+        button.setAttribute("aria-expanded", String(expanded));
+        button.textContent = expanded ? "−" : "+";
+      });
+    }
+
+    function renderMarkdownTables(markdown) {
+      const lines = markdown.split("\\n");
+      const rendered = [];
+
+      const cells = (line) => line.trim().slice(1, -1).split("|").map(cell => cell.trim());
+      const isDivider = (line) => line.trim().startsWith("|") && line.trim().endsWith("|") &&
+        cells(line).every(cell => /^:?-{3,}:?$/.test(cell));
+
+      for (let index = 0; index < lines.length; index++) {
+        if (!lines[index].trim().startsWith("|") || !lines[index].trim().endsWith("|") || !isDivider(lines[index + 1] || "")) {
+          rendered.push(lines[index]);
+          continue;
+        }
+
+        const headerCells = cells(lines[index]);
+        const bodyRows = [];
+        index += 2;
+        while (index < lines.length && lines[index].trim().startsWith("|") && lines[index].trim().endsWith("|")) {
+          bodyRows.push(cells(lines[index]));
+          index++;
+        }
+        index--;
+
+        const header = headerCells.map(cell => "<th>" + cell + "</th>").join("");
+        const body = bodyRows.map(row => "<tr>" + row.map(cell => "<td>" + cell + "</td>").join("") + "</tr>").join("");
+        rendered.push('<div class="markdown-table-wrap"><table><thead><tr>' + header + '</tr></thead><tbody>' + body + '</tbody></table></div>');
+      }
+
+      return rendered.join("\\n");
+    }
+
     function formatMarkdown(md) {
       if (!md) return "";
       let html = md;
@@ -1611,6 +1774,9 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
 
       // Escape HTML
       html = html.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      // Tables are used by morphology and several reference-oriented tools.
+      html = renderMarkdownTables(html);
 
       // Scripture Tag Highlighting [Romans 8:28 (BSB)]
       html = html.replace(new RegExp(B + "[([0-9a-zA-Z" + B + "s]+ " + B + "d+:" + B + "d+(?:-" + B + "d+)?(?:" + B + "s*" + B + "([A-Za-z0-9]+" + B + "))?)]", "g"), '<span class="verse-badge">[$1]</span>');

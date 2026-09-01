@@ -12,7 +12,7 @@ This guide explains how to compile, ingest, and deploy **STEPBible.org datasets*
 | :--- | :--- | :--- | :--- |
 | **TBESG (Greek)** | Tab-separated TSV / STEPBible GitHub | Translators' Brief Lexicon of Extended Greek Strong's with grammatical parsing, transliterations, and nuanced definitions. | `lexicon_lookup`, `word_study_pack`, `passage_exegesis_pack` |
 | **TBESH (Hebrew)** | Tab-separated TSV / STEPBible GitHub | Translators' Brief Lexicon of Extended Hebrew/Aramaic Strong's with root etymologies and lexical senses. | `lexicon_lookup`, `word_study_pack`, `passage_exegesis_pack` |
-| **Tyndale Study Notes (TNotes)** | Curated SQLite Commentary | Concise, high-density, historical-grammatical notes by Tyndale House, Cambridge scholars (CC BY-SA 4.0). | `commentary_lookup`, `sermon_study_pack`, `passage_exegesis_pack` |
+| **Tyndale Study Notes (TNotes)** | Curated SQLite Commentary | Concise, high-density, historical-grammatical notes by Tyndale House, Cambridge scholars (CC BY-SA 4.0). | `commentary_lookup`, `passage_exegesis_pack` |
 | **Septuagint (LXX) & Variants** | SQLite & D1 Indexes | Greek Septuagint text, Brenton English translation, and Masoretic-Septuagint textual divergences. | `septuagint_lookup`, `septuagint_study_pack` |
 | **OT Quotations in NT** | SQLite & D1 Indexes | Verbatim Hebrew Masoretic, Greek LXX, and Greek NT comparative alignment for apostolic quotations. | `ot_quotations_lookup`, `ot_in_nt_study_pack` |
 | **Biblical Entities & Units** | JSON / SQLite Lookup | Disambiguation profiles for biblical persons/places and conversions for ancient currency, weights, and measures. | `entity_disambiguation`, `convert_ancient_units` |
