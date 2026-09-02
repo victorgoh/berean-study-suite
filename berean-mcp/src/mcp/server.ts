@@ -85,6 +85,16 @@ import { z } from "zod";
 import { normalizeMcpToolResult } from "./output.js";
 import { OutputModeSchema } from "./tools.js";
 
+// Keep the health/discovery summary aligned with the registrations below.
+// The AI profile exposes the catalog plus specialized lookup tools; the human
+// profile additionally exposes the composite Study Pack tools.
+export const MCP_TOOL_COUNTS = {
+  specialized: 22,
+  studyPacks: 13,
+  ai: 23,
+  human: 36
+} as const;
+
 export function createMcpServer(env: Env) {
   const baseServer = new McpServer({
     name: "berean-mcp",

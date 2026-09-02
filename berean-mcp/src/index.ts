@@ -7,7 +7,7 @@ if (typeof (globalThis as any).self === "undefined") {
 
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
-import { createMcpServer } from "./mcp/server.js";
+import { createMcpServer, MCP_TOOL_COUNTS } from "./mcp/server.js";
 import { lookupBiblePassage } from "./services/bibleService.js";
 import { searchBible } from "./services/searchService.js";
 import { lookupCrossReferences } from "./services/xrefService.js";
@@ -532,8 +532,10 @@ export default {
             protocol: "Model Context Protocol (MCP) Streamable HTTP",
             endpoint: "/mcp",
             instructions: "Send JSON-RPC 2.0 POST requests to /mcp with standard initialize or tool calls.",
-            toolsCount: 35,
-            studyPacksCount: 12
+            toolsCount: env.MCP_PROFILE === "human" ? MCP_TOOL_COUNTS.human : MCP_TOOL_COUNTS.ai,
+            studyPacksCount: env.MCP_PROFILE === "human" ? MCP_TOOL_COUNTS.studyPacks : 0,
+            specializedToolsCount: MCP_TOOL_COUNTS.specialized,
+            profile: env.MCP_PROFILE || "ai"
           }, null, 2), {
             headers: { "Content-Type": "application/json", ...corsHeaders }
           });
