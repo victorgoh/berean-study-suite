@@ -729,7 +729,7 @@ export function renderPlaygroundHtml(): string {
             <optgroup label="📖 Scripture & Exegesis" data-cat="scripture">
               <option value="bible_lookup" selected>bible_lookup (Passage lookup across BSB/NET/KJV/OHGB)</option>
               <option value="bible_search">bible_search (Full-text scripture keyword search)</option>
-              <option value="commentary_lookup">commentary_lookup (26 Classical commentaries)</option>
+              <option value="commentary_lookup">commentary_lookup (registered commentaries)</option>
               <option value="cross_references">cross_references (TSK Scripture cross references)</option>
               <option value="parallel_passages">parallel_passages (Gospel & historical parallels)</option>
             </optgroup>

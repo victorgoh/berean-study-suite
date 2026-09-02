@@ -470,7 +470,7 @@ export function getOpenApiSpec(serverUrl: string = "https://berean-mcp.victorgoh
         post: {
           tags: ["💬 Classical Commentaries & Cross-References"],
           summary: "Classical Commentary Lookup",
-          description: "Access 26 classical public-domain commentary sets and Tyndale Open Study Notes.",
+          description: "Access the registered public-domain commentary sets and Tyndale Open Study Notes. Call get_available_resources for the current keys, aliases, and coverage.",
           requestBody: {
             required: true,
             content: {

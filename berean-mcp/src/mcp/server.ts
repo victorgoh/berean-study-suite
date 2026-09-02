@@ -375,7 +375,7 @@ export function createMcpServer(env: Env) {
   // 18. Commentary Lookup
   server.tool(
     "commentary_lookup",
-    "Retrieve historical and expository biblical commentaries (Matthew Henry, Jamieson-Fausset-Brown, John Calvin) for passages.",
+    "Retrieve any registered historical, expository, or patristic biblical commentary. Call get_available_resources(category=commentaries) for current keys, aliases, scope, and descriptions.",
     CommentaryLookupSchema,
     async ({ version, reference }) => {
       const res = await lookupCommentary(env, version, reference);

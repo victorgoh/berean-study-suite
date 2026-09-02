@@ -59,7 +59,7 @@ For specific queries, the agent can call any of the 18 individual MCP tools:
 - **`daily_reading`**: 365-day whole-Bible reading schedules with automatic Scripture embedding.
 
 ### 2. Commentaries (Classical Public Domain Sets in `biblematedata`)
-- **`commentary_lookup`**: Query any active commentary. First call `get_available_resources(category="commentaries")`; pass the returned key or alias as `version` and the passage as `reference`. Current examples include `Henry`, `Pulpit`, `ECF`, and `Catena`.
+- **`commentary_lookup`**: Query any active commentary. First call `get_available_resources(category="commentaries")`; pass the returned key or alias as `version` and the passage as `reference`. Current examples include `Henry`, `Pulpit`, `ECF`, `Catena`, `Kretzmann`, and `Schaff`.
 
 ### 3. Linguistics & Morphology
 - **`morphology_lookup`**: Word-by-word grammatical tagging, lemma roots, transliterations, and glosses.

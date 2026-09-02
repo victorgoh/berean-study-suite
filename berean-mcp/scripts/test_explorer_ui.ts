@@ -13,6 +13,8 @@ const modes = Array.from(html.matchAll(/class="mode-pill[^"]*"[^>]*data-mode="([
 assert.equal(modes.length, 36, "Explorer retains the expected tool inventory");
 assert.equal(new Set(modes).size, modes.length, "Explorer tool identifiers are unique");
 assert.match(html, /<option value="ECF">Early Church Fathers Commentary<\/option>/, "ECF is selectable in Single Commentary mode");
+assert.match(html, /<option value="Kretzmann">Kretzmann's Popular Commentary<\/option>/, "Kretzmann is selectable in Single Commentary mode");
+assert.match(html, /<option value="Schaff">Schaff's Popular NT Commentary<\/option>/, "Schaff is selectable in Single Commentary mode");
 
 for (const category of ["Passage", "Reflection", "Commentary", "Original Words", "Background"]) {
   assert.match(html, new RegExp(">" + category + "</button>"), category + " category is present");

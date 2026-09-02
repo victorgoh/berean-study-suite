@@ -300,6 +300,24 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
     description: "Patristic running commentary on Matthew, Mark, Luke, and John, compiled by Thomas Aquinas.",
     aliases: ["catena", "catena aurea", "golden chain", "ccatena"],
     getStoragePath: () => "commentaries/cCatena.commentary"
+  },
+  {
+    key: "Kretzmann",
+    name: "Paul E. Kretzmann's Popular Commentary",
+    author: "Paul E. Kretzmann",
+    scope: "Whole Bible",
+    description: "Clear, practical Lutheran exposition of the Old and New Testaments for teachers and lay readers.",
+    aliases: ["kretzmann", "popular kretzmann", "popular commentary"],
+    getStoragePath: () => "commentaries/cKretzmann.commentary"
+  },
+  {
+    key: "Schaff",
+    name: "Schaff's Popular Commentary on the New Testament",
+    author: "Philip Schaff and contributors",
+    scope: "New Testament",
+    description: "Concise historical and exegetical commentary on the New Testament for educated lay readers.",
+    aliases: ["schaff", "cschaff", "schaff popular commentary"],
+    getStoragePath: () => "commentaries/cSchaff.commentary"
   }
 ];
 

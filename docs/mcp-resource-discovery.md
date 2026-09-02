@@ -15,7 +15,7 @@ AI agents should discover the current resource identifiers before making source-
 | `lexicon_lookup` | `strongs_number` | `lexicon` |
 | `theological_dictionary` | `term` | `source` |
 
-`get_available_resources` returns commentary aliases, scope, and descriptions, so agents should not rely on a hard-coded commentary list. For example, `ECF` and `Catena` are current commentary keys.
+`get_available_resources` returns commentary aliases, scope, and descriptions, so agents should not rely on a hard-coded commentary list. Current examples include `ECF`, `Catena`, `Kretzmann`, and `Schaff`.
 
 Example:
 
