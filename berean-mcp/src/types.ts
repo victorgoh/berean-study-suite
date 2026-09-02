@@ -9,6 +9,9 @@ export interface Env {
   MCP_PROFILE?: "ai" | "human";
   ANALYTICS_SNIPPET?: string;
   CF_BEACON_TOKEN?: string;
+  MCP_RATE_LIMITER?: RateLimit;
+  MCP_EXPENSIVE_LIMITER?: RateLimit;
+  MCP_BURST_LIMITER?: RateLimit;
 }
 
 export interface BibleVerse {

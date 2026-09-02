@@ -74,3 +74,13 @@ Standard mappings are:
 The REST adapter centralizes error mapping in `restServiceResponse()` so services can continue returning their existing result shape during migration. New services should return structured errors with an explicit code, status, and retryability rather than relying on message matching.
 
 Optional missing datasets should produce a controlled resource-unavailable response. They must not crash the Worker or make unrelated features unavailable.
+
+## Anonymous rate limiting
+
+The Worker applies Cloudflare Rate Limiting bindings to `/mcp` and `/tools/*` when deployed:
+
+- 15 requests per 10 seconds per connecting IP (burst protection)
+- 60 requests per minute per connecting IP for normal API traffic
+- 15 requests per minute per connecting IP for MCP, commentary, search, and composite study-pack traffic
+
+Exceeded limits return HTTP `429` with a JSON `RATE_LIMITED` error and `Retry-After`. The bindings are optional during local development; Cloudflare WAF rate-limiting rules should be added at the zone edge for broader distributed protection.

@@ -76,6 +76,40 @@ function restServiceResponse(result: any, corsHeaders: Record<string, string>): 
   return jsonResponse({ error: { code, message, retryable: status >= 500 } }, corsHeaders, status);
 }
 
+function rateLimitResponse(corsHeaders: Record<string, string>, retryAfter: number): Response {
+  return jsonResponse({
+    error: {
+      code: "RATE_LIMITED",
+      message: "Too many requests. Please retry later.",
+      retryable: true
+    }
+  }, { ...corsHeaders, "Retry-After": String(retryAfter) }, 429);
+}
+
+async function enforceRateLimits(request: Request, url: URL, env: Env, corsHeaders: Record<string, string>): Promise<Response | null> {
+  const isApi = url.pathname === "/mcp" || url.pathname.startsWith("/tools/");
+  if (!isApi) return null;
+  const ip = request.headers.get("CF-Connecting-IP") || "anonymous";
+  const expensive = url.pathname === "/mcp" || /(?:commentary|search|study_pack|devotional|sermon|exegesis|word_study|topic_study|prayer|covenant|interlinear|septuagint)/i.test(url.pathname);
+  const key = `${ip}:burst`;
+  try {
+    if (env.MCP_BURST_LIMITER) {
+      const burst = await env.MCP_BURST_LIMITER.limit({ key });
+      if (!burst.success) return rateLimitResponse(corsHeaders, 30);
+    }
+    const limiter = expensive ? env.MCP_EXPENSIVE_LIMITER : env.MCP_RATE_LIMITER;
+    if (limiter) {
+      const result = await limiter.limit({ key: `${ip}:${expensive ? "expensive" : "api"}` });
+      if (!result.success) return rateLimitResponse(corsHeaders, expensive ? 120 : 60);
+    }
+  } catch (error) {
+    // Keep local development and emergency deployments available if a binding
+    // is temporarily unavailable; Cloudflare WAF remains an outer safeguard.
+    console.error("Rate-limit binding error:", error);
+  }
+  return null;
+}
+
 async function checkResourceAvailability(env: Env): Promise<Record<string, string>> {
   const resources: Record<string, string> = {};
   const bucket = env.BIBLEMATE_DATA || env.BEREAN_DATA;
@@ -123,6 +157,9 @@ export default {
         headers: corsHeaders
       });
     }
+
+    const limited = await enforceRateLimits(request, url, env, corsHeaders);
+    if (limited) return limited;
 
     // Bound REST request bodies before parsing to protect the Worker from oversized input.
     const contentLength = Number(request.headers.get("content-length") || 0);
