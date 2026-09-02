@@ -161,7 +161,7 @@ human Explorer for complete long-form articles.
 
 - **`bible_lookup`**: Retrieve full passages from BSB, NET, KJV, or OHGB (Original Hebrew/Greek).
 - **`bible_search`**: High-speed keyword search with book/testament filters and wildcards.
-- **`commentary_lookup`**: Query any active commentary resource in `biblematedata` (e.g. `Henry`, `JFB`, `Calvin`, `Gill`, `MacL`, `Barnes`, `Spur`, `Clarke`, `Wesley`, `Benson`, `Pulpit`, `EGNT`, `CECNT`, `ECER`, `EBC`, `KD`, `Lange`, `Rob`, `Vincent`, `Whedon`, `CBSC`, `Brooks`, `PHC`, `HH`, `BI`). Check each resource's recorded source and licence before redistribution.
+- **`commentary_lookup`**: Query an active commentary with `reference` and `version`. Call `get_available_resources(category="commentaries")` first for current keys, aliases, scope, and descriptions. Examples include `Henry`, `Pulpit`, `ECF`, and `Catena`. Check each resource's recorded source and licence before redistribution.
 - **`cross_references`**: Retrieve Treasury of Scripture Knowledge (TSK) cross-references ranked by relevance votes.
 - **`morphology_lookup`**: Word-by-word grammatical tagging, lemma roots, transliterations, and glosses for any Old or New Testament verse.
 - **`lexicon_lookup`**: Comprehensive lexical definitions from Strong's, Brown-Driver-Briggs (BDB), and Thayer's Greek Lexicon.

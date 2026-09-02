@@ -138,7 +138,7 @@ export function createMcpServer(env: Env) {
       if (res.error) {
         return { isError: true, content: [{ type: "text" as const, text: `Error: ${res.error}` }] };
       }
-      return { content: [{ type: "text" as const, text: res.formattedText || "" }] };
+      return { structuredContent: res.catalog || {}, content: [{ type: "text" as const, text: res.formattedText || "" }] };
     }
   );
 

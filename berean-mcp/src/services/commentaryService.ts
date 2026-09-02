@@ -137,9 +137,23 @@ export async function lookupCommentary(
     if (hasVerseRange) {
       const includeChapterIntro = parsed.verseStart === 1 && parsed.verseEnd >= 999;
       const rangeEndChapter = cols.includes("ChapterEnd") ? "ChapterEnd" : "Chapter";
-      const introClause = includeChapterIntro ? `(${rangeStartCol} = 0 AND ${rangeEndChapter} = Chapter AND VerseEnd = 0) OR ` : "";
+      // A 0-0 record denotes an introduction. Restrict it to the requested
+      // chapter: book-level introductions are commonly stored as Chapter 0
+      // and must not accompany every full-chapter lookup in that book.
+      const introClause = includeChapterIntro
+        ? `(Chapter = ? AND ${rangeEndChapter} = ? AND ${rangeStartCol} = 0 AND VerseEnd = 0) OR `
+        : "";
       sql = `SELECT Chapter, ${rangeStartCol} AS VerseStart, ${rangeEndChapter} AS ChapterEnd, VerseEnd, ${textCol} as Text FROM Commentary WHERE Book = ? AND (${introClause}(( ${rangeEndChapter} > ? OR (${rangeEndChapter} = ? AND VerseEnd >= ?)) AND (Chapter < ? OR (Chapter = ? AND ${rangeStartCol} <= ?)))) ORDER BY Chapter, ${rangeStartCol}, ${rangeEndChapter}, VerseEnd`;
-      params = [parsed.bookNumber, parsed.chapterStart, parsed.chapterStart, parsed.verseStart, parsed.chapterEnd, parsed.chapterEnd, parsed.verseEnd];
+      params = [
+        parsed.bookNumber,
+        ...(includeChapterIntro ? [parsed.chapterStart, parsed.chapterEnd] : []),
+        parsed.chapterStart,
+        parsed.chapterStart,
+        parsed.verseStart,
+        parsed.chapterEnd,
+        parsed.chapterEnd,
+        parsed.verseEnd
+      ];
     } else if (hasVerse) {
       const includeChapterIntro = parsed.verseStart === 1 && parsed.verseEnd >= 999;
       sql = `SELECT Chapter, Verse, ${textCol} as Text FROM Commentary WHERE Book = ? AND Chapter = ? AND ${includeChapterIntro ? "(Verse = 0 OR " : ""}Verse >= ? AND Verse <= ?${includeChapterIntro ? ")" : ""} ORDER BY Chapter, Verse`;

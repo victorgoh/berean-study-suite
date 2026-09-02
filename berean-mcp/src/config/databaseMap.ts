@@ -277,6 +277,29 @@ export const COMMENTARIES_LIST: CommentaryMeta[] = [
       if (bookNumber <= 44) return "commentaries/cPulpit_3.commentary";
       return "commentaries/cPulpit_4.commentary";
     }
+  },
+  {
+    key: "ECF",
+    name: "Early Church Fathers Commentary",
+    author: "SermonIndex.net / Church Fathers",
+    scope: "Whole Bible",
+    description: "Patristic commentary from Augustine, Chrysostom, Bede, Jerome, Origen, and many other early church writers.",
+    aliases: ["ecf", "cecf", "early church fathers", "church fathers"],
+    getStoragePath: (bookNumber: number) => {
+      if (bookNumber <= 17) return "commentaries/cECF_1.commentary";
+      if (bookNumber <= 39) return "commentaries/cECF_2.commentary";
+      if (bookNumber <= 56) return "commentaries/cECF_3.commentary";
+      return "commentaries/cECF_4.commentary";
+    }
+  },
+  {
+    key: "Catena",
+    name: "St Thomas Aquinas' Catena Aurea",
+    author: "St Thomas Aquinas, compiled from the Church Fathers",
+    scope: "Gospels",
+    description: "Patristic running commentary on Matthew, Mark, Luke, and John, compiled by Thomas Aquinas.",
+    aliases: ["catena", "catena aurea", "golden chain", "ccatena"],
+    getStoragePath: () => "commentaries/cCatena.commentary"
   }
 ];
 

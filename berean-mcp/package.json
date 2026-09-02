@@ -16,8 +16,15 @@
     "data:validate": "python3 scripts/resource_data.py validate",
     "data:upload-plan": "python3 scripts/resource_data.py upload-plan",
     "test:phase4": "tsx scripts/test_phase4.ts",
+    "test:commentary-ranges": "tsx scripts/test_commentary_range_intros.ts",
+    "test:sword-pulpit": "tsx scripts/test_sword_pulpit_conversion.ts",
+    "prepare:ecf": "python3 scripts/prepare_ecf.py",
+    "shard:ecf": "python3 scripts/shard_ecf.py",
+    "prepare:catena": "python3 scripts/prepare_catena.py",
+    "test:catena": "tsx scripts/test_catena_conversion.ts data/commentaries/cCatena.commentary",
+    "test:ecf": "tsx scripts/test_ecf_conversion.ts \"data/commentaries/cECF_{sharded}.commentary\"",
     "test:explorer": "tsx scripts/test_explorer_ui.ts",
-    "test:smoke": "npm run test:phase4 && npm run test:explorer",
+    "test:smoke": "npm run test:phase4 && npm run test:commentary-ranges && npm run test:ecf && npm run test:explorer",
     "test": "npm run test:smoke"
   },
   "dependencies": {

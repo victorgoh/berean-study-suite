@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { COMMENTARIES_LIST, LEXICON_REGISTRY } from "../config/databaseMap.js";
 
 // MCP clients may omit this field; the server defaults to compact output.
 // It is included in the shared tool shape as the rollout expands across the
@@ -140,7 +141,7 @@ export const DailyReadingSchema = {
 // --- Group B: Classical Commentaries & Cross-References ---
 
 export const CommentaryLookupSchema = {
-  version: z.string().default("Henry").describe("Commentary version or author: 'TNotes' (Tyndale Open Study Notes - CC BY-SA 4.0), 'Henry' (Matthew Henry), 'JFB' (Jamieson-Fausset-Brown), 'Calvin' (John Calvin), 'Barnes' (Albert Barnes), 'MacL' (Alexander Maclaren), 'HH' (Charles Simeon), 'Gill' (John Gill), 'Spur' (Charles Spurgeon), 'KD' (Keil & Delitzsch), 'EGNT' (Expositor's Greek NT), 'CECNT' (H.A.W. Meyer), 'Pulpit' (The Pulpit Commentary), 'BI' (Biblical Illustrator), 'ECER' (Charles Ellicott), 'EBC' (Expositor's Bible), 'Rob' (A.T. Robertson), 'Vincent' (Marvin Vincent), 'Wesley' (John Wesley), 'Clarke' (Adam Clarke), 'Benson' (Joseph Benson), 'Whedon' (Daniel Whedon), 'Lange' (John Peter Lange)"),
+  version: z.string().default("Henry").describe(`Commentary resource key or alias. Query get_available_resources(category=commentaries) for the current catalog. Canonical keys: ${COMMENTARIES_LIST.map(c => c.key).join(", ")}. Scope and aliases are returned by the catalog.`),
   reference: z.string().describe("Passage reference, e.g., 'Romans 8:28', 'John 1:1-5', 'Genesis 1'")
 };
 
@@ -153,7 +154,7 @@ export const CrossReferenceSchema = {
 
 export const LexiconLookupSchema = {
   strongs_number: z.string().describe("Strong's number (e.g. 'G2889' for Greek kosmos, 'H7225' for Hebrew bereshit)"),
-  lexicon: z.string().default("strongs").describe("Lexicon source: 'step' (TBESG/TBESH), 'thayer', 'bdb', 'lsj', 'strongs', 'all'")
+  lexicon: z.string().default("strongs").describe(`Lexicon source key or alias. Available canonical keys: ${LEXICON_REGISTRY.map(l => l.code).join(", ")}; runtime aliases include step, thayer, bdb, lsj, strongs, and all.`)
 };
 
 export const MorphologyLookupSchema = {

@@ -90,16 +90,27 @@ export async function getAvailableResources(
       name: c.name,
       author: c.author,
       scope: c.scope,
-      description: c.description
+      description: c.description,
+      aliases: c.aliases,
+      selection_parameter: "version"
     }));
     sections.push(`## Available Commentary Sets (${COMMENTARIES_LIST.length})\n` +
       COMMENTARIES_LIST.map(c => `- **${c.key}** — *${c.name}* [${c.scope}]: ${c.description}`).join("\n"));
   }
 
   if (cat === "all" || cat === "lexicons") {
-    catalog.lexicons = LEXICON_REGISTRY;
+    catalog.lexicons = LEXICON_REGISTRY.map(l => ({ ...l, selection_parameter: "lexicon" }));
     sections.push(`## Original Language Lexicons (${LEXICON_REGISTRY.length})\n` +
       LEXICON_REGISTRY.map(l => `- **${l.code}** (${l.name}) [${l.language}]: ${l.description}`).join("\n"));
+  }
+
+  if (cat === "all" || cat === "commentaries" || cat === "lexicons") {
+    catalog.tool_parameter_guide = {
+      commentary_lookup: { required: ["reference"], optional: ["version", "output_mode"], resource_parameter: "version" },
+      commentary_study_pack: { required: ["reference"], optional: ["commentators", "order_mode", "output_mode"], resource_parameter: "commentators" },
+      lexicon_lookup: { required: ["strongs_number"], optional: ["lexicon", "output_mode"], resource_parameter: "lexicon" },
+      theological_dictionary: { required: ["term"], optional: ["source", "output_mode"], resource_parameter: "source" }
+    };
   }
 
   if (includeStudyPacks && (cat === "all" || cat === "study_packs")) {
