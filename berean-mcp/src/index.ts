@@ -522,11 +522,25 @@ export default {
 
     // --- MCP Streamable HTTP endpoint ---
     if (url.pathname === "/mcp") {
-      // If a client or browser sends a plain GET request without requesting an SSE stream, return instant JSON status
+      // Handle GET requests on /mcp
       if (request.method === "GET") {
         const accept = request.headers.get("accept") || "";
         const sessionId = request.headers.get("mcp-session-id");
-        if (!sessionId && !accept.includes("text/event-stream")) {
+
+        // If an MCP client probes for standalone SSE stream support without an established session,
+        // return 405 Method Not Allowed as per MCP Streamable HTTP specification.
+        if (accept.includes("text/event-stream") && !sessionId) {
+          return new Response("Method Not Allowed", {
+            status: 405,
+            headers: {
+              "Allow": "POST, OPTIONS",
+              ...corsHeaders
+            }
+          });
+        }
+
+        // If a client or browser sends a plain GET request without requesting an SSE stream, return instant JSON status
+        if (!sessionId) {
           return new Response(JSON.stringify({
             status: "Berean MCP Server Online",
             protocol: "Model Context Protocol (MCP) Streamable HTTP",
