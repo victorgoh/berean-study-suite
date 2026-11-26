@@ -150,6 +150,14 @@ async function main() {
   const henry = (await (await post(envFor(), "commentary_lookup", { reference: "John 3:16", version: "Henry" })).json()) as any;
   if (henry.formattedText) assert.match(henry.formattedText, /^# \[Henry\] Commentary on John 3:16\n/);
 
+  console.log("14. Text-only results are sent as text, not as empty structured content");
+  const xref = (await rpc(envFor(), "tools/call", { name: "cross_references", arguments: { reference: "Matthew 11:28", limit: 5 } })).result;
+  assert.ok(!xref.isError, JSON.stringify(xref));
+  assert.equal(xref.structuredContent, undefined, "no structuredContent when there is no structured data");
+  assert.match(xref.content[0].text, /Cross References: Matthew 11:28/);
+  const verses = (await rpc(envFor(), "tools/call", { name: "bible_lookup", arguments: { reference: "John 11:35" } })).result;
+  assert.ok(Array.isArray(verses.structuredContent.verses), "structured data is still sent when present");
+
   console.log("\n🎉 Tool registry tests passed.");
 }
 

@@ -70,6 +70,17 @@ export function normalizeMcpToolResult(result: unknown, input: unknown): Record<
 
   const text = rawText;
 
+  // Some MCP clients (including Claude's apps) show the model structuredContent
+  // instead of the text block whenever it is present. If a service returned
+  // nothing but Markdown (e.g. cross_references), structuredContent would hold
+  // only bookkeeping fields and the result would look empty, so send text only.
+  const hasStructuredData = isRecord(structured)
+    ? Object.entries(structured).some(([key, value]) => key !== "metadata" && value !== undefined)
+    : structured !== undefined;
+  if (!hasStructuredData) {
+    return { content: [{ type: "text", text }] };
+  }
+
   const structuredResult = {
     ...(isRecord(structured) ? structured : { value: structured }),
     output_mode: mode,
