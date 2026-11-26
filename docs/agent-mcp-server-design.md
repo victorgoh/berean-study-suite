@@ -6,21 +6,33 @@ Audience: AI programming agents; human review required.
 
 ## MCP response contract
 
-MCP tool calls use compact output by default to reduce context-window usage. A
-tool may accept `output_mode` with these values:
+Every MCP tool accepts two optional arguments that control response size:
 
-- `compact`: bounded, structured output for AI processing (default)
-- `standard`: structured output with a larger readable text rendering
-- `full`: comprehensive human-readable rendering, subject to the server limit
+- `output_mode` sets the size of one response: `compact` (about 12,000
+  characters, the default), `standard` (about 32,000) or `full` (about
+  100,000).
+- `page` selects which part of a long result to return, starting at 1.
 
-MCP results expose `structuredContent` and also include serialized structured
-JSON in a text content block for compatibility with clients that do not consume
-`structuredContent`. Responses include `metadata.output_mode`,
-`metadata.character_count`, and `metadata.truncated`. Responses are never
-silently truncated. If a complete resource exceeds the selected limit, the
-server returns `RESOURCE_TOO_LARGE` and identifies the resource size and
-available alternatives. These are application conventions built on MCP's
-standard `structuredContent` result field; they are not MCP-defined names.
+The text block always carries the readable Markdown result. When a result also
+has machine-readable fields (for example `verses` from `bible_lookup`), they are
+sent in `structuredContent` with `metadata.output_mode`,
+`metadata.character_count` and `metadata.truncated`. Results that are only
+Markdown are sent as text alone, because some clients (including Claude's apps)
+show the model `structuredContent` instead of the text whenever it is present.
+
+Results are never refused or silently cut for being long. A result larger than
+the selected budget is split into pages at paragraph boundaries; each page ends
+with a note such as "Part 1 of 3 of this result. To continue, call this tool
+again with the same arguments and page: 2." Paged responses omit
+`structuredContent`, which would repeat the same content. Asking for a page that
+does not exist returns an error.
+
+Tool errors start with the service error code and a hint, for example
+`Error (RESOURCE_UNAVAILABLE): No verses found for Genesis 50:99 in BSB`,
+followed by what to try next. The codes are the same as the REST codes below.
+Every tool is annotated as read-only, non-destructive, idempotent and closed-world
+(`readOnlyHint`, `destructiveHint: false`, `idempotentHint`, `openWorldHint: false`)
+and has a short `title`.
 
 ## Human Explorer and AI tool profiles
 

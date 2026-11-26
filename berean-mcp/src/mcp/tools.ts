@@ -6,7 +6,10 @@ import { COMMENTARIES_LIST, LEXICON_REGISTRY } from "../config/databaseMap.js";
 // tool catalog.
 export const OutputModeSchema = {
   output_mode: z.enum(["compact", "standard", "full"]).default("compact").describe(
-    "Response detail: compact minimizes AI context usage, standard is balanced, and full is comprehensive for human reading."
+    "Size of each response page: compact (about 12k characters, default), standard (about 32k), or full (about 100k). Longer results are split into pages."
+  ),
+  page: z.number().int().min(1).default(1).describe(
+    "Page of a long result to return, starting at 1. A paged response ends with a note giving the next page number."
   )
 };
 
@@ -115,7 +118,7 @@ export const TopicStudyPackSchema = {
 // --- Group A: Scripture Texts & Translations ---
 
 export const BibleLookupSchema = {
-  version: z.string().default("BSB").describe("Bible version abbreviation, e.g. BSB, NET, KJV, ASV, WEB, BBE, OHGB"),
+  version: z.string().default("BSB").describe("Bible version: BSB (default), NET, KJV, WEB, ASV, OHGB (Hebrew/Greek), LXX (Septuagint, OT only)"),
   reference: z.string().describe("Passage reference, e.g., 'John 3:16', 'Romans 8:28-30', 'Genesis 1:1-5'")
 };
 

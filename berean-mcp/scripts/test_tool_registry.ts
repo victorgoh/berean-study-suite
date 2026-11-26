@@ -18,6 +18,7 @@ import {
 } from "../src/mcp/toolRegistry.js";
 import { getOpenApiSpec } from "../src/ui/openapi.js";
 import { internalError } from "../src/services/errors.js";
+import { paginateText } from "../src/mcp/output.js";
 import { formatReference, parseReferenceString } from "../src/services/bibleService.js";
 import { renderExplorerHtml } from "../src/ui/explorer.js";
 import { Env } from "../src/types.js";
@@ -70,7 +71,16 @@ async function main() {
       listed.map((t) => t.name).sort(),
       mcpToolsForProfile(profile).map((t) => t.name).sort()
     );
-    for (const t of listed) assert.ok(t.inputSchema.properties.output_mode, `${t.name} lacks output_mode`);
+    for (const t of listed) {
+      assert.ok(t.inputSchema.properties.output_mode, `${t.name} lacks output_mode`);
+      assert.ok(t.inputSchema.properties.page, `${t.name} lacks page`);
+      assert.ok(t.title && t.annotations?.title === t.title, `${t.name} lacks a title`);
+      assert.equal(t.annotations.readOnlyHint, true, `${t.name} must be marked read-only`);
+      assert.equal(t.annotations.destructiveHint, false);
+      assert.equal(t.annotations.idempotentHint, true);
+      assert.equal(t.annotations.openWorldHint, false);
+      assert.doesNotMatch(t.description, /High-speed|BBE/, `${t.name} description`);
+    }
   }
   assert.equal(mcpToolsForProfile("ai").some((t) => t.tier === "study_pack"), false);
 
@@ -86,6 +96,9 @@ async function main() {
   console.log("7. MCP error policy");
   const bad = (await rpc(envFor(), "tools/call", { name: "bible_lookup", arguments: { reference: "Notabook 99:99" } })).result;
   assert.equal(bad.isError, true);
+  assert.match(bad.content[0].text, /^Error \(REQUEST_FAILED\): .+\nCheck the arguments/);
+  const none = (await rpc(envFor(), "tools/call", { name: "bible_lookup", arguments: { reference: "Genesis 50:99" } })).result;
+  assert.match(none.content[0].text, /^Error \(RESOURCE_UNAVAILABLE\): No verses found for Genesis 50:99/);
   const tool = (name: string) => TOOLS_BY_NAME.get(name)!;
   assert.equal(mcpErrorFor(tool("bible_lookup"), { error: "x" }), "x");
   assert.equal(mcpErrorFor(tool("bible_lookup"), { formattedText: "ok" }), null);
@@ -157,6 +170,28 @@ async function main() {
   assert.match(xref.content[0].text, /Cross References: Matthew 11:28/);
   const verses = (await rpc(envFor(), "tools/call", { name: "bible_lookup", arguments: { reference: "John 11:35" } })).result;
   assert.ok(Array.isArray(verses.structuredContent.verses), "structured data is still sent when present");
+
+  console.log("15. Long results are paged instead of refused");
+  const sample = Array.from({ length: 40 }, (_, i) => `Paragraph ${i} ` + "word ".repeat(60)).join("\n\n");
+  const samplePages = paginateText(sample, 1000);
+  assert.ok(samplePages.length > 1);
+  for (const pg of samplePages) assert.ok(pg.length <= 1000);
+  assert.equal(samplePages.join("").replace(/\s+/g, ""), sample.replace(/\s+/g, ""), "pages must cover all text");
+  const callTopic = async (args: Record<string, unknown>) =>
+    (await rpc(envFor(), "tools/call", { name: "topic_study", arguments: { query: "Prayer", ...args } })).result;
+  const first = await callTopic({});
+  assert.ok(!first.isError, first.content?.[0]?.text?.slice(0, 200));
+  const match = /Part 1 of (\d+) of this result\..*page: 2/.exec(first.content[0].text);
+  assert.ok(match, "first page must say how to continue");
+  const total = Number(match[1]);
+  assert.ok(first.content[0].text.length <= 12000);
+  const last = await callTopic({ page: total });
+  assert.match(last.content[0].text, new RegExp(`Part ${total} of ${total} of this result\\.\\*$`));
+  const beyond = await callTopic({ page: total + 1 });
+  assert.equal(beyond.isError, true);
+  assert.match(beyond.content[0].text, /^Error \(REQUEST_FAILED\): page \d+ does not exist/);
+  const full = await callTopic({ output_mode: "full" });
+  assert.ok(!full.isError);
 
   console.log("\n🎉 Tool registry tests passed.");
 }

@@ -138,9 +138,9 @@ For AI-assisted research, use one commentary per request and select the preferre
 
 Large dictionary and encyclopedia articles are standalone resources. They are
 not automatically embedded in AI-oriented responses. If a complete article is
-larger than the MCP response limit, the request returns an explicit
-`RESOURCE_TOO_LARGE` result rather than silently truncating the source. Use the
-human Explorer for complete long-form articles.
+larger than the MCP response limit, it is returned in pages: each page ends with
+a note giving the next `page` number to request. Use `output_mode: "full"` for
+larger pages, or the human Explorer to read long articles in one view.
 
 | Tool Name | Focus & Included Resources |
 | :--- | :--- |

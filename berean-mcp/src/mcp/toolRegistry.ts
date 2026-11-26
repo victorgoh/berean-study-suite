@@ -82,6 +82,9 @@ export interface ToolContext {
 
 export interface ToolDefinition<Shape extends z.ZodRawShape = z.ZodRawShape> {
   name: string;
+  /** Short human-readable name shown by MCP clients. */
+  title: string;
+  /** What the tool returns and when to use it; models choose tools from this text. */
   description: string;
   tier: ToolTier;
   /** Zod raw shape for arguments (MCP input schema and REST validation). */
@@ -107,9 +110,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   // ===========================================================================
   defineTool({
     name: "get_available_resources",
+    title: "Resource Catalog",
     tier: "catalog",
     description:
-      "List all available Bible translations, classical commentary sets, original language lexicons, study packs, and personas in this Berean MCP instance.",
+      "List the Bible translations, commentaries, lexicons, study packs and personas this server offers, with their keys and aliases. Call this first when you need a valid version, commentary or lexicon key.",
     schema: S.GetAvailableResourcesSchema,
     mcpErrors: "on_error",
     restMethods: ["GET", "POST"],
@@ -126,9 +130,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   // ===========================================================================
   defineTool({
     name: "sermon_study_pack",
+    title: "Sermon Study Pack",
     tier: "study_pack",
     description:
-      "High-speed composite tool that bundles scripture text, historical commentaries, and cross-references for sermon preparation in a single one-shot response.",
+      "One-call sermon preparation for a passage: Scripture text, Alexander Maclaren's expositions, Charles Simeon's Horae Homileticae outlines and cross-references. Add more commentators with extra_commentators.",
     schema: S.SermonStudyPackSchema,
     mcpErrors: "never",
     restAliases: PASSAGE,
@@ -136,9 +141,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "illustration_study_pack",
+    title: "Illustration Study Pack",
     tier: "study_pack",
     description:
-      "Opt-in fuller pack for Biblical Illustrator anecdotes and sermon illustrations, with Scripture and a few cross-references.",
+      "Sermon illustrations and anecdotes from the Biblical Illustrator for a passage, with the Scripture text and a few cross-references. Output is often long; use page to read it in parts.",
     schema: S.IllustrationStudyPackSchema,
     mcpErrors: "never",
     restAliases: PASSAGE,
@@ -146,9 +152,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "lesson_creator_study_pack",
+    title: "Lesson Creator Pack",
     tier: "study_pack",
     description:
-      "Focused teaching pack with Scripture, a sourced chapter opening, Ellicott's historical context, and cross-references.",
+      "Material for a Sunday school or small-group lesson: Scripture text, Adam Clarke's chapter-opening synopsis, Ellicott's historical commentary and cross-references.",
     schema: S.LessonCreatorStudyPackSchema,
     mcpErrors: "never",
     restAliases: PASSAGE,
@@ -156,9 +163,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "devotional_study_pack",
+    title: "Devotional Study Pack",
     tier: "study_pack",
     description:
-      "High-speed composite tool that bundles scripture text, meditation cross-references, and biblical promises for devotional reflections in a single one-shot response.",
+      "Devotional material for a passage: Scripture text, Tyndale Open Study Notes, Matthew Henry's Concise Commentary, related biblical promises and cross-references.",
     schema: S.DevotionalStudyPackSchema,
     mcpErrors: "never",
     restAliases: PASSAGE,
@@ -166,9 +174,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "prayer_guide_study_pack",
+    title: "Prayer Guide Pack",
     tier: "study_pack",
     description:
-      "High-speed composite tool that bundles scripture text, Spurgeon/Benson adoration, Wesley examination, and biblical promises for 1st-person ACTS prayer.",
+      "Material for praying through a passage: Scripture text, Joseph Benson, John Wesley and Matthew Henry's Concise Commentary, plus related biblical promises.",
     schema: S.PrayerGuideStudyPackSchema,
     mcpErrors: "never",
     restAliases: PASSAGE,
@@ -176,9 +185,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "passage_exegesis_pack",
+    title: "Passage Exegesis Pack",
     tier: "study_pack",
     description:
-      "High-speed composite tool that bundles primary translation, original Hebrew/Greek text (OHGB), morphological parsing, and historical commentaries for scholarly exegesis.",
+      "Scholarly exegesis of a passage: translation plus original Hebrew/Greek text, morphology, the Septuagint for Old Testament passages, and technical commentaries (Keil & Delitzsch, Meyer, Expositor's Greek NT, JFB, Clarke, Pulpit).",
     schema: S.PassageExegesisPackSchema,
     mcpErrors: "never",
     restAliases: PASSAGE,
@@ -186,9 +196,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "word_study_pack",
+    title: "Word Study Pack",
     tier: "study_pack",
     description:
-      "High-speed composite tool that bundles Strong's lexicon definition, in-context morphological parsing, and linguistic guardrails against totality transfer.",
+      "Study one Greek or Hebrew word by Strong's number: lexicon definitions; with a reference, its parsing in that verse, plus A. T. Robertson and Marvin Vincent's notes for New Testament verses.",
     schema: S.WordStudyPackSchema,
     mcpErrors: "never",
     restAliases: { strongs: "strongs_number", query: "strongs_number", ...PASSAGE },
@@ -196,9 +207,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "interlinear_study_pack",
+    title: "Interlinear Study Pack",
     tier: "study_pack",
     description:
-      "High-speed composite tool that generates an inline Greek/Hebrew to English word-by-word interlinear with continuous verse layout, grammatical parsing, and original language glossary.",
+      "Word-by-word Greek or Hebrew interlinear for a passage with English glosses, parsing and a glossary of notable words. Choose inline, ruby or table layout with display_mode.",
     schema: S.InterlinearStudyPackSchema,
     mcpErrors: "on_error",
     restAliases: { ...PASSAGE, displayMode: "display_mode" },
@@ -206,9 +218,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "septuagint_study_pack",
+    title: "Septuagint Study Pack",
     tier: "study_pack",
     description:
-      "Comprehensive composite study pack analyzing the Greek Septuagint (LXX), Brenton English translation, Dead Sea Scrolls textual variants, and Hebrew Masoretic Text comparative exegesis.",
+      "Compare an Old Testament passage across the Hebrew Masoretic Text, the Greek Septuagint (with Brenton's English) and a modern translation, with Keil & Delitzsch, Clarke and New Testament quotations. Old Testament references only.",
     schema: S.SeptuagintStudyPackSchema,
     mcpErrors: "on_empty",
     restAliases: PASSAGE,
@@ -216,9 +229,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "ot_in_nt_study_pack",
+    title: "OT in NT Study Pack",
     tier: "study_pack",
     description:
-      "Comprehensive composite study pack analyzing Old Testament quotations and allusions in the New Testament with verbatim Hebrew MT, Greek LXX, and Greek NT alignment, apostolic hermeneutics, and Christological fulfillment.",
+      "How the New Testament quotes or alludes to the Old Testament at a passage: aligned NT Greek, Hebrew text, Septuagint and translation, with Calvin, Gill and cross-references.",
     schema: S.OtInNtStudyPackSchema,
     mcpErrors: "on_empty",
     restAliases: PASSAGE,
@@ -226,9 +240,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "covenant_theology_pack",
+    title: "Covenant Theology Pack",
     tier: "study_pack",
     description:
-      "High-speed composite tool that bundles scripture text, John Calvin's Christocentric exposition, John Gill's rabbinic/prophetic insights, ISBE articles, and canonical cross-references.",
+      "Covenant and redemptive-history study of a passage: Scripture text, John Calvin, John Gill, the Tyndale dictionary article on covenant, Old Testament quotations and cross-references.",
     schema: S.CovenantTheologyPackSchema,
     mcpErrors: "never",
     restAliases: PASSAGE,
@@ -236,9 +251,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "commentary_study_pack",
+    title: "Commentary Study Pack",
     tier: "study_pack",
     description:
-      "High-speed composite tool that retrieves multiple biblical commentaries (e.g. Tyndale Open Study Notes, Matthew Henry, JFB, Calvin, Maclaren, Barnes, Spurgeon) for a passage in a single request with priority ordering.",
+      "Several commentaries on one passage in a single call. Pass commentators to choose which (keys from get_available_resources); order_mode sets modern-first or classic-first order. Output is often long; use page to read it in parts.",
     schema: S.CommentaryStudyPackSchema,
     mcpErrors: "never",
     restAliases: PASSAGE,
@@ -246,9 +262,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "topic_study_pack",
+    title: "Topic Study Pack",
     tier: "study_pack",
     description:
-      "High-speed composite tool that bundles theological dictionary definitions and scriptural promises for topical and doctrinal studies.",
+      "One-call topical study: the Tyndale Bible Dictionary article on the topic plus related biblical promises with full Scripture text.",
     schema: S.TopicStudyPackSchema,
     mcpErrors: "never",
     restAliases: { query: "topic" },
@@ -261,8 +278,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   // --- Scripture texts & translations ---
   defineTool({
     name: "bible_lookup",
+    title: "Bible Lookup",
     tier: "specialized",
-    description: "Retrieve Bible verses from verified biblical translations (e.g. NET, KJV, ASV, WEB, BBE, OHGB).",
+    description:
+      "Get the text of a verse, range or whole chapter in a chosen translation (default BSB). Accepts references like 'John 3:16', 'Romans 8:28-30', 'Matt 5:1-7:27' or 'Psalm 23'. Always use this to quote Scripture rather than quoting from memory.",
     schema: S.BibleLookupSchema,
     mcpErrors: "on_error",
     restAliases: PASSAGE,
@@ -270,9 +289,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "bible_search",
+    title: "Bible Search",
     tier: "specialized",
     description:
-      "Search for words or phrases in one or all books across Bible translations with wildcard and boolean support.",
+      "Find verses containing a word or phrase in one translation, optionally limited to one book. Supports * wildcards and + (and) / | (or). Returns matching verses with references.",
     schema: S.BibleSearchSchema,
     mcpErrors: "on_error",
     restAliases: { text: "query", book: "book_filter" },
@@ -280,8 +300,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "parallel_passages",
+    title: "Parallel Passages",
     tier: "specialized",
-    description: "Retrieve and compare Gospel harmonies and Old/New Testament parallel passages and pericopes.",
+    description:
+      "Find parallel accounts of an event or teaching (for example Gospel harmonies such as 'Feeding the 5000' or 'Sermon on the Mount'), optionally with the full text of each passage.",
     schema: S.ParallelPassagesSchema,
     mcpErrors: "on_error",
     restAliases: { reference: "query", passage: "query" },
@@ -289,9 +311,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "daily_reading",
+    title: "Daily Reading",
     tier: "specialized",
     description:
-      "Retrieve scheduled daily Bible readings for today or any specified date, complete with full scripture passages.",
+      "The Bible reading plan's passages for today or a given date (YYYY-MM-DD), optionally with full Scripture text.",
     schema: S.DailyReadingSchema,
     mcpErrors: "on_error",
     run: (env, a) => getDailyReading(env, a.date, a.include_text, a.version)
@@ -300,9 +323,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   // --- Commentaries & cross-references ---
   defineTool({
     name: "commentary_lookup",
+    title: "Commentary Lookup",
     tier: "specialized",
     description:
-      "Retrieve any registered historical, expository, or patristic biblical commentary. Call get_available_resources(category=commentaries) for current keys, aliases, scope, and descriptions.",
+      "One commentary's notes on a passage. Choose the commentary with version (default Matthew Henry); call get_available_resources with category 'commentaries' for valid keys. If a verse has no note, try the whole chapter.",
     schema: S.CommentaryLookupSchema,
     mcpErrors: "on_error",
     restAliases: { commentary: "version", ...PASSAGE },
@@ -310,9 +334,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "cross_references",
+    title: "Cross References",
     tier: "specialized",
     description:
-      "Retrieve rich inter-biblical cross references linking OT and NT scriptures (Treasury of Scripture Knowledge).",
+      "Related passages for a verse from the Treasury of Scripture Knowledge, grouped by the word or phrase they connect to.",
     schema: S.CrossReferenceSchema,
     mcpErrors: "on_error",
     restAliases: PASSAGE,
@@ -322,9 +347,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   // --- Original languages & textual alignment ---
   defineTool({
     name: "lexicon_lookup",
+    title: "Lexicon Lookup",
     tier: "specialized",
     description:
-      "Look up definitions, Strong's concordance data, and lexical domains for Greek and Hebrew words (Thayer, BDB, LSJ).",
+      "Definition of a Greek or Hebrew word by Strong's number (e.g. G26, H7225), from Thayer, BDB, LSJ or STEPBible lexicons. Set lexicon to choose a source, or 'all'.",
     schema: S.LexiconLookupSchema,
     mcpErrors: "on_error",
     restAliases: { strongs: "strongs_number", query: "strongs_number" },
@@ -332,9 +358,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "morphology_lookup",
+    title: "Morphology Lookup",
     tier: "specialized",
     description:
-      "Parse original Hebrew / Greek morphology, grammar, verb tenses, syntactical cases, and transliterations for a verse.",
+      "Word-by-word Greek or Hebrew parsing for a verse: original word, lemma, transliteration, gloss, and grammar (tense, voice, mood, case, number).",
     schema: S.MorphologyLookupSchema,
     mcpErrors: "on_error",
     restAliases: PASSAGE,
@@ -342,9 +369,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "interlinear_lookup",
+    title: "Interlinear Lookup",
     tier: "specialized",
     description:
-      "Generate an inline word-by-word Greek/Hebrew to English interlinear with continuous verse layout and an automated glossary of rare/notable words at the bottom.",
+      "Word-by-word Greek or Hebrew interlinear for a passage, with English glosses and a glossary of notable words. Choose inline, ruby or table layout with display_mode.",
     schema: S.InterlinearLookupSchema,
     mcpErrors: "on_error",
     restAliases: { ...PASSAGE, displayMode: "display_mode" },
@@ -352,9 +380,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "septuagint_lookup",
+    title: "Septuagint Lookup",
     tier: "specialized",
     description:
-      "Look up Greek Septuagint (LXX) text, Brenton English translation, and textual divergence notes for any Old Testament passage.",
+      "Greek Septuagint (LXX) text with Brenton's English translation and notes on where it differs from the Hebrew, for an Old Testament passage.",
     schema: S.SeptuagintLookupSchema,
     mcpErrors: "on_empty",
     restAliases: PASSAGE,
@@ -362,9 +391,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "ot_quotations_lookup",
+    title: "OT Quotations Lookup",
     tier: "specialized",
     description:
-      "Look up Old Testament quotations, citations, allusions, and Septuagint bridge references for any NT or OT passage.",
+      "Old Testament passages quoted or alluded to at a New Testament reference (or New Testament uses of an Old Testament passage), including Septuagint links.",
     schema: S.OtQuotationsLookupSchema,
     mcpErrors: "on_empty",
     restAliases: PASSAGE,
@@ -374,9 +404,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   // --- Theology, doctrine & devotion ---
   defineTool({
     name: "theological_dictionary",
+    title: "Bible Dictionary",
     tier: "specialized",
     description:
-      "Look up source-labelled articles and definitions from Tyndale, ISBE, Easton's, Smith's, Fausset's, Morrish, Vine's, or the combined classic reference collection.",
+      "A dictionary or encyclopedia article on a biblical or theological term. Sources: tyndale (default), isbe, easton, smith, fausset, morrish, vine, or collection (several classic sources). Articles can be long; use page to read in parts.",
     schema: S.TheologicalDictionarySchema,
     mcpErrors: "on_error",
     restAliases: { query: "term", word: "term" },
@@ -384,9 +415,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "topic_study",
+    title: "Topical Index",
     tier: "specialized",
     description:
-      "Topical Bible study retrieving comprehensive scripture outlines and doctrinal subtopics (Nave's / Torrey Topical datasets).",
+      "Topical Bible index for a subject (Nave's/Torrey style): subtopics with their Scripture references. Common topics are long; use page to read in parts.",
     schema: S.TopicStudySchema,
     mcpErrors: "on_error",
     restAliases: { topic: "query", term: "query" },
@@ -394,8 +426,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "biblical_promises",
+    title: "Biblical Promises",
     tier: "specialized",
-    description: "Retrieve categorized biblical promises and scriptures for specific life situations and spiritual needs.",
+    description:
+      "Bible promises for a life situation or need (e.g. 'Peace', 'Fear', 'Strength'), optionally with the full text of each passage.",
     schema: S.BiblicalPromisesSchema,
     mcpErrors: "on_error",
     restAliases: { category: "topic", query: "topic" },
@@ -405,9 +439,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   // --- People, places, history & culture ---
   defineTool({
     name: "character_lookup",
+    title: "Bible Character",
     tier: "specialized",
     description:
-      "Retrieve rich biographical data, parental ancestry, KJV occurrences, and visual ASCII family & relationship trees for Bible figures.",
+      "Biography of a person in the Bible: description, family relationships and key passages, with a family tree.",
     schema: S.CharacterLookupSchema,
     mcpErrors: "on_error",
     restAliases: { query: "name", character: "name" },
@@ -415,9 +450,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "location_lookup",
+    title: "Bible Location",
     tier: "specialized",
     description:
-      "Retrieve geographical coordinates, live Google Map links, and historical-archaeological descriptions of Bible places.",
+      "A biblical place: coordinates, a map link, and a historical and archaeological description.",
     schema: S.LocationLookupSchema,
     mcpErrors: "on_error",
     restAliases: { query: "location", name: "location" },
@@ -425,26 +461,30 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "entity_disambiguation",
+    title: "Name Disambiguation",
     tier: "specialized",
     description:
-      "Disambiguate biblical persons or locations sharing identical names (e.g. Mary, James, John, Zechariah, Herod), returning exact identities, lineages, roles, and biblical passages.",
+      "Tell apart different people or places that share a name (e.g. Mary, James, John, Herod), with each one's identity, family, role and key passages.",
     schema: S.EntityDisambiguationSchema,
     mcpErrors: "on_empty",
     run: (env, a) => lookupEntityDisambiguation(env, a.name)
   }),
   defineTool({
     name: "convert_ancient_units",
+    title: "Ancient Unit Converter",
     tier: "specialized",
     description:
-      "Convert ancient biblical weights (Talent, Shekel, Mina), dry/liquid measurements (Cor, Ephah, Bath, Hin, Omer), distances (Cubit, Span, Stadion), and currencies (Denarius, Drachma, Stater, Talent, Mite) into modern metric, imperial, and labor-wage purchasing power.",
+      "Convert a biblical weight, measure, distance or coin (e.g. talent, shekel, cubit, ephah, denarius) to modern metric and imperial units, with an indication of its value in wages.",
     schema: S.ConvertAncientUnitsSchema,
     mcpErrors: "on_empty",
     run: (env, a) => convertAncientUnits(env, a.unit, a.amount)
   }),
   defineTool({
     name: "bible_names",
+    title: "Bible Names",
     tier: "specialized",
-    description: "Look up meanings, linguistic origins, and occurrences of biblical names.",
+    description:
+      "Meaning and origin of a biblical name.",
     schema: S.BibleNamesSchema,
     mcpErrors: "on_error",
     restAliases: { name: "query", search: "query" },
@@ -452,9 +492,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "chronology",
+    title: "Bible Chronology",
     tier: "specialized",
     description:
-      "Search biblical chronology, timelines, date spans, and sequencing of historical events (Kings of Israel/Judah, Paul).",
+      "Dated events from a biblical timeline matching a person, period or event (e.g. 'David', 'Exodus', 'Kings of Judah').",
     schema: S.ChronologySchema,
     mcpErrors: "on_error",
     restAliases: { period: "query", event: "query" },
@@ -462,8 +503,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "book_analysis",
+    title: "Book Introduction",
     tier: "specialized",
-    description: "Retrieve a source-attributed Tyndale Open Study Notes book summary or full introduction.",
+    description:
+      "Introduction to a Bible book from the Tyndale Open Study Notes: purpose, author, date and setting. Set detail to 'full' for the complete introduction.",
     schema: S.BookAnalysisSchema,
     mcpErrors: "on_error",
     restAliases: { query: "book" },
@@ -471,8 +514,10 @@ export const TOOLS: readonly ToolDefinition[] = [
   }),
   defineTool({
     name: "chapter_summary",
+    title: "Chapter Summary",
     tier: "specialized",
-    description: "Retrieve Adam Clarke's source-attributed chapter-opening synopsis for any Bible chapter.",
+    description:
+      "Adam Clarke's synopsis at the opening of a Bible chapter, summarising its contents.",
     schema: S.ChapterSummarySchema,
     mcpErrors: "on_error",
     restAliases: { query: "book" },
