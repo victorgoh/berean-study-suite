@@ -47,8 +47,8 @@ async function main() {
 
   console.log("1. Registry: unique names and derived counts");
   assert.equal(new Set(names).size, names.length, "duplicate tool names");
-  assert.equal(TOOLS.length, 36);
-  assert.deepEqual(MCP_TOOL_COUNTS, { specialized: 22, studyPacks: 13, ai: 23, human: 36 });
+  assert.equal(TOOLS.length, 37);
+  assert.deepEqual(MCP_TOOL_COUNTS, { specialized: 23, studyPacks: 13, ai: 24, human: 37 });
 
   console.log("2. Drift: OpenAPI paths match the registry exactly");
   const specPaths = Object.keys((getOpenApiSpec("http://localhost") as any).paths)
@@ -247,12 +247,42 @@ async function main() {
   assert.equal(morphWords.find((w) => w.Lexeme === "ἀναπαύω")?.Strongs, "G373");
   assert.ok(morphWords.every((w) => !("LexicalEntry" in w)), "raw LexicalEntry is not exposed");
   // A word study with no lexicon entry is an error, with a hint for non-Strong's input.
-  const ws = await restJ("word_study_pack", { strongs_number: "rest" });
+  const ws = await restJ("word_study_pack", { strongs_number: "xyzzyq" });
   assert.equal(ws.status, 404);
   assert.match(ws.body.error.message, /Strong's number such as G26/);
-  const wsMcp = (await rpc(envFor("human"), "tools/call", { name: "word_study_pack", arguments: { strongs_number: "rest" } })).result;
+  const wsMcp = (await rpc(envFor("human"), "tools/call", { name: "word_study_pack", arguments: { strongs_number: "xyzzyq" } })).result;
   assert.equal(wsMcp.isError, true);
   assert.equal((await restJ("word_study_pack", { strongs_number: "G373" })).status, 200);
+
+  console.log("18. Words instead of Strong's numbers");
+  const agape = await restJ("lexicon_lookup", { strongs_number: "agape" });
+  assert.equal(agape.status, 200);
+  assert.match(agape.body.formattedText.normalize("NFC"), /^\*\u201Cagape\u201D is G26 \S+ \(agap\S+, \u201Clove\u201D\)/);
+  assert.equal((await restJ("lexicon_lookup", { strongs_number: "αγαπη" })).status, 200, "unaccented Greek lemma");
+  const shalom = (await restJ("lexicon_lookup", { strongs_number: "shalom" })).body;
+  assert.match(shalom.formattedText, /H7965/, "Hebrew variants collapse to their base number");
+  const rest = (await restJ("lexicon_lookup", { strongs_number: "rest" })).body;
+  assert.ok(rest.candidates.length > 1);
+  assert.match(rest.formattedText, /^# Words matching \u201Crest\u201D[\s\S]*\| G372 \| /);
+  const restPack = await restJ("word_study_pack", { strongs_number: "rest" });
+  assert.equal(restPack.status, 200);
+  assert.ok(restPack.body.result.candidates.length > 1, "word study offers a choice for an ambiguous word");
+  const agapePack = (await restJ("word_study_pack", { strongs_number: "agape" })).body;
+  assert.match(agapePack.formattedText, /Lexical Definition[\s\S]*G26/);
+  assert.equal((await restJ("lexicon_lookup", { strongs_number: "G26" })).status, 200, "Strong's numbers still work");
+
+  console.log("19. Compare translations");
+  const cmp = await restJ("compare_translations", { reference: "John 11:35" });
+  assert.equal(cmp.status, 200);
+  assert.deepEqual(cmp.body.versions, ["BSB", "KJV", "NET", "WEB"]);
+  assert.equal(cmp.body.verses.length, 1);
+  assert.match(cmp.body.verses[0].texts.KJV, /Jesus wept/);
+  assert.match(cmp.body.formattedText, /^# Compare Translations: John 11:35[\s\S]*\*\*BSB\*\* — Jesus wept\./);
+  assert.equal((await restJ("compare_translations", { reference: "John 3:16", versions: ["BSB", "KJV", "NET", "WEB", "ASV"] })).status, 400, "at most four");
+  assert.equal((await restJ("compare_translations", { reference: "not a passage" })).status, 400);
+  const pair = (await restJ("compare_translations", { reference: "Psalm 23:1-2", versions: ["KJV", "BSB"] })).body;
+  assert.deepEqual(pair.versions, ["KJV", "BSB"]);
+  assert.equal(pair.verses.length, 2);
 
   console.log("\n🎉 Tool registry tests passed.");
 }

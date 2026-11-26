@@ -394,6 +394,34 @@ export function getOpenApiSpec(serverUrl: string = "https://berean-mcp.victorgoh
           responses: { "200": { description: "Passage text and formatted output" } }
         }
       },
+      "/tools/compare_translations": {
+        post: {
+          tags: ["📖 Scripture Texts & Translations"],
+          summary: "Compare Translations",
+          description: "A passage verse by verse in up to four translations side by side (default BSB, KJV, NET, WEB).",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    reference: { type: "string", example: "John 3:16", description: "Scripture reference" },
+                    versions: {
+                      type: "array",
+                      maxItems: 4,
+                      items: { type: "string", enum: ["BSB", "NET", "KJV", "WEB", "ASV", "OHGB", "LXX"] },
+                      default: ["BSB", "KJV", "NET", "WEB"]
+                    }
+                  },
+                  required: ["reference"]
+                }
+              }
+            }
+          },
+          responses: { "200": { description: "Verses with each translation's text" } }
+        }
+      },
       "/tools/bible_search": {
         post: {
           tags: ["📖 Scripture Texts & Translations"],

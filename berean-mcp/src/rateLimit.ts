@@ -15,7 +15,7 @@ export type ToolCost = "standard" | "expensive";
 
 /** Tools that load large databases (commentaries, search indexes) or bundle several lookups. */
 const EXPENSIVE_TOOL_PATTERN =
-  /(?:commentary|search|study_pack|devotional|sermon|exegesis|word_study|topic_study|prayer|covenant|interlinear|septuagint)/i;
+  /(?:commentary|search|study_pack|devotional|sermon|exegesis|word_study|topic_study|prayer|covenant|interlinear|septuagint|compare)/i;
 
 /** Retry-After seconds, matched to each binding's window. */
 const RETRY_AFTER = { burst: 10, standard: 60, expensive: 60 } as const;

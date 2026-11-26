@@ -59,6 +59,7 @@ These are referenced by `upload_auxiliary_to_r2.py`, `sync_data_to_r2.py`, or th
 | `data/chapter_summary.data` | `data/chapter_summary.data` | Chapter summaries | BibleMateData candidate; verify |
 | `collections3.sqlite` | `collections3.sqlite` | Promises / collections | BibleMateData candidate; verify |
 | `data/lookup/*.json` | same R2 key | Topic, character, dictionary, encyclopedia, parallel, promise, name, chronology, daily reading indexes | BibleMateData candidate; verify |
+| `data/lookup/lexicon_words.json` | same R2 key | Word → Strong's index for `lexicon_lookup` / `word_study_pack` (transliterations, lemmas, English glosses) | Generated from the STEPBible `lexicon_step` table by `scripts/build_lexicon_word_index.py`; rebuild after lexicon changes |
 | `commentaries/c*.commentary` | same R2 key | Commentary lookup | BibleMateData candidate; verify each file’s original source/license |
 | `commentaries/TNotes.commentary` / `cTNotes.commentary` | same R2 key | Tyndale notes | Likely STEPBible/Tyndale; do not classify as BibleMateData without package manifest evidence |
 

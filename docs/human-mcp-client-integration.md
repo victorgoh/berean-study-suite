@@ -165,11 +165,12 @@ larger pages, or the human Explorer to read long articles in one view.
 ### 📖 Granular Tools
 
 - **`bible_lookup`**: A verse, range or whole chapter in BSB (default), NET, KJV, WEB, ASV, OHGB (original Hebrew/Greek) or LXX.
+- **`compare_translations`**: A passage verse by verse in up to four translations side by side.
 - **`bible_search`**: Find verses containing a word or phrase in one translation, optionally within one book; supports `*` wildcards and reports the total number of matches.
 - **`commentary_lookup`**: Query an active commentary with `reference` and `version`. Call `get_available_resources(category="commentaries")` first for current keys, aliases, scope, and descriptions. Examples include `Henry`, `Pulpit`, `ECF`, `Catena`, `Kretzmann`, and `Schaff`. Check each resource's recorded source and licence before redistribution.
 - **`cross_references`**: Treasury of Scripture Knowledge (TSK) cross-references grouped by the word they connect to; `limit` caps how many are returned.
-- **`morphology_lookup`**: Word-by-word grammatical tagging, lemma roots, transliterations, and glosses for any Old or New Testament verse.
-- **`lexicon_lookup`**: Definitions by Strong's number from STEPBible TBESG/TBESH, Brown-Driver-Briggs (BDB), Thayer's Greek Lexicon and LSJ; "see …" pointer entries are followed.
+- **`morphology_lookup`**: Word-by-word grammatical tagging, lemma roots, Strong's numbers, transliterations, and glosses for any Old or New Testament verse.
+- **`lexicon_lookup`**: Definitions from STEPBible TBESG/TBESH, Brown-Driver-Briggs (BDB), Thayer's Greek Lexicon and LSJ. Accepts a Strong's number, a transliteration (`agape`), the original word or an English word (`rest` returns the matching Strong's numbers); "see …" pointer entries are followed.
 - **`theological_dictionary`**: Query Tyndale, ISBE, Easton's, Smith's, Fausset's, Morrish, Vine's, or the source-labelled Classic Bible Dictionary Collection. Explicit source requests do not silently fall back to another source.
 - **`parallel_passages`**: Gospel harmonies and Old/New Testament parallel accounts, optionally with full text.
 - **`daily_reading`**: Daily Bible reading plan with scripture retrieval.

@@ -68,7 +68,7 @@ export const PassageExegesisPackSchema = {
 };
 
 export const WordStudyPackSchema = {
-  strongs_number: z.string().describe("Strong's number (e.g. 'G2842' for koinonia, 'H7225' for bereshit)"),
+  strongs_number: z.string().describe("Strong's number (e.g. 'G2842'), a transliteration ('koinonia', 'shalom'), the Greek/Hebrew word, or an English word ('fellowship'). A word with several matches returns a list to choose from."),
   reference: z.string().optional().describe("Optional verse reference for in-context grammatical morphology, e.g. 'Philippians 1:5'"),
   lexicon: z.string().default("strongs").describe("Lexicon source: 'thayer', 'bdb', 'lsj', 'strongs'")
 };
@@ -122,6 +122,11 @@ export const BibleLookupSchema = {
   reference: z.string().describe("Passage reference, e.g., 'John 3:16', 'Romans 8:28-30', 'Genesis 1:1-5'")
 };
 
+export const CompareTranslationsSchema = {
+  reference: z.string().describe("Passage reference, e.g. 'John 3:16' or 'Psalm 23:1-3'"),
+  versions: z.array(z.string()).max(4).default(["BSB", "KJV", "NET", "WEB"]).describe("Up to 4 translations: BSB, NET, KJV, WEB, ASV, OHGB (Hebrew/Greek), LXX (OT only)")
+};
+
 export const BibleSearchSchema = {
   query: z.string().describe("Word or phrase to search for. Use * as a wildcard, e.g. 'rest*'"),
   version: z.string().default("BSB").describe("Bible version to search in, e.g. BSB, NET, KJV, WEB"),
@@ -156,7 +161,7 @@ export const CrossReferenceSchema = {
 // --- Group C: Original Languages & Textual Alignment ---
 
 export const LexiconLookupSchema = {
-  strongs_number: z.string().describe("Strong's number (e.g. 'G2889' for Greek kosmos, 'H7225' for Hebrew bereshit)"),
+  strongs_number: z.string().describe("Strong's number (e.g. 'G2889', 'H7225'), a transliteration ('kosmos', 'agape'), the Greek/Hebrew word, or an English word ('world'). A word with several matches returns a list to choose from."),
   lexicon: z.string().default("strongs").describe(`Lexicon source key or alias. Available canonical keys: ${LEXICON_REGISTRY.map(l => l.code).join(", ")}; runtime aliases include step, thayer, bdb, lsj, strongs, and all.`)
 };
 

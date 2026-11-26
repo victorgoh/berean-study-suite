@@ -15,7 +15,7 @@ import * as S from "./tools.js";
 import { Env } from "../types.js";
 import type { ServiceErrorCode } from "../services/errors.js";
 import { getAvailableResources } from "../services/catalogService.js";
-import { lookupBiblePassage } from "../services/bibleService.js";
+import { lookupBiblePassage, compareTranslations } from "../services/bibleService.js";
 import { searchBible } from "../services/searchService.js";
 import { lookupCrossReferences } from "../services/xrefService.js";
 import { lookupLexiconEntry } from "../services/lexiconService.js";
@@ -199,7 +199,7 @@ export const TOOLS: readonly ToolDefinition[] = [
     title: "Word Study Pack",
     tier: "study_pack",
     description:
-      "Study one Greek or Hebrew word by Strong's number: lexicon definitions; with a reference, its parsing in that verse, plus A. T. Robertson and Marvin Vincent's notes for New Testament verses.",
+      "Study one Greek or Hebrew word, given a Strong's number, transliteration (agape) or English word: lexicon definitions; with a reference, its parsing in that verse, plus A. T. Robertson and Marvin Vincent's notes for New Testament verses.",
     schema: S.WordStudyPackSchema,
     mcpErrors: "on_empty",
     restAliases: { strongs: "strongs_number", query: "strongs_number", ...PASSAGE },
@@ -288,6 +288,17 @@ export const TOOLS: readonly ToolDefinition[] = [
     run: (env, a) => lookupBiblePassage(env, a.version, a.reference)
   }),
   defineTool({
+    name: "compare_translations",
+    title: "Compare Translations",
+    tier: "specialized",
+    description:
+      "Show a passage verse by verse in up to four translations side by side (default BSB, KJV, NET, WEB). Use it to see how translations render a word or phrase differently.",
+    schema: S.CompareTranslationsSchema,
+    mcpErrors: "on_error",
+    restAliases: PASSAGE,
+    run: (env, a) => compareTranslations(env, a.reference, a.versions)
+  }),
+  defineTool({
     name: "bible_search",
     title: "Bible Search",
     tier: "specialized",
@@ -350,7 +361,7 @@ export const TOOLS: readonly ToolDefinition[] = [
     title: "Lexicon Lookup",
     tier: "specialized",
     description:
-      "Definition of a Greek or Hebrew word by Strong's number (e.g. G26, H7225), from Thayer, BDB, LSJ or STEPBible lexicons. Set lexicon to choose a source, or 'all'.",
+      "Definition of a Greek or Hebrew word from Thayer, BDB, LSJ or STEPBible lexicons. Accepts a Strong's number (G26, H7225), a transliteration (agape, shalom), the original word, or an English word (love); a word with several matches returns a list of Strong's numbers to choose from. Set lexicon to choose a source, or 'all'.",
     schema: S.LexiconLookupSchema,
     mcpErrors: "on_error",
     restAliases: { strongs: "strongs_number", query: "strongs_number" },

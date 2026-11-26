@@ -57,7 +57,7 @@ export const SERVER_INSTRUCTIONS = [
   "Berean is a read-only Bible study server: Scripture texts, classic public-domain commentaries, Greek and Hebrew lexicons and morphology, Bible dictionaries, cross-references and background resources. It retrieves sources; it does not write interpretations.",
   "Quote Scripture only from bible_lookup (or a tool that returns verse text), never from memory, and give the translation, e.g. [John 3:16 (BSB)].",
   "Call get_available_resources first when you need a valid Bible version, commentary key or lexicon; commentary_lookup takes one commentary per call.",
-  "For a word study, call morphology_lookup on the verse to get each word's Strong's number, then call lexicon_lookup with that number.",
+  "For a word study, lexicon_lookup and word_study_pack accept a Strong's number, a transliteration (agape) or an English word; to study a word as used in a verse, call morphology_lookup on the verse for each word's Strong's number.",
   "Long results come in pages: when a response ends with 'Part 1 of N', call the tool again with the same arguments and page: 2. Use output_mode 'full' for larger pages.",
   "Errors begin with a code: REQUEST_FAILED (fix the arguments), RESOURCE_UNAVAILABLE (nothing matched; try another query or source), DEPENDENCY_UNAVAILABLE or INTERNAL_ERROR (retry later).",
   "Cite the source of each commentary, dictionary or lexicon you use."

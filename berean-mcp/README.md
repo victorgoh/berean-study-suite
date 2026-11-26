@@ -127,7 +127,7 @@ For AI-facing MCP use, request one commentary at a time and specify the preferre
 5. **`devotional_study_pack`**: Scripture, Tyndale Open Study Notes, Matthew Henry's Concise Commentary, related biblical promises and cross-references.
 6. **`prayer_guide_study_pack`**: Scripture, Joseph Benson, John Wesley and Matthew Henry's Concise Commentary, plus related promises, for praying through a passage.
 7. **`passage_exegesis_pack`**: Translation plus OHGB Hebrew/Greek, morphology, the Septuagint for OT passages, Keil & Delitzsch, H. A. W. Meyer, Expositor's Greek NT, JFB, Clarke, The Pulpit Commentary and cross-references.
-8. **`word_study_pack`**: Lexicon definitions for a Strong's number; with a reference, its parsing in that verse, plus A. T. Robertson and Marvin Vincent for New Testament verses.
+8. **`word_study_pack`**: Lexicon definitions for a Strong's number, transliteration or English word; with a reference, its parsing in that verse, plus A. T. Robertson and Marvin Vincent for New Testament verses.
 9. **`interlinear_study_pack`**: Word-by-word Greek/Hebrew interlinear with English glosses, parsing and a glossary of notable words (`inline`, `ruby` or `table` layout).
 10. **`septuagint_study_pack`**: Hebrew Masoretic Text, Greek Septuagint with Brenton's English, a modern translation, Keil & Delitzsch, Clarke and New Testament quotations (OT passages only).
 11. **`ot_in_nt_study_pack`**: New Testament quotations of and allusions to the Old Testament, with aligned NT Greek, Hebrew text, Septuagint and translation, plus Calvin, Gill and cross-references.
@@ -139,6 +139,7 @@ For AI-facing MCP use, request one commentary at a time and specify the preferre
 
 #### Scripture Texts & Translations
 15. **`bible_lookup`**: A verse, range or whole chapter in BSB (default), NET, KJV, WEB, ASV, OHGB or LXX.
+15a. **`compare_translations`**: A passage verse by verse in up to four translations side by side (default BSB, KJV, NET, WEB).
 16. **`bible_search`**: Find verses containing a word or phrase in one translation, optionally within one book; supports `*` wildcards and reports the total number of matches.
 17. **`parallel_passages`**: Gospel harmonies and Old/New Testament parallel accounts, optionally with full text.
 18. **`daily_reading`**: The reading plan's passages for today or a given date, optionally with full text.
@@ -148,8 +149,8 @@ For AI-facing MCP use, request one commentary at a time and specify the preferre
 20. **`cross_references`**: Treasury of Scripture Knowledge references grouped by keyword; `limit` caps how many are returned.
 
 #### Original Languages & Textual Alignment
-21. **`lexicon_lookup`**: STEPBible TBESG/TBESH, Thayer, BDB and LSJ definitions by Strong's number; "see …" pointer entries are followed.
-22. **`morphology_lookup`**: Word-by-word Greek/Hebrew parsing for a verse.
+21. **`lexicon_lookup`**: STEPBible TBESG/TBESH, Thayer, BDB and LSJ definitions. Accepts a Strong's number, a transliteration (`agape`, `shalom`), the original word, or an English word (`rest`, which returns a list of matching Strong's numbers); "see …" pointer entries are followed.
+22. **`morphology_lookup`**: Word-by-word Greek/Hebrew parsing for a verse, including each word's Strong's number.
 23. **`interlinear_lookup`**: Word-by-word Greek/Hebrew interlinear with English glosses and a glossary of notable words.
 24. **`septuagint_lookup`**: Greek Septuagint text, Brenton's English and notes on differences from the Hebrew, for an OT passage.
 25. **`ot_quotations_lookup`**: Old Testament quotations and allusions at a New Testament reference (or NT uses of an OT passage), with Septuagint links.

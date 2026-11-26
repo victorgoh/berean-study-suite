@@ -1,7 +1,16 @@
 import { getDatabase } from "../db/sqliteEngine.js";
 import { parseReferenceString, formatReference } from "./bibleService.js";
+import { OFFICIAL_BOOK_NAMES, resolveBookNumber } from "../mcp/constants.js";
 import { Env } from "../types.js";
 import { dependencyUnavailable, internalError, invalidRequest, notFound, type ServiceErrorFields } from "./errors.js";
+
+/** TSK abbreviates books ("Joh 6:37", "1Jn 4:9"); show the full name ("John 6:37"). */
+function expandBookAbbreviation(ref: string): string {
+  const m = /^([1-3]?[A-Za-z]+)\s+(\d.*)$/.exec(ref);
+  if (!m) return ref;
+  const book = resolveBookNumber(m[1]);
+  return book ? `${OFFICIAL_BOOK_NAMES[book]} ${m[2]}` : ref;
+}
 
 interface TskRef {
   ref: string;
@@ -20,7 +29,8 @@ function parseTskGroups(html: string): { label: string; refs: TskRef[] }[] {
     const refs: TskRef[] = [];
     for (const [, ref, after] of body.matchAll(/<ref[^>]*>([^<]+)<\/ref>([^<]*)/gi)) {
       const note = after.replace(/^\s*-\s*/, "").replace(/[,\s]+$/, "").trim();
-      refs.push(note && /^\s*-/.test(after) ? { ref: ref.trim(), note } : { ref: ref.trim() });
+      const full = expandBookAbbreviation(ref.trim());
+      refs.push(note && /^\s*-/.test(after) ? { ref: full, note } : { ref: full });
     }
     if (refs.length > 0) groups.push({ label: label.trim().replace(/:$/, ""), refs });
   }

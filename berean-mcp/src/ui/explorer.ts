@@ -3,6 +3,27 @@
  * Warm, accessible companion for spiritual growth, scripture reflection, and biblical learning.
  */
 
+import { BOOK_MAP, OFFICIAL_BOOK_NAMES } from "../mcp/constants.js";
+
+/** Aliases that are ordinary English words; linking "Son 1:2" or "Act 3:4" would mislead. */
+const NON_LINKING_ALIASES = new Set(["son", "mar", "act", "can", "cant", "song"]);
+
+/**
+ * Book names the Explorer turns into clickable references: every official name,
+ * "Psalm", and aliases of three or more characters. Regex source, longest first,
+ * with spaces allowing one or more blanks. Built once per isolate.
+ */
+const BOOK_LINK_PATTERN = [
+  ...new Set([
+    ...OFFICIAL_BOOK_NAMES.filter(Boolean),
+    "Psalm",
+    ...Object.keys(BOOK_MAP).filter((alias) => alias.length >= 3 && !NON_LINKING_ALIASES.has(alias))
+  ])
+]
+  .sort((a, b) => b.length - a.length)
+  .map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/ /g, " +"))
+  .join("|");
+
 export function renderExplorerHtml(analyticsSnippet: string = ""): string {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -911,6 +932,20 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       .markdown-table-wrap { overflow: visible; }
       .results-body th, .results-body td { border-color: #999; }
     }
+    .suggestion-list { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-top: .75rem; }
+    .result-rule { border: 0; border-top: 1px solid var(--surface-border); margin: 1rem 0; }
+
+    /* Clickable Scripture references and their preview */
+    .ref-link { color: inherit; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; cursor: pointer; }
+    .ref-link:hover, .ref-link:focus-visible { text-decoration-style: solid; }
+    .ref-preview { position: absolute; z-index: 40; width: min(440px, calc(100vw - 32px)); max-height: 60vh; overflow: auto; padding: .85rem 1rem; background: var(--surface); border: 1px solid var(--surface-border); border-radius: 8px; box-shadow: 0 10px 28px rgba(0,0,0,.14); font-size: .95rem; line-height: 1.55; color: var(--text-main); }
+    .ref-preview[hidden] { display: none; }
+    .ref-preview-head { display: flex; justify-content: space-between; align-items: baseline; gap: .75rem; margin-bottom: .4rem; font-weight: 600; }
+    .ref-preview-close { border: 0; background: none; font-size: 1.2rem; line-height: 1; cursor: pointer; color: var(--text-muted); padding: .1rem .3rem; }
+    .ref-preview-verse { margin: .25rem 0; }
+    .ref-preview-num { font-size: .75em; font-weight: 600; color: var(--text-muted); margin-right: .3rem; vertical-align: super; }
+    .ref-preview-open { display: inline-block; margin-top: .6rem; font-size: .9rem; color: var(--text-main); }
+    @media print { .ref-preview { display: none !important; } .ref-link { text-decoration: none; } }
   </style>
 </head>
 <body>
@@ -959,10 +994,11 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       <div class="mode-pills" id="mode-pills">
         <!-- Passage -->
         <div class="mode-pill active" data-cat="passage" data-mode="scripture">Read Scripture</div>
+        <div class="mode-pill" data-cat="passage" data-mode="compare">Compare Translations</div>
         <div class="mode-pill" data-cat="passage" data-mode="search">Search the Bible</div>
         <div class="mode-pill" data-cat="passage" data-mode="xref">Cross References</div>
         <div class="mode-pill" data-cat="passage" data-mode="parallels">Gospel Parallels</div>
-        <div class="mode-pill" data-cat="passage" data-mode="daily_reading" data-tier="more">Daily Reading Plan</div>
+        <div class="mode-pill" data-cat="passage" data-mode="daily_reading">Daily Reading Plan</div>
 
         <!-- Reflection -->
         <div class="mode-pill" data-cat="reflection" data-mode="devotional">Daily Devotional</div>
@@ -978,30 +1014,28 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         <div class="mode-pill" data-cat="study" data-mode="lesson" data-tier="more">Small Group & Sunday School</div>
         <div class="mode-pill" data-cat="study" data-mode="sermon" data-tier="more">Teaching & Sermon Helper</div>
         <div class="mode-pill" data-cat="study" data-mode="illustrations" data-tier="more">Sermon Illustrations</div>
-        <div class="mode-pill" data-cat="study" data-mode="covenant" data-tier="more">Themes Across Scripture</div>
-        <div class="mode-pill" data-cat="study" data-mode="topic_pack" data-tier="more">Topical Study Pack</div>
-        <div class="mode-pill" data-cat="study" data-mode="topic" data-tier="more">Bible Topics</div>
+        <div class="mode-pill" data-cat="study" data-mode="covenant" data-tier="more">Covenant Theme Study</div>
+        <div class="mode-pill" data-cat="study" data-mode="topic_pack" data-tier="more">Topic Overview</div>
+        <div class="mode-pill" data-cat="study" data-mode="topic" data-tier="more">Topical Index</div>
 
         <!-- Original words -->
-        <div class="mode-pill" data-cat="words" data-mode="word_pack">Original Word Meaning</div>
-        <div class="mode-pill" data-cat="words" data-mode="lexicon">Lexicon Lookup</div>
-        <div class="mode-pill" data-cat="words" data-mode="morphology">Grammar & Syntax</div>
-        <div class="mode-pill" data-cat="words" data-mode="interlinear_pack">Word-by-Word Interlinear</div>
-        <div class="mode-pill" data-cat="words" data-mode="interlinear_lookup" data-tier="more">Inline Interlinear</div>
-        <div class="mode-pill" data-cat="words" data-mode="septuagint_pack" data-tier="more">Greek Septuagint & Hebrew MT</div>
-        <div class="mode-pill" data-cat="words" data-mode="septuagint_lookup" data-tier="more">Septuagint Text</div>
+        <div class="mode-pill" data-cat="words" data-mode="word_pack">Word Study</div>
+        <div class="mode-pill" data-cat="words" data-mode="lexicon">Lexicon Entry</div>
+        <div class="mode-pill" data-cat="words" data-mode="morphology">Word-by-Word Grammar</div>
+        <div class="mode-pill" data-cat="words" data-mode="interlinear_pack">Interlinear</div>
+        <div class="mode-pill" data-cat="words" data-mode="septuagint_pack" data-tier="more">Septuagint & Hebrew Compared</div>
+        <div class="mode-pill" data-cat="words" data-mode="septuagint_lookup" data-tier="more">Septuagint Text Only</div>
 
         <!-- Historical and cultural background -->
         <div class="mode-pill" data-cat="background" data-mode="dictionary">Bible Dictionary</div>
-        <div class="mode-pill" data-cat="background" data-mode="entities">People & Places</div>
+        <div class="mode-pill" data-cat="background" data-mode="entities">Same-Name People & Places</div>
         <div class="mode-pill" data-cat="background" data-mode="character">Bible Characters</div>
         <div class="mode-pill" data-cat="background" data-mode="location">Biblical Places</div>
         <div class="mode-pill" data-cat="background" data-mode="chronology">Biblical Timeline</div>
-        <div class="mode-pill" data-cat="background" data-mode="ot_in_nt_pack" data-tier="more">Old Testament in the New</div>
-        <div class="mode-pill" data-cat="background" data-mode="ot_quotations" data-tier="more">OT Quotes & Allusions</div>
+        <div class="mode-pill" data-cat="background" data-mode="ot_in_nt_pack" data-tier="more">OT in the NT Study</div>
+        <div class="mode-pill" data-cat="background" data-mode="ot_quotations" data-tier="more">Find OT Quotations</div>
         <div class="mode-pill" data-cat="background" data-mode="units" data-tier="more">Coins, Weights & Measures</div>
         <div class="mode-pill" data-cat="background" data-mode="names" data-tier="more">Name Meanings</div>
-        <div class="mode-pill" data-cat="background" data-mode="resources" data-tier="more">Resource Catalog</div>
       </div>
 
       <!-- Clean Unified Search Input Row -->
@@ -1123,6 +1157,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       </p>
       <nav class="footer-links" aria-label="Helpful information">
         <a href="https://github.com/victorgoh/berean-study-suite/blob/main/docs/human-user-guide.md" target="_blank" rel="noopener noreferrer">How to use this study tool</a>
+        <a href="?tool=resources&amp;run=1">What's in the library</a>
         <a href="https://github.com/victorgoh/berean-study-suite/blob/main/docs/data-sources-and-provenance.md" target="_blank" rel="noopener noreferrer">Study sources and credits</a>
         <a href="https://github.com/victorgoh/berean-study-suite" target="_blank" rel="noopener noreferrer">About the project</a>
       </nav>
@@ -1150,6 +1185,23 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
           { label: "Philippians 4:4-8 (Peace of God)", query: "Philippians 4:4-8" }
         ],
         buildPayload: (q, v) => ({ reference: q, version: v })
+      },
+      compare: {
+        endpoint: "/tools/compare_translations",
+        icon: "📚",
+        btnLabel: "Compare Translations",
+        placeholder: "Passage: e.g. John 1:1, Romans 3:23-24, Psalm 23:1-3",
+        defaultQuery: "John 1:1",
+        samples: [
+          { label: "John 1:1 (In the Beginning Was the Word)", query: "John 1:1" },
+          { label: "Romans 3:23-24 (Justified Freely)", query: "Romans 3:23-24" },
+          { label: "Philippians 2:5-8 (The Mind of Christ)", query: "Philippians 2:5-8" }
+        ],
+        // The preferred translation first, then the others, four in all.
+        buildPayload: (q, v) => ({
+          reference: q,
+          versions: [v].concat(["BSB", "KJV", "NET", "WEB"].filter(x => x !== v)).slice(0, 4)
+        })
       },
       search: {
         endpoint: "/tools/bible_search",
@@ -1409,7 +1461,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         endpoint: "/tools/word_study_pack",
         icon: "🔤",
         btnLabel: "Explore Word Meaning",
-        placeholder: "Strong's Number: e.g. G26 (Agape), G4102 (Pistis), H7965 (Shalom)",
+        placeholder: "Word or Strong's number: e.g. agape, shalom, rest, G26",
         defaultQuery: "G26",
         samples: [
           { label: "G26 (Agape • Love)", query: "G26" },
@@ -1423,7 +1475,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         endpoint: "/tools/lexicon_lookup",
         icon: "🏛️",
         btnLabel: "Look Up Lexicon",
-        placeholder: "Strong's Number: e.g. G2889 (Kosmos), H7225 (Reshit)",
+        placeholder: "Word or Strong's number: e.g. kosmos, love, G2889, H7225",
         defaultQuery: "G2889",
         samples: [
           { label: "G2889 (Kosmos • World)", query: "G2889" },
@@ -1634,6 +1686,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       scripture: "Enter a verse or passage to read it in your preferred translation.",
       search: "Enter a word or phrase to find where it appears in Scripture.",
       xref: "Enter a verse to find related passages and biblical connections.",
+      compare: "Enter a verse or short passage to read it side by side in four translations.",
       devotional: "Enter a passage to gather concise material for reflection and prayer.",
       prayer: "Enter a passage to build a Scripture-centered prayer guide.",
       exegesis: "Enter a passage for a structured verse-by-verse study.",
@@ -1641,8 +1694,8 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       commentary_pack: "Enter a passage to compare selected commentary perspectives.",
       book_analysis: "Enter a Bible book name for its summary, themes, and introduction.",
       chapter_summary: "Enter a chapter such as Romans 8 for a concise guide.",
-      word_pack: "Enter a verse to examine important words in their original-language context.",
-      lexicon: "Enter a Strong's number such as G26 or H2617.",
+      word_pack: "Enter a Greek or Hebrew word (agape, shalom), an English word (rest), or a Strong's number (G26).",
+      lexicon: "Enter a word such as agape or love, or a Strong's number such as G26 or H2617.",
       morphology: "Enter a verse to inspect the grammatical form of its original words.",
       interlinear_pack: "Enter a verse or short passage for word-by-word language study.",
       dictionary: "Enter a person, place, practice, object, or theological term.",
@@ -1709,9 +1762,13 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       return pill ? pill.getAttribute("data-cat") : "passage";
     }
 
+    // Older links may name tools that are no longer listed separately.
+    const MODE_ALIASES = { interlinear_lookup: "interlinear_pack" };
+
     function restoreUrlState() {
       const params = new URLSearchParams(window.location.search);
-      const requestedMode = params.get("tool");
+      const rawMode = params.get("tool");
+      const requestedMode = rawMode && MODE_ALIASES[rawMode] ? MODE_ALIASES[rawMode] : rawMode;
       if (requestedMode && TOOL_CONFIG[requestedMode]) activeMode = requestedMode;
       queryInput.value = params.get("q") || "";
       setSelectValue(prefVersionSelect, params.get("translation"));
@@ -1963,19 +2020,39 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       searchPanel.hidden = true;
     }
 
-    function showResultError(title, message) {
+    function showResultError(title, message, suggestions) {
       const wrapper = document.createElement("div");
       wrapper.className = "result-message";
       const heading = document.createElement("h2");
       heading.textContent = title;
       const detail = document.createElement("p");
       detail.textContent = message;
-      const retry = document.createElement("button");
-      retry.type = "button";
-      retry.className = "action-btn";
-      retry.textContent = "Try again";
-      retry.addEventListener("click", executeStudy);
-      wrapper.append(heading, detail, retry);
+      wrapper.append(heading, detail);
+      if (suggestions && suggestions.length > 0) {
+        const list = document.createElement("div");
+        list.className = "suggestion-list";
+        suggestions.forEach(mode => {
+          const cfg = TOOL_CONFIG[mode];
+          if (!cfg) return;
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "action-btn suggestion-btn";
+          button.textContent = cfg.btnLabel;
+          button.addEventListener("click", () => {
+            selectMode(mode, categoryForMode(mode));
+            executeStudy();
+          });
+          list.append(button);
+        });
+        wrapper.append(list);
+      } else {
+        const retry = document.createElement("button");
+        retry.type = "button";
+        retry.className = "action-btn";
+        retry.textContent = "Try again";
+        retry.addEventListener("click", executeStudy);
+        wrapper.append(retry);
+      }
       resultsBody.replaceChildren(wrapper);
       resultsBottomActions.classList.remove("visible");
       btnExpandAll.classList.remove("visible");
@@ -1997,6 +2074,224 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       return ["Unable to load results", "Please check your connection and try again."];
     }
 
+    // ----- Suggestions when the input does not fit the chosen tool ------------
+    // Tools that need a Bible reference such as "John 3:16".
+    const PASSAGE_MODES = new Set(["scripture", "compare", "xref", "devotional", "prayer", "exegesis", "commentary_single",
+      "commentary_pack", "morphology", "interlinear_pack", "interlinear_lookup", "septuagint_pack", "septuagint_lookup",
+      "ot_in_nt_pack", "ot_quotations", "sermon", "illustrations", "lesson", "covenant"]);
+
+    function looksLikePassage(q) {
+      return /[0-9]/.test(q) && /[A-Za-z]/.test(q);
+    }
+
+    /** Tools that can handle input which is not a passage, best first. */
+    function suggestToolsFor(q) {
+      const text = q.trim();
+      if (/^[GH][0-9]{1,5}[a-z]?$/i.test(text)) return ["word_pack", "lexicon"];
+      const words = text.split(/ +/).filter(Boolean);
+      const suggestions = ["search", "promises", "topic", "dictionary"];
+      if (words.length <= 2 && /^[A-Z]/.test(text)) suggestions.push("character", "location");
+      return suggestions;
+    }
+
+    function showSuggestionsFor(q, config) {
+      resultsCard.style.display = "block";
+      resultsHeading.textContent = config.btnLabel + ": " + q;
+      showResultError(
+        "This tool needs a Bible reference",
+        "\u201C" + q + "\u201D isn\u2019t a passage like John 3:16 or Psalm 23. Try one of these instead:",
+        suggestToolsFor(q)
+      );
+      showResultsView(config.btnLabel + " · " + q);
+    }
+
+    // ----- Clickable Scripture references -----------------------------------
+    // References in results (e.g. "John 6:37", "Isaiah 55:1-3") become links.
+    // A click shows the passage in a small preview; ctrl/cmd-click or the
+    // preview's "Open passage" link opens it as its own study.
+    const BOOK_PATTERN = ${JSON.stringify(BOOK_LINK_PATTERN)};
+    const REF_SOURCE = "(^|[^A-Za-z0-9])((?:" + BOOK_PATTERN + ")[.]? +[0-9]{1,3}:[0-9]{1,3}(?: *[-–] *[0-9]{1,3}(?::[0-9]{1,3})?)?)";
+    const REF_TEST = new RegExp(REF_SOURCE, "i");
+    const refPreviewCache = new Map();
+    const refPreview = document.createElement("div");
+    refPreview.className = "ref-preview";
+    refPreview.hidden = true;
+    refPreview.setAttribute("role", "dialog");
+    refPreview.setAttribute("aria-label", "Passage preview");
+    document.body.appendChild(refPreview);
+    let refPreviewLink = null;
+
+    function passageUrl(reference) {
+      const url = new URL(window.location.href);
+      url.search = "";
+      url.searchParams.set("tool", "scripture");
+      url.searchParams.set("q", reference);
+      url.searchParams.set("translation", prefVersionSelect.value || "BSB");
+      url.searchParams.set("run", "1");
+      return url.toString();
+    }
+
+    function linkifyReferences(root) {
+      const nodes = [];
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+          const parent = node.parentElement;
+          if (!parent || parent.closest("a, button, summary, code, pre, .verse-badge, [data-action], h1, h2, h3, h4")) return NodeFilter.FILTER_REJECT;
+          return REF_TEST.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+        }
+      });
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+
+      nodes.forEach(node => {
+        const text = node.nodeValue;
+        const pattern = new RegExp(REF_SOURCE, "gi");
+        const fragment = document.createDocumentFragment();
+        let last = 0;
+        let match;
+        while ((match = pattern.exec(text)) !== null) {
+          const reference = match[2];
+          // Book names are capitalised in the sources; skip lower-case look-alikes.
+          if (!/^[A-Z0-9]/.test(reference)) continue;
+          const start = match.index + match[1].length;
+          fragment.append(text.slice(last, start));
+          const link = document.createElement("a");
+          link.className = "ref-link";
+          link.href = passageUrl(reference.replace(/ +/g, " "));
+          link.dataset.ref = reference.replace(/ +/g, " ").replace("–", "-");
+          link.textContent = reference;
+          fragment.append(link);
+          last = start + reference.length;
+        }
+        if (last === 0) return;
+        fragment.append(text.slice(last));
+        node.replaceWith(fragment);
+      });
+    }
+
+    // Strong's numbers in word-related results (the "Words matching" choice
+    // list, the morphology table) open a word study for that number.
+    const STRONGS_MODES = new Set(["word_pack", "lexicon", "morphology", "interlinear_pack"]);
+
+    function linkifyStrongs(root) {
+      if (!STRONGS_MODES.has(activeMode)) return;
+      const target = activeMode === "lexicon" ? "lexicon" : "word_pack";
+      const nodes = [];
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+          const parent = node.parentElement;
+          if (!parent || parent.closest("a, button, summary, [data-action], h1, h2")) return NodeFilter.FILTER_REJECT;
+          return /(^|[^A-Za-z0-9])[GH][0-9]{1,5}(?![0-9])/.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+        }
+      });
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach(node => {
+        const text = node.nodeValue;
+        const pattern = /(^|[^A-Za-z0-9])([GH][0-9]{1,5})(?![0-9])/g;
+        const fragment = document.createDocumentFragment();
+        let last = 0;
+        let match;
+        while ((match = pattern.exec(text)) !== null) {
+          const start = match.index + match[1].length;
+          fragment.append(text.slice(last, start));
+          const link = document.createElement("a");
+          link.className = "ref-link strongs-link";
+          link.dataset.strongs = match[2];
+          link.dataset.mode = target;
+          const url = new URL(window.location.href);
+          url.search = "";
+          url.searchParams.set("tool", target);
+          url.searchParams.set("q", match[2]);
+          url.searchParams.set("run", "1");
+          link.href = url.toString();
+          link.title = (target === "lexicon" ? "Look up " : "Word study for ") + match[2];
+          link.textContent = match[2];
+          fragment.append(link);
+          last = start + match[2].length;
+        }
+        if (last === 0) return;
+        fragment.append(text.slice(last));
+        node.replaceWith(fragment);
+      });
+    }
+
+    function closeRefPreview(returnFocus) {
+      if (refPreview.hidden) return;
+      refPreview.hidden = true;
+      if (returnFocus && refPreviewLink) refPreviewLink.focus();
+      refPreviewLink = null;
+    }
+
+    function renderRefPreview(reference, href, verses, errorMessage) {
+      const head = document.createElement("div");
+      head.className = "ref-preview-head";
+      const title = document.createElement("span");
+      title.textContent = reference + " (" + (prefVersionSelect.value || "BSB") + ")";
+      const close = document.createElement("button");
+      close.type = "button";
+      close.className = "ref-preview-close";
+      close.setAttribute("aria-label", "Close preview");
+      close.textContent = "×";
+      close.addEventListener("click", () => closeRefPreview(true));
+      head.append(title, close);
+      const body = document.createElement("div");
+      if (errorMessage) {
+        body.textContent = errorMessage;
+      } else {
+        verses.forEach(verse => {
+          const line = document.createElement("p");
+          line.className = "ref-preview-verse";
+          const num = document.createElement("span");
+          num.className = "ref-preview-num";
+          num.textContent = verse.chapter + ":" + verse.verse;
+          line.append(num, verse.text);
+          body.append(line);
+        });
+      }
+      const open = document.createElement("a");
+      open.className = "ref-preview-open";
+      open.href = href;
+      open.textContent = "Open passage";
+      refPreview.replaceChildren(head, body, open);
+    }
+
+    async function showRefPreview(link) {
+      const reference = link.dataset.ref;
+      const version = prefVersionSelect.value || "BSB";
+      refPreviewLink = link;
+      const rect = link.getBoundingClientRect();
+      const width = Math.min(440, window.innerWidth - 32);
+      refPreview.style.left = Math.max(16, Math.min(rect.left + window.scrollX, window.scrollX + window.innerWidth - width - 16)) + "px";
+      refPreview.style.top = (rect.bottom + window.scrollY + 6) + "px";
+      refPreview.hidden = false;
+      const key = version + "|" + reference;
+      if (!refPreviewCache.has(key)) {
+        refPreview.textContent = "Loading " + reference + "…";
+        try {
+          const res = await fetch("/tools/bible_lookup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reference: reference, version: version })
+          });
+          const data = await res.json();
+          refPreviewCache.set(key, res.ok && data.verses
+            ? { verses: data.verses.slice(0, 30) }
+            : { error: (data.error && data.error.message) || "This passage could not be loaded." });
+        } catch {
+          refPreviewCache.set(key, { error: "This passage could not be loaded. Check your connection." });
+        }
+      }
+      if (refPreviewLink !== link) return; // another preview was opened meanwhile
+      const cached = refPreviewCache.get(key);
+      renderRefPreview(reference, link.href, cached.verses || [], cached.error);
+    }
+
+    document.addEventListener("click", event => {
+      if (!refPreview.hidden && !refPreview.contains(event.target) && !event.target.closest(".ref-link")) closeRefPreview(false);
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") closeRefPreview(true);
+    });
+
     // Execute Study Request
     async function executeStudy() {
       const q = queryInput.value.trim();
@@ -2010,6 +2305,11 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       const c = commentarySelect.value;
       const d = dictSelect.value;
       const config = TOOL_CONFIG[activeMode] || TOOL_CONFIG.scripture;
+      if (PASSAGE_MODES.has(activeMode) && !looksLikePassage(q)) {
+        cancelActiveRequest();
+        showSuggestionsFor(q, config);
+        return;
+      }
       const payload = config.buildPayload(q, v, c, d);
       cancelActiveRequest();
       const requestId = ++requestSequence;
@@ -2084,6 +2384,9 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         resultsBody.innerHTML = isSectionedResult
           ? formatStudyPackMarkdown(md)
           : formatMarkdown(md);
+        closeRefPreview(false);
+        linkifyReferences(resultsBody);
+        linkifyStrongs(resultsBody);
 
         enhanceResultNavigation(isSectionedResult, md);
         showResultsView(requestSummary(config, q, payload));
@@ -2210,6 +2513,17 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     resultsBody.addEventListener("click", event => {
       const toggle = event.target.closest('[data-action="toggle-section"]');
       if (toggle && resultsBody.contains(toggle)) toggleStudyPackSection(toggle);
+      const refLink = event.target.closest("a.ref-link");
+      if (refLink && resultsBody.contains(refLink) && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+        event.preventDefault();
+        if (refLink.dataset.strongs) {
+          queryInput.value = refLink.dataset.strongs;
+          selectMode(refLink.dataset.mode, categoryForMode(refLink.dataset.mode));
+          executeStudy();
+        } else {
+          showRefPreview(refLink);
+        }
+      }
     });
 
     function renderMarkdownTables(markdown) {
@@ -2299,6 +2613,9 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       // Blockquotes
       html = html.replace(/^&gt; (.*$)/gim, '<blockquote>$1</blockquote>');
 
+      // Horizontal rules ("---" between commentary entries)
+      html = html.replace(/^ *(?:-{3,}|_{3,}) *$/gm, '<hr class="result-rule" />');
+
       // Paragraphs & Linebreaks
       html = html.replace(/\\n\\n+/g, '</p><p>');
       html = html.replace(/\\n/g, '<br />');
@@ -2323,7 +2640,11 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
 
     btnShare.addEventListener("click", async () => {
       const original = btnShare.textContent;
-      const shareUrl = updateUrlState();
+      // run=1 makes the shared link show the results straight away. Plain page
+      // visits (and crawlers) still never request data on load.
+      const link = new URL(updateUrlState());
+      link.searchParams.set("run", "1");
+      const shareUrl = link.toString();
       try {
         await navigator.clipboard.writeText(shareUrl);
         btnShare.textContent = "Link copied";
@@ -2361,9 +2682,13 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       lastRenderedMarkdown = "";
     });
 
-    // Initial setup on load
+    // Initial setup on load. Only links that ask for it (run=1, added by
+    // "Copy link") run the study automatically.
     restoreUrlState();
     updateContextualControls();
+    if (new URLSearchParams(window.location.search).get("run") === "1") {
+      executeStudy();
+    }
   </script>
 </body>
 </html>`;

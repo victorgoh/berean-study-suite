@@ -566,10 +566,11 @@ export async function getWordStudyPack(
   // The definition is the heart of a word study: without it, report an error
   // rather than a "successful" pack whose only content is the failure message.
   if (lexiconRes.error) {
-    const hint = /^[GH]\d+[A-Za-z]?$/i.test(strongsNumber.trim())
-      ? ""
-      : " Word studies take a Strong's number such as G26 or H7965; morphology_lookup on a verse shows each word's number.";
-    return { formattedText: "", error: lexiconRes.error + hint, errorCode: lexiconRes.errorCode ?? "RESOURCE_UNAVAILABLE" };
+    return { formattedText: "", error: lexiconRes.error, errorCode: lexiconRes.errorCode ?? "RESOURCE_UNAVAILABLE" };
+  }
+  // A word such as "rest" can match several Strong's numbers: offer the choice.
+  if (lexiconRes.candidates) {
+    return { formattedText: lexiconRes.formattedText ?? "", result: { candidates: lexiconRes.candidates } };
   }
   const morphRes = reference ? await lookupMorphology(env, reference) : null;
   const robRes = reference && isNT ? await lookupCommentary(env, "Rob", reference) : null;

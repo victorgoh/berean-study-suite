@@ -190,3 +190,69 @@ export async function lookupBiblePassage(
     return internalError("Bible passage query", err);
   }
 }
+
+const COMPARE_DEFAULT_VERSIONS = ["BSB", "KJV", "NET", "WEB"];
+const COMPARE_MAX_VERSIONS = 4;
+const COMPARE_MAX_VERSES = 40;
+
+export interface ComparedVerse {
+  reference: string;
+  texts: Record<string, string>;
+}
+
+/**
+ * A passage verse by verse in several translations. Versions are fetched one
+ * after another (each opens its own Bible file), so the count is capped.
+ */
+export async function compareTranslations(
+  env: Env,
+  reference: string,
+  versions: string[] = COMPARE_DEFAULT_VERSIONS
+): Promise<ServiceErrorFields & { formattedText?: string; versions?: string[]; verses?: ComparedVerse[] }> {
+  const parsed = parseReferenceString(reference);
+  if (!parsed) {
+    return invalidRequest(`Could not parse passage reference: "${reference}"`);
+  }
+  const wanted = [...new Set((versions.length ? versions : COMPARE_DEFAULT_VERSIONS).map((v) => v.trim().toUpperCase()).filter(Boolean))];
+  if (wanted.length > COMPARE_MAX_VERSIONS) {
+    return invalidRequest(`Compare at most ${COMPARE_MAX_VERSIONS} translations at a time.`);
+  }
+
+  const rows = new Map<string, ComparedVerse>();
+  const shown: string[] = [];
+  const failed: string[] = [];
+  for (const version of wanted) {
+    const res = await lookupBiblePassage(env, version, reference);
+    if (!res.verses || res.verses.length === 0) {
+      failed.push(version);
+      continue;
+    }
+    shown.push(version);
+    for (const v of res.verses) {
+      const key = `${v.book} ${v.chapter}:${v.verse}`;
+      const row = rows.get(key) ?? { reference: key, texts: {} };
+      row.texts[version] = v.text.trim();
+      rows.set(key, row);
+    }
+  }
+  if (shown.length === 0) {
+    return notFound(`No verses found for ${formatReference(parsed)} in ${wanted.join(", ")}.`);
+  }
+
+  const verses = [...rows.values()];
+  const listed = verses.slice(0, COMPARE_MAX_VERSES);
+  const lines = [`# Compare Translations: ${formatReference(parsed)}`, "", `*${shown.join(" · ")}*`, ""];
+  for (const verse of listed) {
+    lines.push(`### ${verse.reference}`);
+    for (const version of shown) {
+      if (verse.texts[version]) lines.push(`**${version}** — ${verse.texts[version]}`, "");
+    }
+  }
+  if (verses.length > listed.length) {
+    lines.push(`*Showing the first ${listed.length} of ${verses.length} verses; compare a shorter passage to see the rest.*`);
+  }
+  if (failed.length > 0) {
+    lines.push(`*Not available for this passage: ${failed.join(", ")}.*`);
+  }
+  return { formattedText: lines.join("\n").trimEnd(), versions: shown, verses: listed };
+}

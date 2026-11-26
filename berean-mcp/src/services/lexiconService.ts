@@ -1,4 +1,4 @@
-import { getDatabase } from "../db/sqliteEngine.js";
+import { getDatabase, getJsonFromR2 } from "../db/sqliteEngine.js";
 import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { Env } from "../types.js";
 import { notFound, type ServiceErrorCode } from "./errors.js";
@@ -16,11 +16,6 @@ export interface StepLexiconRow {
   definition: string;
 }
 
-/**
- * Standardized Original Language Lexicon Lookup
- * Queries modern STEPBible TBESG (Greek) and TBESH (Hebrew) with sub-lemma disambiguation,
- * with optional side-by-side classical Thayer / BDB / LSJ entries.
- */
 /**
  * Some classical entries are only a pointer, e.g. Thayer G4239 πραΰς: "see
  * πρᾷός". Returns the entry it points to (one hop, matched by headword), or
@@ -41,18 +36,119 @@ function followSeeReference(db: Database, row: { Topic: string; Definition: stri
   }
 }
 
-export async function lookupLexiconEntry(
-  env: Env,
-  strongsNumber: string,
-  lexicon: string = "step"
-): Promise<{
+// ---------------------------------------------------------------------------
+// Finding Strong's numbers by word ("agape", "shalom", "αγαπη", "rest")
+// ---------------------------------------------------------------------------
+
+/** Built by scripts/build_lexicon_word_index.py from the STEPBible lexicon. */
+interface LexiconWordIndex {
+  entries: Record<string, [lemma: string, transliteration: string, gloss: string]>;
+  /** normalized transliteration or lemma -> Strong's numbers */
+  forms: Record<string, string[]>;
+  /** English gloss word -> Strong's numbers, best first */
+  glosses: Record<string, string[]>;
+}
+
+export interface LexiconCandidate {
+  strongs: string;
+  lemma: string;
+  transliteration: string;
+  gloss: string;
+}
+
+const WORD_INDEX_KEY = "data/lookup/lexicon_words.json";
+const GLOSS_STOP_WORDS = new Set(["to", "the", "a", "an", "of", "be", "in", "on", "for", "and", "or", "with", "at", "by", "from", "as", "is", "one", "who", "that"]);
+
+/** Must match normalize() in scripts/build_lexicon_word_index.py. */
+export function normalizeWord(text: string): string {
+  return text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+}
+
+/** True for input such as G26, G0026, H7965 or H7965G. */
+export function isStrongsNumber(text: string): boolean {
+  return /^[GH]\d{1,5}[A-Za-z]?$/i.test(text.trim());
+}
+
+/** "H7965G" -> "H7965", "G0026" -> "G26". */
+function baseStrongs(strongs: string): string {
+  const m = /^([GH])0*(\d+)/i.exec(strongs);
+  return m ? m[1].toUpperCase() + m[2] : strongs;
+}
+
+/**
+ * Strong's numbers for a word: exact transliteration/lemma matches first, then
+ * English gloss matches. Returns [] when the index is unavailable or nothing matches.
+ */
+export async function findStrongsForWord(env: Env, word: string): Promise<{ candidates: LexiconCandidate[]; exactForm: boolean }> {
+  const index = await getJsonFromR2<LexiconWordIndex>(env, WORD_INDEX_KEY);
+  if (!index) return { candidates: [], exactForm: false };
+  const form = normalizeWord(word);
+  let numbers = index.forms[form] ?? [];
+  const exactForm = numbers.length > 0;
+  if (!exactForm) {
+    const words = word.toLowerCase().split(/[^a-z]+/).filter((w) => w && !GLOSS_STOP_WORDS.has(w));
+    numbers = index.glosses[words.join("")] ?? (words[0] ? index.glosses[words[0]] ?? [] : []);
+  }
+  const candidates = numbers
+    .filter((n) => index.entries[n])
+    .map((n) => {
+      const [lemma, transliteration, gloss] = index.entries[n];
+      return { strongs: n, lemma, transliteration, gloss };
+    });
+  return { candidates, exactForm };
+}
+
+function candidateTable(word: string, candidates: LexiconCandidate[]): string {
+  const rows = candidates.map((c) => `| ${baseStrongs(c.strongs)} | ${c.lemma} | ${c.transliteration} | ${c.gloss} |`);
+  return (
+    `# Words matching \u201C${word}\u201D\n\n` +
+    `| Strong's | Word | Transliteration | Meaning |\n| :--- | :--- | :--- | :--- |\n` +
+    rows.join("\n") +
+    `\n\nLook up one of these Strong's numbers for its full entry.`
+  );
+}
+
+export type LexiconLookupResult = {
   error?: string;
   errorCode?: ServiceErrorCode;
   formattedText?: string;
   definition?: string;
   stepEntries?: StepLexiconRow[];
   classicalDefinition?: string;
-}> {
+  /** Set when a word matched several Strong's numbers; the caller should pick one. */
+  candidates?: LexiconCandidate[];
+};
+
+/**
+ * Standardized Original Language Lexicon Lookup
+ * Queries modern STEPBible TBESG (Greek) and TBESH (Hebrew) with sub-lemma disambiguation,
+ * with optional side-by-side classical Thayer / BDB / LSJ entries.
+ * Accepts a Strong's number, or a word (transliteration, Greek/Hebrew lemma or English),
+ * which is resolved through the word index first.
+ */
+export async function lookupLexiconEntry(
+  env: Env,
+  strongsNumber: string,
+  lexicon: string = "step"
+): Promise<LexiconLookupResult> {
+  const input = strongsNumber.trim();
+  if (input && !isStrongsNumber(input) && !/^\d+$/.test(input)) {
+    const { candidates, exactForm } = await findStrongsForWord(env, input);
+    const bases = [...new Set(candidates.map((c) => baseStrongs(c.strongs)))];
+    if (exactForm && bases.length === 1) {
+      const result = await lookupLexiconEntry(env, bases[0], lexicon);
+      const c = candidates[0];
+      const note = `*\u201C${input}\u201D is ${bases[0]} ${c.lemma} (${c.transliteration}, \u201C${c.gloss}\u201D).*\n\n`;
+      return result.formattedText ? { ...result, formattedText: note + result.formattedText } : result;
+    }
+    if (candidates.length > 0) {
+      return { candidates, formattedText: candidateTable(input, candidates) };
+    }
+    return notFound(
+      `No Strong's number found for '${input}'. Try a Strong's number such as G26 or H7965, a transliteration such as 'agape', or an English word such as 'love'.`
+    );
+  }
+
   const rawKey = strongsNumber.trim();
   const cleanKey = rawKey.toUpperCase();
   const isHebrew = cleanKey.startsWith("H") || /[\u0590-\u05FF]/.test(rawKey);
