@@ -139,7 +139,32 @@ async function testStreamableHttp() {
   assert.equal(restLimited.status, 429);
   assert.equal(((await restLimited.json()) as any).error.code, "RATE_LIMITED");
 
-  console.log("\n🎉 All Streamable HTTP + rate-limit tests passed.");
+  console.log("14. Optional API key: off by default, enforced on /mcp and /tools/* when API_KEY is set");
+  const keyed = { ...baseEnv, API_KEY: "test-secret-123" } as unknown as Env;
+  const ping = (headers: Record<string, string> = {}, query = "") =>
+    call(keyed, `/mcp${query}`, {
+      method: "POST",
+      headers: { ...MCP_HEADERS, ...headers },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "ping" })
+    });
+  const denied = await ping();
+  assert.equal(denied.status, 401);
+  assert.match(denied.headers.get("WWW-Authenticate") ?? "", /^Bearer/);
+  assert.equal(((await denied.json()) as any).error.code, -32001);
+  assert.equal((await ping({ Authorization: "Bearer wrong-key" })).status, 401);
+  assert.equal((await ping({ Authorization: "Bearer test-secret-123" })).status, 200);
+  assert.equal((await ping({ Authorization: "test-secret-123" })).status, 200);
+  assert.equal((await ping({ "x-api-key": "test-secret-123" })).status, 200);
+  assert.equal((await ping({}, "?key=test-secret-123")).status, 200);
+  const restDenied = await call(keyed, "/tools/bible_lookup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reference: "John 3:16" }) });
+  assert.equal(restDenied.status, 401);
+  assert.equal(((await restDenied.json()) as any).error.code, "UNAUTHORIZED");
+  const restAllowed = await call(keyed, "/tools/bible_lookup", { method: "POST", headers: { "Content-Type": "application/json", "x-api-key": "test-secret-123" }, body: JSON.stringify({ reference: "John 3:16" }) });
+  assert.equal(restAllowed.status, 200);
+  assert.equal((await call(keyed, "/health")).status, 200, "health stays public");
+  assert.equal((await call({ ...baseEnv, API_KEY: "  " } as unknown as Env, "/mcp", { method: "POST", headers: MCP_HEADERS, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "ping" }) })).status, 200, "a blank API_KEY leaves the API public");
+
+  console.log("\n🎉 All Streamable HTTP + rate-limit + API-key tests passed.");
 }
 
 testStreamableHttp().catch((err) => {

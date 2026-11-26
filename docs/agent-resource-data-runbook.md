@@ -48,7 +48,7 @@ The following is the starting manifest inferred from the current repository, reg
 
 ### BibleMateData package candidates
 
-These are referenced by `upload_auxiliary_to_r2.py`, `sync_data_to_r2.py`, or the runtime’s `~/biblemate/data` fallback and should be reconciled against the actual BibleMateData package:
+These are referenced by `upload_auxiliary_to_r2.py`, `sync_data_to_r2.py`, or the local runners' data search path (`~/biblemate/data` and the other folders listed in [local deployment](local-deployment.md#where-local-data-is-read-from)) and should be reconciled against the actual BibleMateData package:
 
 | Local relative path | R2 key | Runtime feature | Status |
 |---|---|---|---|

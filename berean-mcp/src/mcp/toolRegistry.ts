@@ -188,7 +188,7 @@ export const TOOLS: readonly ToolDefinition[] = [
     title: "Passage Exegesis Pack",
     tier: "study_pack",
     description:
-      "Scholarly exegesis of a passage: translation plus original Hebrew/Greek text, morphology, the Septuagint for Old Testament passages, and technical commentaries (Keil & Delitzsch, Meyer, Expositor's Greek NT, JFB, Clarke, Pulpit).",
+      "Scholarly exegesis of a passage: translation plus original Hebrew/Greek text, morphology, the Septuagint for Old Testament passages, technical commentaries (Keil & Delitzsch, Meyer, Expositor's Greek NT, JFB, Clarke, Pulpit) and cross-references.",
     schema: S.PassageExegesisPackSchema,
     mcpErrors: "never",
     restAliases: PASSAGE,
@@ -243,7 +243,7 @@ export const TOOLS: readonly ToolDefinition[] = [
     title: "Covenant Theology Pack",
     tier: "study_pack",
     description:
-      "Covenant and redemptive-history study of a passage: Scripture text, John Calvin, John Gill, the Tyndale dictionary article on covenant, Old Testament quotations and cross-references.",
+      "Covenant and redemptive-history study of a passage: Scripture text, John Calvin, John Gill, the ISBE encyclopedia article on covenant, Old Testament quotations and cross-references.",
     schema: S.CovenantTheologyPackSchema,
     mcpErrors: "never",
     restAliases: PASSAGE,

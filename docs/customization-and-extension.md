@@ -14,12 +14,13 @@ See:
 
 ## Extend the server
 
-- Add a service for the new data shape.
-- Add a schema and tool registration.
+- Add a service for the new data shape. Report failures with the typed helpers in `src/services/errors.ts` (`invalidRequest`, `notFound`, `dependencyUnavailable`, `internalError`) so REST and MCP return the right status and error code.
+- Add the argument schema to `src/mcp/tools.ts` and one `defineTool(...)` entry to `src/mcp/toolRegistry.ts` with a title, a plain description of what the tool returns, its tier (`specialized` or `study_pack`), its MCP error policy and the handler. That entry registers the MCP tool, the REST route and the `/health` listing; tool counts are derived from it.
+- Add the tool to the OpenAPI document (`src/ui/openapi.ts`) and, if humans should see it, the Explorer configuration. These are still written by hand; `npm run test:registry` fails if either drifts from the registry.
 - Add the resource to catalog discovery.
 - Define exact missing-resource and missing-reference behavior.
 - Keep focused lookups separate from human-oriented Study Packs.
-- Add tests and run `npm run typecheck` before deployment.
+- Add tests and run `npm run typecheck` and `npm run test:registry` before deployment.
 
 ## Extend the interface
 

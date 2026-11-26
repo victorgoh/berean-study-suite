@@ -8,6 +8,8 @@ This guide explains how to connect and use the **Berean Model Context Protocol (
 
 The Berean MCP Server provides access to verified classical and modern commentary sets, original-language Hebrew/Greek morphology, Strong's lexicons, and composite Study Packs according to the configured MCP profile. Use `tools/list` or `get_available_resources` to discover the current tools.
 
+The public endpoint needs no credentials. A self-hosted deployment may require an API key (see [optional API key](agent-mcp-server-design.md#optional-api-key)); the configurations below show where it goes, and the header lines can be left out for public deployments.
+
 ### Available Production Endpoints
 
 | Environment | Transport | Endpoint URL |
@@ -46,7 +48,7 @@ Add the server to your `mcp_config.json` (located in `~/.gemini/config/mcp_confi
       "args": ["-y", "tsx", "scripts/run_local_stdio.ts"],
       "cwd": "/path/to/berean-study-suite/berean-mcp",
       "env": {
-        "BEREAN_DATA": "/path/to/berean/data"
+        "DATA_DIR": "/path/to/berean/data"
       }
     }
   }
@@ -74,10 +76,13 @@ Add Berean MCP to your `claude_desktop_config.json` (`~/Library/Application Supp
 }
 ```
 
+For a key-protected deployment, add `"--header", "Authorization: Bearer YOUR_API_KEY"` to the end of `args`.
+
 `mcp-remote` provides the local process bridge Claude Desktop uses to connect to
 the remote Streamable HTTP MCP endpoint. Restart Claude Desktop after saving the
 configuration. Use the plain URL shown above; do not wrap it in Markdown link
-syntax or add a trailing `?key` unless your deployment specifically requires it.
+syntax. After the server is updated, toggle the connector off and on (or restart
+Claude Desktop) so it picks up changed tool descriptions and arguments.
 
 *For local offline execution directly with Node.js:*
 ```json
@@ -144,47 +149,57 @@ larger pages, or the human Explorer to read long articles in one view.
 
 | Tool Name | Focus & Included Resources |
 | :--- | :--- |
-| **`covenant_theology_pack`** | Redemptive-historical covenant progression, Calvin exegesis, Matthew Henry architecture, Gill prophecy, ISBE encyclopedia, and 12 TSK cross-references. |
-| **`passage_exegesis_pack`** | Detailed academic exegesis: Greek/Hebrew text, morphology, Keil & Delitzsch (`KD`), Expositor's Greek NT (`EGNT`), H. A. W. Meyer (`CECNT`), Clarke, The Pulpit Commentary, and JFB. |
+| **`covenant_theology_pack`** | Redemptive-historical covenant study: Scripture text, John Calvin, John Gill, the ISBE encyclopedia article on covenant, Old Testament quotations, and 12 TSK cross-references. |
+| **`passage_exegesis_pack`** | Detailed academic exegesis: Greek/Hebrew text, morphology, the Septuagint for OT passages, Keil & Delitzsch (`KD`), Expositor's Greek NT (`EGNT`), H. A. W. Meyer (`CECNT`), Clarke, The Pulpit Commentary, JFB, and cross-references. |
 | **`sermon_study_pack`** | Focused homiletics & preaching: Scripture, Alexander Maclaren, Charles Simeon (Horae Homileticae), and TSK cross-references. |
 | **`illustration_study_pack`** | Opt-in Biblical Illustrator anecdotes and sermon illustrations. This intentionally fuller source is separate from the default sermon pack. |
-| **`lesson_creator_study_pack`** | Focused Bible teaching & small groups: Scripture text, a sourced chapter opening, Charles Ellicott, and cross-references. |
-| **`devotional_study_pack`** | Concise pastoral meditation: Scripture text, Tyndale Open Study Notes, Matthew Henry Concise Commentary, and biblical promises. |
-| **`prayer_guide_study_pack`** | Scriptural intercession: Scripture text, Charles Spurgeon, Joseph Benson, John Wesley, and biblical promises for ACTS prayer. |
-| **`word_study_pack`** | Deep word study: Strong's Concordance, BDB / Thayer lexicons, morphology occurrences, A. T. Robertson, and Marvin Vincent. |
-| **`topic_study_pack`** | Systematic topical study: Easton's Bible Dictionary, Nave's Topical definitions, and biblical promises. |
-| **`commentary_study_pack`** | Multi-commentator comparison: Synthesizes custom commentators side-by-side on any passage. |
+| **`lesson_creator_study_pack`** | Focused Bible teaching & small groups: Scripture text, Adam Clarke's chapter-opening synopsis, Charles Ellicott, and cross-references. |
+| **`devotional_study_pack`** | Concise pastoral meditation: Scripture text, Tyndale Open Study Notes, Matthew Henry Concise Commentary, biblical promises, and cross-references. |
+| **`prayer_guide_study_pack`** | Scriptural intercession: Scripture text, Joseph Benson, John Wesley, Matthew Henry Concise Commentary, and biblical promises. |
+| **`word_study_pack`** | Deep word study: lexicon definitions for a Strong's number; with a reference, its parsing in that verse, plus A. T. Robertson and Marvin Vincent for New Testament verses. |
+| **`topic_study_pack`** | Topical study: the Tyndale Bible Dictionary article on the topic and related biblical promises with full Scripture text. |
+| **`commentary_study_pack`** | Multi-commentator comparison: several commentaries on one passage, chosen with `commentators` and ordered with `order_mode`. |
 
 ---
 
 ### 📖 Granular Tools
 
-- **`bible_lookup`**: Retrieve full passages from BSB, NET, KJV, or OHGB (Original Hebrew/Greek).
-- **`bible_search`**: High-speed keyword search with book/testament filters and wildcards.
+- **`bible_lookup`**: A verse, range or whole chapter in BSB (default), NET, KJV, WEB, ASV, OHGB (original Hebrew/Greek) or LXX.
+- **`bible_search`**: Find verses containing a word or phrase in one translation, optionally within one book; supports `*` wildcards and `+` / `|`.
 - **`commentary_lookup`**: Query an active commentary with `reference` and `version`. Call `get_available_resources(category="commentaries")` first for current keys, aliases, scope, and descriptions. Examples include `Henry`, `Pulpit`, `ECF`, `Catena`, `Kretzmann`, and `Schaff`. Check each resource's recorded source and licence before redistribution.
-- **`cross_references`**: Retrieve Treasury of Scripture Knowledge (TSK) cross-references ranked by relevance votes.
+- **`cross_references`**: Treasury of Scripture Knowledge (TSK) cross-references grouped by the word they connect to; `limit` caps how many are returned.
 - **`morphology_lookup`**: Word-by-word grammatical tagging, lemma roots, transliterations, and glosses for any Old or New Testament verse.
-- **`lexicon_lookup`**: Comprehensive lexical definitions from Strong's, Brown-Driver-Briggs (BDB), and Thayer's Greek Lexicon.
+- **`lexicon_lookup`**: Definitions by Strong's number from STEPBible TBESG/TBESH, Brown-Driver-Briggs (BDB), Thayer's Greek Lexicon and LSJ; "see …" pointer entries are followed.
 - **`theological_dictionary`**: Query Tyndale, ISBE, Easton's, Smith's, Fausset's, Morrish, Vine's, or the source-labelled Classic Bible Dictionary Collection. Explicit source requests do not silently fall back to another source.
-- **`parallel_passages`**: Side-by-side Gospel parallels, Old Testament synoptic parallels, and quote fulfillments.
+- **`parallel_passages`**: Gospel harmonies and Old/New Testament parallel accounts, optionally with full text.
 - **`daily_reading`**: Daily Bible reading plan with scripture retrieval.
 - **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, and study packs.
+
+Every tool is marked read-only and accepts `output_mode` (page size) and `page`. Errors start with a code and a hint, for example `Error (RESOURCE_UNAVAILABLE): No verses found for Genesis 50:99 in BSB`. The full tool list, with each tool's description, comes from `tools/list`.
 
 ---
 
 ## 🔒 Security & Verification (Cloudflare Deployment Example)
 
-The public demonstration deployment is intentionally unauthenticated. A private deployment may enforce authentication at the Worker or Cloudflare edge. Use the appropriate URL and credentials for the deployment you are testing:
+The public demonstration deployment is intentionally open and protected by per-IP rate limits. A self-hosted deployment can require an API key by setting the optional `API_KEY` secret; it can also be restricted at the Cloudflare edge, for example with Cloudflare Access.
 
 ```bash
-# Test public health endpoint
+# Test the health endpoint
 curl -s https://berean-mcp.<your-subdomain>.workers.dev/health
 
-# Test authenticated Bible Lookup on a protected deployment
-curl -s -X POST "https://berean-mcp.<your-subdomain>.workers.dev/tools/bible_lookup?key=YOUR_API_KEY" \
+# Test a REST tool call
+curl -s -X POST "https://berean-mcp.<your-subdomain>.workers.dev/tools/bible_lookup" \
+  -H "Content-Type: application/json" \
+  -d '{"version":"BSB","reference":"John 3:16"}'
+
+# The same call on a key-protected deployment (401 without the header)
+curl -s -X POST "https://berean-mcp.<your-subdomain>.workers.dev/tools/bible_lookup" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"version":"BSB","reference":"John 3:16"}'
 ```
+
+Cloudflare's browser check rejects requests whose user agent is Python's default `Python-urllib` (error 1010). The official MCP SDKs, `httpx`, `requests`, Node and curl are not affected; if you script against the server with `urllib`, set a `User-Agent` header.
 
 ### Deployment-aware health checks
 

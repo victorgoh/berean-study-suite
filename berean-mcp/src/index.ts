@@ -9,6 +9,7 @@ import { renderSwaggerHtml } from "./ui/swagger.js";
 import { getOpenApiSpec } from "./ui/openapi.js";
 import { Env } from "./types.js";
 import { checkRateLimits, toolCallsInJsonRpc } from "./rateLimit.js";
+import { isAuthorized } from "./auth.js";
 
 function jsonResponse(payload: unknown, corsHeaders: Record<string, string>, status = 200): Response {
   return new Response(JSON.stringify(payload, null, 2), {
@@ -145,7 +146,7 @@ export default {
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization, mcp-session-id, last-event-id, mcp-protocol-version, x-session-id",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, x-api-key, mcp-session-id, last-event-id, mcp-protocol-version, x-session-id",
       "Access-Control-Expose-Headers": "mcp-session-id, mcp-protocol-version"
     };
 
@@ -162,6 +163,21 @@ export default {
       return jsonResponse({ error: { code: "REQUEST_TOO_LARGE", message: "Request body exceeds the 256 KiB limit." } }, corsHeaders, 413);
     }
 
+    // Optional API key (src/auth.ts): only enforced when an API_KEY secret is set,
+    // and only on the API surfaces. Pages and health checks stay public.
+    const isToolRoute = url.pathname.startsWith("/tools/");
+    const isApiRoute = isToolRoute || url.pathname === "/mcp";
+    if (isApiRoute && !isAuthorized(request, url, env)) {
+      const challenge = { "WWW-Authenticate": 'Bearer realm="berean-mcp"' };
+      return url.pathname === "/mcp"
+        ? jsonRpcErrorResponse(corsHeaders, 401, -32001, "Unauthorized: missing or invalid API key.", challenge)
+        : jsonResponse(
+            { error: { code: "UNAUTHORIZED", message: "Missing or invalid API key.", retryable: false } },
+            { ...corsHeaders, ...challenge },
+            401
+          );
+    }
+
     // MCP POST bodies are parsed up front so rate limiting can tell tool calls
     // apart from protocol messages (initialize, tools/list, notifications, ...).
     let mcpBody: unknown;
@@ -173,8 +189,7 @@ export default {
       }
     }
 
-    const isToolRoute = url.pathname.startsWith("/tools/");
-    if (isToolRoute || url.pathname === "/mcp") {
+    if (isApiRoute) {
       const clientKey = request.headers.get("CF-Connecting-IP") || "anonymous";
       const toolNames = isToolRoute ? [url.pathname.slice("/tools/".length)] : toolCallsInJsonRpc(mcpBody);
       const limited = await checkRateLimits(env, clientKey, toolNames);

@@ -38,17 +38,24 @@ The public demo lets you explore the available tools before running your own loc
 
 ---
 
-## Optional Cloudflare Authentication
+## Access, Optional API Key and Rate Limits
 
-Authentication is deployment-specific. The public demo is intentionally unauthenticated. A private Cloudflare deployment can add API-key or Bearer-token authorization before its URL is shared.
+The public demo is intentionally open, and so is any deployment by default. Abuse is limited by per-IP rate limits (see [MCP server design](../docs/agent-mcp-server-design.md#anonymous-rate-limiting)).
 
-### 1. Set Secret in Cloudflare
+### Optional: require an API key on your own deployment
+
+If you host your own copy and want to restrict it, set an `API_KEY` secret. The Worker then requires that key on `/mcp` and `/tools/*`; health checks and the docs pages stay public.
+
 ```bash
 npx wrangler secret put API_KEY
-# Enter your high-entropy key, e.g. bm_live_...
+# Enter a long random key
 ```
 
-### 2. Client Configurations
+Clients send the key as `Authorization: Bearer <key>` (preferred), as an `x-api-key` header, or, if a client cannot set headers, as `?key=<key>` on the URL (query strings can end up in logs). Requests without the right key get HTTP `401`. To make the deployment public again, delete the secret with `npx wrangler secret delete API_KEY`.
+
+The Explorer's own tool calls do not send a key, so on a key-protected deployment the Explorer page loads but cannot fetch results.
+
+### Client configuration
 
 #### Antigravity / Cursor / Custom Clients (`mcp_config.json`):
 ```json
@@ -57,26 +64,34 @@ npx wrangler secret put API_KEY
     "berean": {
       "url": "https://berean-mcp.<your-subdomain>.workers.dev/mcp",
       "headers": {
-        "Authorization": "Bearer YOUR_SECRET_KEY"
+        "Authorization": "Bearer YOUR_API_KEY"
       }
     }
   }
 }
 ```
 
+Leave out `headers` for a public deployment such as the demo.
+
 #### Claude Desktop (`claude_desktop_config.json`):
 ```json
 {
   "mcpServers": {
     "berean": {
-      "url": "https://berean-mcp.<your-subdomain>.workers.dev/mcp",
-      "headers": {
-        "Authorization": "Bearer YOUR_SECRET_KEY"
-      }
+      "command": "npx",
+      "args": [
+        "-y", "mcp-remote",
+        "https://berean-mcp.<your-subdomain>.workers.dev/mcp",
+        "--header", "Authorization: Bearer YOUR_API_KEY"
+      ]
     }
   }
 }
 ```
+
+Leave out the two `--header` entries for a public deployment.
+
+The server is stateless: it issues no MCP session ID, so any client that speaks Streamable HTTP can connect, and a client never needs to resume a session. After a server update, reconnect the client (or restart Claude Desktop) to pick up changed tool descriptions.
 
 ---
 
@@ -100,58 +115,61 @@ The Berean Study Suite is strictly built on **100% Public Domain** classical his
 ### 0. Catalog Discovery & Metadata
 1. **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, study packs, personas, skills, workflows, and rules.
 
-### 1. Composite Study Packs (High-Speed Single-Turn Endpoints)
+### 1. Composite Study Packs (Single-Call Bundles)
 
 > **AI usage note:** Composite Study Packs are optimized for human readers who want several related resources together. They are not necessarily token-efficient for AI clients: a single response can contain multiple commentaries, Scripture text, cross-references, and language data. Prefer the granular tools for focused AI requests, and use larger Study Packs only when the additional context is needed.
 
-For AI-facing MCP use, request one commentary at a time and specify the preferred commentary when relevant (for example, `TNotes`, `Henry`, or `JFB`). The human Explorer may use multiple commentaries and Study Packs for comparison and comprehensive research. Study Pack tools are human-oriented and should be omitted from an AI-facing tool set.
-2. **`sermon_study_pack`**: Focused preaching preparation: Scripture, Alexander Maclaren homiletics, Charles Simeon outlines (*Horae Homileticae*), and TSK cross-references.
-3. **`illustration_study_pack`**: Opt-in Biblical Illustrator historical anecdotes and sermon illustrations, kept separate because its source material can be substantial.
-4. **`lesson_creator_study_pack`**: Focused Sunday School and small-group preparation: Scripture, a sourced chapter opening, Charles Ellicott's historical context, and cross-references.
-4. **`devotional_study_pack`**: Concise devotional reflection using Tyndale Open Study Notes, Matthew Henry's Concise Commentary, and supporting cross-references.
-5. **`prayer_guide_study_pack`**: Scripture for prayer, Spurgeon/Benson adoration, Wesley self-examination, and promises for first-person ACTS prayer.
-6. **`passage_exegesis_pack`**: Primary translation, OHGB original Greek/Hebrew, Keil & Delitzsch (OT) / H.A.W. Meyer (NT), Expositor's Greek NT, The Pulpit Commentary, and JFB.
-7. **`word_study_pack`**: Strong's numbers, TBESG/TBESH/Thayer/BDB lexicons, in-context morphology, and A.T. Robertson / Marvin Vincent word studies.
-8. **`interlinear_study_pack`**: Inline Greek/Hebrew to English word-by-word interlinear with continuous verse layout, grammatical parsing tags, and an automated lexical glossary.
-9. **`septuagint_study_pack`**: Greek Septuagint (LXX) text, Brenton English translation, Dead Sea Scrolls textual variants, and Hebrew Masoretic Text comparative exegesis.
-10. **`ot_in_nt_study_pack`**: Apostolic hermeneutics and Old Testament quotations/allusions in the New Testament with verbatim Hebrew MT, Greek LXX, and Greek NT comparative alignment.
-11. **`covenant_theology_pack`**: Redemptive covenants throughout Scripture with John Calvin, John Gill, and ISBE Encyclopedia insights.
-12. **`commentary_study_pack`**: Dynamic multi-commentary bundler allowing side-by-side comparative retrieval across any subset of the 26 available commentators with priority ordering.
-13. **`topic_study_pack`**: Nave's Topical Concordance, Torrey's New Topical Textbook, Easton's Bible Dictionary, and cross-references.
+For AI-facing MCP use, request one commentary at a time and specify the preferred commentary when relevant (for example, `TNotes`, `Henry`, or `JFB`). The human Explorer may use multiple commentaries and Study Packs for comparison and comprehensive research. Study Pack tools are human-oriented and are only exposed over MCP when `MCP_PROFILE=human`.
+
+2. **`sermon_study_pack`**: Scripture, Alexander Maclaren, Charles Simeon (*Horae Homileticae*) and TSK cross-references; add commentators with `extra_commentators`.
+3. **`illustration_study_pack`**: Biblical Illustrator anecdotes and sermon illustrations with Scripture and a few cross-references; kept separate because its source material is long.
+4. **`lesson_creator_study_pack`**: Scripture, Adam Clarke's chapter-opening synopsis, Charles Ellicott's commentary and cross-references.
+5. **`devotional_study_pack`**: Scripture, Tyndale Open Study Notes, Matthew Henry's Concise Commentary, related biblical promises and cross-references.
+6. **`prayer_guide_study_pack`**: Scripture, Joseph Benson, John Wesley and Matthew Henry's Concise Commentary, plus related promises, for praying through a passage.
+7. **`passage_exegesis_pack`**: Translation plus OHGB Hebrew/Greek, morphology, the Septuagint for OT passages, Keil & Delitzsch, H. A. W. Meyer, Expositor's Greek NT, JFB, Clarke, The Pulpit Commentary and cross-references.
+8. **`word_study_pack`**: Lexicon definitions for a Strong's number; with a reference, its parsing in that verse, plus A. T. Robertson and Marvin Vincent for New Testament verses.
+9. **`interlinear_study_pack`**: Word-by-word Greek/Hebrew interlinear with English glosses, parsing and a glossary of notable words (`inline`, `ruby` or `table` layout).
+10. **`septuagint_study_pack`**: Hebrew Masoretic Text, Greek Septuagint with Brenton's English, a modern translation, Keil & Delitzsch, Clarke and New Testament quotations (OT passages only).
+11. **`ot_in_nt_study_pack`**: New Testament quotations of and allusions to the Old Testament, with aligned NT Greek, Hebrew text, Septuagint and translation, plus Calvin, Gill and cross-references.
+12. **`covenant_theology_pack`**: Scripture, John Calvin, John Gill, the ISBE encyclopedia article on covenant, Old Testament quotations and 12 TSK cross-references.
+13. **`commentary_study_pack`**: Several commentaries on one passage in a single call; choose them with `commentators` and the order with `order_mode`.
+14. **`topic_study_pack`**: The Tyndale Bible Dictionary article on a topic plus related biblical promises with full Scripture text.
 
 ### 2. Specialized Single-Engine Tools
 
 #### Scripture Texts & Translations
-14. **`bible_lookup`**: Retrieve full chapter and verse ranges across BSB, NET, KJV, ASV, WEB, OHGB, and LXX.
-15. **`bible_search`**: High-speed full-text search with regex and testament filters.
-16. **`parallel_passages`**: Gospel harmonies and Old/New Testament parallel passages.
-17. **`daily_reading`**: 365-day whole-Bible reading schedules with automatic Scripture embedding.
+15. **`bible_lookup`**: A verse, range or whole chapter in BSB (default), NET, KJV, WEB, ASV, OHGB or LXX.
+16. **`bible_search`**: Find verses containing a word or phrase in one translation, optionally within one book; supports `*` wildcards and `+` / `|`.
+17. **`parallel_passages`**: Gospel harmonies and Old/New Testament parallel accounts, optionally with full text.
+18. **`daily_reading`**: The reading plan's passages for today or a given date, optionally with full text.
 
 #### Classical Commentaries & Cross-References
-18. **`commentary_lookup`**: Query any individual commentator (26 classical sets + Tyndale Open Study Notes) with intelligent alias normalization.
-19. **`cross_references`**: Query Treasury of Scripture Knowledge (TSK) cross-reference collections.
+19. **`commentary_lookup`**: One commentary's notes on a passage; call `get_available_resources(category="commentaries")` for keys and aliases.
+20. **`cross_references`**: Treasury of Scripture Knowledge references grouped by keyword; `limit` caps how many are returned.
 
 #### Original Languages & Textual Alignment
-20. **`lexicon_lookup`**: Strong's, TBESG/TBESH, Thayer's Greek, BDB Hebrew, and LSJ Lexicons.
-21. **`morphology_lookup`**: Original language grammatical and parsing breakdowns.
-22. **`interlinear_lookup`**: Inline word-by-word Greek/Hebrew to English interlinear with continuous verse layout and rare-word glossary.
-23. **`septuagint_lookup`**: Look up Greek Septuagint (LXX) text, Brenton English translation, and textual divergence notes for any Old Testament passage.
-24. **`ot_quotations_lookup`**: Look up Old Testament quotations, citations, allusions, and Septuagint bridge references for any NT or OT passage.
+21. **`lexicon_lookup`**: STEPBible TBESG/TBESH, Thayer, BDB and LSJ definitions by Strong's number; "see …" pointer entries are followed.
+22. **`morphology_lookup`**: Word-by-word Greek/Hebrew parsing for a verse.
+23. **`interlinear_lookup`**: Word-by-word Greek/Hebrew interlinear with English glosses and a glossary of notable words.
+24. **`septuagint_lookup`**: Greek Septuagint text, Brenton's English and notes on differences from the Hebrew, for an OT passage.
+25. **`ot_quotations_lookup`**: Old Testament quotations and allusions at a New Testament reference (or NT uses of an OT passage), with Septuagint links.
 
 #### Theology, Doctrines & Devotional Tools
-25. **`theological_dictionary`**: Source-specific Tyndale, ISBE, Easton's, Smith's, Fausset's, Morrish, and Vine's articles, plus an explicitly labelled Classic Bible Dictionary Collection option.
-26. **`topic_study`**: Topical concordance lookups (Nave's & Torrey's).
-27. **`biblical_promises`**: Topic-indexed biblical promises for faith and prayer.
+26. **`theological_dictionary`**: Tyndale (default), ISBE, Easton's, Smith's, Fausset's, Morrish or Vine's articles, or the labelled classic collection.
+27. **`topic_study`**: Topical index (Nave's/Torrey style) with subtopics and references.
+28. **`biblical_promises`**: Bible promises for a situation or need; everyday words such as "fear", "worry" or "lonely" map to matching topics.
 
 #### Historical, Geographical & Cultural Backgrounds
-28. **`character_lookup`**: Biographical profiles & ASCII relationship family trees.
-29. **`location_lookup`**: GPS coordinates and Google Maps links for biblical cities and sites.
-30. **`entity_disambiguation`**: Disambiguate biblical persons or locations sharing identical names (e.g. Mary, James, John, Zechariah, Herod).
-31. **`convert_ancient_units`**: Convert ancient biblical weights, measures, distances, and currencies into modern metric, imperial, and labor purchasing power.
-32. **`bible_names`**: Etymological meanings and origins of biblical names.
-33. **`chronology`**: Biblical timelines and historical genealogies.
-34. **`book_analysis`**: Source-attributed Tyndale Open Study Notes book summaries and full introductions.
-35. **`chapter_summary`**: Structural summaries and central themes for any chapter.
+29. **`character_lookup`**: Biographies of people in the Bible with family relationships and a family tree.
+30. **`location_lookup`**: Coordinates, a map link and a historical/archaeological description of a biblical place.
+31. **`entity_disambiguation`**: Tell apart people or places that share a name (e.g. Mary, James, Herod).
+32. **`convert_ancient_units`**: Convert biblical weights, measures, distances and coins to modern units, with an indication of value in wages.
+33. **`bible_names`**: Meanings and origins of biblical names.
+34. **`chronology`**: Dated events from a biblical timeline matching a person, period or event.
+35. **`book_analysis`**: Tyndale Open Study Notes book introduction (`summary` or `full`).
+36. **`chapter_summary`**: Adam Clarke's chapter-opening synopsis.
+
+All MCP tools are marked read-only and accept `output_mode` and `page`: long results are returned in pages, each ending with the next page number to request. Errors start with a code such as `RESOURCE_UNAVAILABLE` followed by a hint on what to try next.
 
 ---
 
@@ -175,6 +193,8 @@ npm install
 npm run start:http
 ```
 * **MCP Streamable HTTP Endpoint**: `http://localhost:7860/mcp`
+* **Explorer**: `http://localhost:7860/` (set `PORT` to change the port)
+* **Data location**: see [where local data is read from](../docs/local-deployment.md#where-local-data-is-read-from); set `DATA_DIR` to point at your data
 * **Health Check**: `http://localhost:7860/health`
 * **REST Tool Calling Example**:
   ```bash

@@ -28,33 +28,33 @@ You can execute these setup and diagnostic commands directly in chat in any proj
 
 ---
 
-## 📦 9 High-Speed Composite Study Packs
+## 📦 Composite Study Packs
 
-When you execute `/berean`, `/berean-plus`, or ask free-form study questions, the AI directly invokes these single-turn study pack tools from the **Berean MCP Server**:
+When you execute `/berean`, `/berean-plus`, or ask free-form study questions, the AI can invoke these single-call study pack tools from the **Berean MCP Server**. Study packs are only exposed over MCP when the server runs with `MCP_PROFILE=human`; the public deployment uses the AI profile, where the agent combines the specialized tools below instead. The Explorer's REST routes always offer every pack.
 
 | Study Pack | Description & Included Datasets |
 | :--- | :--- |
 | **`passage_exegesis_pack`** | Detailed academic exegesis: Greek/Hebrew text, morphology, Keil & Delitzsch (`KD`), H. A. W. Meyer (`CECNT`), Expositor's Greek NT (`EGNT`), Clarke, The Pulpit Commentary, and JFB. |
 | **`sermon_study_pack`** | Focused preaching & homiletics: Scripture, Alexander Maclaren, Charles Simeon (Horae Homileticae), and TSK cross-references. |
 | **`illustration_study_pack`** | Opt-in Biblical Illustrator historical anecdotes and sermon illustrations. Its fuller source content is kept out of the default sermon pack. |
-| **`covenant_theology_pack`** | Redemptive-historical covenant progression: John Calvin, John Gill prophecy, ISBE Encyclopedia, and 12 TSK cross-references. |
-| **`lesson_creator_study_pack`** | Focused Bible teaching & small groups: Scripture text, a sourced chapter opening, Charles Ellicott, and cross-references. |
+| **`covenant_theology_pack`** | Redemptive-historical covenant study: Scripture text, John Calvin, John Gill, the ISBE encyclopedia article on covenant, Old Testament quotations, and 12 TSK cross-references. |
+| **`lesson_creator_study_pack`** | Focused Bible teaching & small groups: Scripture text, Adam Clarke's chapter-opening synopsis, Charles Ellicott, and cross-references. |
 | **`devotional_study_pack`** | Concise pastoral meditation: Scripture text, Tyndale Open Study Notes, Matthew Henry Concise Commentary, and supporting cross-references. |
-| **`prayer_guide_study_pack`** | Scriptural intercession: Scripture text, Charles Spurgeon adoration, Joseph Benson, John Wesley examination, and promises. |
-| **`word_study_pack`** | Deep word study: Strong's Concordance, Brown-Driver-Briggs (BDB), Thayer's Greek Lexicon, A. T. Robertson, and Marvin Vincent. |
-| **`topic_study_pack`** | Systematic topical study: Easton's Bible Dictionary, Nave's Topical definitions, and biblical promises. |
-| **`commentary_study_pack`** | Multi-commentator comparison: Synthesizes custom commentators side-by-side on any passage. |
+| **`prayer_guide_study_pack`** | Scriptural intercession: Scripture text, Joseph Benson, John Wesley, Matthew Henry Concise Commentary, and biblical promises. |
+| **`word_study_pack`** | Deep word study: lexicon definitions for a Strong's number; with a reference, its parsing in that verse, plus A. T. Robertson and Marvin Vincent for New Testament verses. |
+| **`topic_study_pack`** | Topical study: the Tyndale Bible Dictionary article on the topic and related biblical promises with full Scripture text. |
+| **`commentary_study_pack`** | Multi-commentator comparison: several commentaries on one passage, chosen with `commentators` and ordered with `order_mode`. |
 
 ---
 
-## 📖 18 Specialized Single-Engine Berean MCP Tools
+## 📖 Specialized Single-Engine Berean MCP Tools
 
-For specific queries, the agent can call any of the 18 individual MCP tools:
+For specific queries, the agent can call any of the individual MCP tools (the current list comes from `tools/list`):
 
 ### 1. Scripture & Translations
-- **`bible_lookup`**: Retrieve passages from BSB, NET, KJV, or OHGB (Original Hebrew/Greek).
-- **`bible_search`**: Search for keywords across the Old and New Testaments.
-- **`cross_references`**: Retrieve Treasury of Scripture Knowledge (TSK) ranked references.
+- **`bible_lookup`**: A verse, range or whole chapter in BSB (default), NET, KJV, WEB, ASV, OHGB (original Hebrew/Greek) or LXX.
+- **`bible_search`**: Find verses containing a word or phrase in one translation, optionally within one book.
+- **`cross_references`**: Treasury of Scripture Knowledge (TSK) references grouped by keyword; `limit` caps how many are returned.
 - **`parallel_passages`**: Side-by-side Gospel parallels, OT parallels, and prophecy fulfillments.
 - **`daily_reading`**: 365-day whole-Bible reading schedules with automatic Scripture embedding.
 
@@ -63,7 +63,7 @@ For specific queries, the agent can call any of the 18 individual MCP tools:
 
 ### 3. Linguistics & Morphology
 - **`morphology_lookup`**: Word-by-word grammatical tagging, lemma roots, transliterations, and glosses.
-- **`lexicon_lookup`**: Comprehensive definitions from Strong's, Brown-Driver-Briggs (BDB), and Thayer.
+- **`lexicon_lookup`**: Definitions by Strong's number from STEPBible TBESG/TBESH, Brown-Driver-Briggs (BDB), Thayer and LSJ.
 
 ### 4. Topical, Historical & Contextual Reference
 - **`topic_study`**: Search Nave's Topical Bible and Torrey's New Topical Textbook.
@@ -72,7 +72,7 @@ For specific queries, the agent can call any of the 18 individual MCP tools:
 - **`theological_dictionary`**: Query Tyndale, ISBE, Easton's, Smith's, Fausset's, Morrish, Vine's, or the source-labelled Classic Bible Dictionary Collection. Explicit source requests do not silently fall back to another source.
 - **`book_analysis`**: Source-attributed Tyndale Open Study Notes book summaries and full introductions.
 - **`chapter_summary`**: Source-attributed Adam Clarke chapter-opening synopsis.
-- **`biblical_promises`**: Thematic promises categorized by spiritual need.
+- **`biblical_promises`**: Promises for a situation or need; everyday words such as "fear", "worry" or "lonely" map to matching topics.
 - **`bible_names`**: Etymological meanings and origins of biblical names.
 - **`chronology`**: Biblical timelines, kings chronology, and historical genealogies.
 - **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, study packs, personas, skills, workflows, and rules.
