@@ -179,7 +179,7 @@ async function runAllTests() {
 
   // 14. Book Analysis
   await test("14. book_analysis ('Romans')", () =>
-    lookupBookAnalysis(mockEnv, "Romans", 0)
+    lookupBookAnalysis(mockEnv, "Romans", "summary")
   );
 
   // 15. Chapter Summary

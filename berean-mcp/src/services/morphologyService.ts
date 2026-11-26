@@ -1,6 +1,7 @@
 import { getDatabase } from "../db/sqliteEngine.js";
 import { parseReferenceString } from "./bibleService.js";
 import { Env, MorphologyWord } from "../types.js";
+import { translationOf } from "../utils/morphology.js";
 import { dependencyUnavailable, internalError, invalidRequest, notFound, type ServiceErrorFields } from "./errors.js";
 
 export async function lookupMorphology(
@@ -47,6 +48,8 @@ export async function lookupMorphology(
       return dependencyUnavailable(dbError || "Morphology database not available.");
     }
   }
+
+  words = words.map((w) => ({ ...w, Translation: translationOf(w.Translation) }));
 
   if (words.length === 0) {
     return notFound(`No morphology records found for ${parsed.bookName} ${parsed.chapterStart}:${parsed.verseStart}`);

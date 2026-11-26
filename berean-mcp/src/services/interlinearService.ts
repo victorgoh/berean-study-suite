@@ -2,6 +2,7 @@ import { getDatabase } from "../db/sqliteEngine.js";
 import { parseReferenceString } from "./bibleService.js";
 import { lookupLexiconEntry } from "./lexiconService.js";
 import { Env, MorphologyWord, StudyPackResponse } from "../types.js";
+import { translationOf } from "../utils/morphology.js";
 
 // Common stop-words for Greek and Hebrew that are excluded from default "rare_and_notable" glossary
 const GREEK_COMMON_LEMMAS = new Set([
@@ -222,7 +223,7 @@ export async function lookupInterlinear(
           strongs: standardizedStrongs,
           datasetTag,
           morphology: w.Morphology || "",
-          gloss: w.Gloss || w.Translation || "",
+          gloss: w.Gloss || translationOf(w.Translation) || "",
           definition: ""
         });
 
@@ -276,9 +277,7 @@ export async function lookupInterlinear(
       const lemma = (w.Lexeme || w.Word || "").trim();
       const glossIndex = lemmaToEntryMap.get(lemma);
       const alpha = glossIndex ? getAlphaLabel(glossIndex) : undefined;
-      const bsbTranslation = (w.Translation !== undefined && w.Translation !== null && w.Translation.trim() !== "")
-        ? w.Translation.trim()
-        : (w.Gloss || "").trim();
+      const bsbTranslation = translationOf(w.Translation) ?? (w.Gloss || "").trim();
 
       structuredWords.push({
         word: w.Word,

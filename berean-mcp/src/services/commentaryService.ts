@@ -202,7 +202,11 @@ export async function lookupCommentary(
         .join("\n\n---\n\n");
     } else {
       // Full chapter commentary or parse <vid> tags if specific verses requested
-      const rawChapterText = rows[0].Text || "";
+      // The chapter-introduction anchor (verse 0) renders as a bare "0"; drop its label.
+      const rawChapterText = (rows[0].Text || "").replace(
+        /(<vid\s+id=["']v\d+\.\d+\.0["'][^>]*>)\s*0\s*(<\/vid>)/gi,
+        "$1$2"
+      );
       if (parsed.verseStart > 1 || parsed.verseEnd < 999) {
         const targetSet = new Set<number>();
         for (let v = parsed.verseStart; v <= parsed.verseEnd; v++) targetSet.add(v);
@@ -224,7 +228,13 @@ export async function lookupCommentary(
       result: {
         book: parsed.bookName,
         chapter: parsed.chapterStart,
-        verses: `${parsed.verseStart}-${parsed.verseEnd}`,
+        // "28", "28-30", or omitted for a whole chapter (parser uses 1-999 for that).
+        verses:
+          parsed.verseStart === 1 && parsed.verseEnd === 999
+            ? undefined
+            : parsed.verseStart === parsed.verseEnd
+              ? `${parsed.verseStart}`
+              : `${parsed.verseStart}-${parsed.verseEnd}`,
         version: cleanVer,
         commentaryText: commentaryOutput
       }

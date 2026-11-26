@@ -2,6 +2,7 @@ import { getDatabase } from "../db/sqliteEngine.js";
 import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { Env } from "../types.js";
 import { notFound, type ServiceErrorCode } from "./errors.js";
+import type { Database } from "sql.js";
 
 export interface StepLexiconRow {
   strongs: string;
@@ -20,6 +21,26 @@ export interface StepLexiconRow {
  * Queries modern STEPBible TBESG (Greek) and TBESH (Hebrew) with sub-lemma disambiguation,
  * with optional side-by-side classical Thayer / BDB / LSJ entries.
  */
+/**
+ * Some classical entries are only a pointer, e.g. Thayer G4239 πραΰς: "see
+ * πρᾷός". Returns the entry it points to (one hop, matched by headword), or
+ * null when the entry has real content or the target is missing.
+ */
+function followSeeReference(db: Database, row: { Topic: string; Definition: string }): { Topic: string; Definition: string } | null {
+  const html = row.Definition || "";
+  if (html.length > 600) return null;
+  const pointer = /see\s*<b>\s*<ref0[^>]*entry="([^"]+)"/i.exec(html);
+  if (!pointer) return null;
+  const stmt = db.prepare("SELECT Topic, Definition FROM Lexicon WHERE Topic <> ? AND Definition LIKE ? LIMIT 1");
+  try {
+    // Anchor on the article's own headword ("<div><p><b>G4235 — <ref0 ... entry=\"πρᾷός\">"), not any mention.
+    stmt.bind([row.Topic, `<div><p><b>G% — <ref0 class="word" entry="${pointer[1]}">%`]);
+    return stmt.step() ? (stmt.getAsObject() as { Topic: string; Definition: string }) : null;
+  } finally {
+    stmt.free();
+  }
+}
+
 export async function lookupLexiconEntry(
   env: Env,
   strongsNumber: string,
@@ -114,6 +135,10 @@ export async function lookupLexiconEntry(
           if (stmt.step()) {
             const row = stmt.getAsObject() as { Topic: string; Definition: string };
             classicalDef = cleanHtmlToMarkdown(row.Definition || "");
+            const target = followSeeReference(db, row);
+            if (target) {
+              classicalDef += `\n\n---\n\n` + cleanHtmlToMarkdown(target.Definition);
+            }
           }
           stmt.free();
         } catch (err: any) {

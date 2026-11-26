@@ -47,6 +47,43 @@ function parsePassageRefs(html: string): string[] {
   return refs;
 }
 
+/**
+ * Everyday feelings and needs, mapped to the situational topics in the index
+ * ("When you are afraid", "When you worry", ...). Without this, a query such as
+ * "Fear" fuzzy-matches the shortest title containing the word ("GRACE TO FEAR
+ * GOD"), which is a different subject.
+ */
+const SITUATION_TOPICS: Record<string, string> = {
+  fear: "When you are afraid", fears: "When you are afraid", afraid: "When you are afraid",
+  scared: "When you are afraid", frightened: "When you are afraid",
+  worry: "When you worry", worried: "When you worry", worries: "When you worry",
+  anxiety: "[19] Promises to Those Who are Anxious and Afraid", anxious: "[19] Promises to Those Who are Anxious and Afraid",
+  despair: "When you are in despair", hopeless: "When you are in despair", depression: "When you are in despair", depressed: "When you are in despair",
+  crisis: "When you are in crisis",
+  discouraged: "When you are discouraged", discouragement: "When you are discouraged",
+  sad: "When you are sad", sadness: "When you are sad", grief: "When you are sad", sorrow: "When you are sad", grieving: "When you are sad",
+  doubt: "When you doubt", doubts: "When you doubt", doubting: "When you doubt",
+  trouble: "When you are in troubles", troubles: "When you are in troubles",
+  frustrated: "When you are frustrated", frustration: "When you are frustrated",
+  danger: "When you are in dangers", dangers: "When you are in dangers",
+  lonely: "When you are lonely", loneliness: "When you are lonely", alone: "When you are lonely",
+  justice: "When you need justice", injustice: "When you need justice",
+  tired: "When you are tired", weary: "When you are tired", exhausted: "When you are tired", weariness: "When you are tired",
+  betrayed: "When you are betrayed", betrayal: "When you are betrayed",
+  tempted: "When you are tempted", temptation: "When you are tempted",
+  lost: "When you are lost"
+};
+
+/** Exact topic names win; then everyday feelings; then fuzzy matching. */
+function matchPromiseTopic(query: string, topics: string[]): string | null {
+  const q = query.trim().toLowerCase();
+  const exact = topics.find((t) => decodeHtmlEntities(t).toLowerCase() === q);
+  if (exact) return exact;
+  const situation = SITUATION_TOPICS[q];
+  if (situation && topics.includes(situation)) return situation;
+  return findBestMatch(query, topics);
+}
+
 export async function lookupPromises(
   env: Env,
   topic: string,
@@ -58,7 +95,7 @@ export async function lookupPromises(
     return dependencyUnavailable("Promises lookup index (promises_index.json) not available in R2.");
   }
 
-  const bestMatch = findBestMatch(topic, Object.keys(index));
+  const bestMatch = matchPromiseTopic(topic, Object.keys(index));
   if (!bestMatch) {
     return notFound(`Could not locate biblical promises for topic '${topic}'.`);
   }

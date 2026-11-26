@@ -8,6 +8,25 @@ interface NameEntry {
   meaning: string;
 }
 
+/** Words the source data capitalised mechanically ("Mountain Of Strength"). */
+const MINOR_WORDS = new Set(["a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "of", "on", "or", "the", "to", "with"]);
+
+/**
+ * Tidies the source's mechanical Title Case without rewriting it: fixes the
+ * possessive ("Father'S" → "Father's") and lowers minor words inside each
+ * semicolon-separated meaning ("Mountain Of Strength" → "Mountain of Strength",
+ * "Uncle, Or Father'S Brother" → "Uncle, or Father's Brother").
+ */
+export function tidyNameMeaning(meaning: string): string {
+  return meaning
+    .replace(/(\w)['’]S\b/g, "$1's")
+    .split(/(;\s*)/)
+    .map((phrase) =>
+      phrase.replace(/(?<=\S\s+)([A-Z][a-z]*)\b/g, (word) => (MINOR_WORDS.has(word.toLowerCase()) ? word.toLowerCase() : word))
+    )
+    .join("");
+}
+
 export async function lookupBibleNames(
   env: Env,
   query: string
@@ -50,8 +69,9 @@ export async function lookupBibleNames(
     return aExact - bExact;
   });
 
-  const lines = matches.slice(0, 30).map((m) => `• **${m.name}**: ${m.meaning}`);
+  const shown = matches.slice(0, 30).map((m) => ({ ...m, meaning: tidyNameMeaning(m.meaning) }));
+  const lines = shown.map((m) => `• **${m.name}**: ${m.meaning}`);
   const formattedText = `# Bible Names: "${query}"\n\n` + lines.join("\n");
 
-  return { matches: matches.slice(0, 30), formattedText };
+  return { matches: shown, formattedText };
 }

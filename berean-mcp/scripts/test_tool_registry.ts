@@ -18,7 +18,9 @@ import {
 } from "../src/mcp/toolRegistry.js";
 import { getOpenApiSpec } from "../src/ui/openapi.js";
 import { internalError } from "../src/services/errors.js";
-import { paginateText } from "../src/mcp/output.js";
+import { paginateText, normalizeMcpToolResult } from "../src/mcp/output.js";
+import { tidyNameMeaning } from "../src/services/namesService.js";
+import { translationOf } from "../src/utils/morphology.js";
 import { formatReference, parseReferenceString } from "../src/services/bibleService.js";
 import { renderExplorerHtml } from "../src/ui/explorer.js";
 import { Env } from "../src/types.js";
@@ -164,10 +166,13 @@ async function main() {
   if (henry.formattedText) assert.match(henry.formattedText, /^# \[Henry\] Commentary on John 3:16\n/);
 
   console.log("14. Text-only results are sent as text, not as empty structured content");
+  const textOnly = normalizeMcpToolResult({ formattedText: "# Heading\n\nBody" }, {}) as any;
+  assert.equal(textOnly.structuredContent, undefined, "no structuredContent when there is no structured data");
+  assert.equal(textOnly.content[0].text, "# Heading\n\nBody");
   const xref = (await rpc(envFor(), "tools/call", { name: "cross_references", arguments: { reference: "Matthew 11:28", limit: 5 } })).result;
   assert.ok(!xref.isError, JSON.stringify(xref));
-  assert.equal(xref.structuredContent, undefined, "no structuredContent when there is no structured data");
   assert.match(xref.content[0].text, /Cross References: Matthew 11:28/);
+  assert.equal(xref.structuredContent.references.length, 5, "cross_references now sends its reference list");
   const verses = (await rpc(envFor(), "tools/call", { name: "bible_lookup", arguments: { reference: "John 11:35" } })).result;
   assert.ok(Array.isArray(verses.structuredContent.verses), "structured data is still sent when present");
 
@@ -192,6 +197,28 @@ async function main() {
   assert.match(beyond.content[0].text, /^Error \(REQUEST_FAILED\): page \d+ does not exist/);
   const full = await callTopic({ output_mode: "full" });
   assert.ok(!full.isError);
+
+  console.log("16. Result-quality fixes");
+  const restJson = async (tool: string, body: unknown) => (await (await post(envFor(), tool, body)).json()) as any;
+  assert.equal((await restJson("biblical_promises", { topic: "Fear", include_text: false })).topic, "When you are afraid");
+  assert.equal((await restJson("biblical_promises", { topic: "Worry", include_text: false })).topic, "When you worry");
+  assert.equal((await restJson("biblical_promises", { topic: "Peace", include_text: false })).topic, "PEACE", "exact topic names still win");
+  const xr = await restJson("cross_references", { reference: "Matthew 11:28", limit: 5 });
+  assert.equal(xr.references.length, 5);
+  assert.match(xr.formattedText, /Showing 5 of \d+ references/);
+  const barnes = await restJson("commentary_lookup", { reference: "Romans 8", version: "Barnes" });
+  assert.match(barnes.formattedText, /^# \[Barnes\] Commentary on Romans 8\n\nThis chapter/, "no stray 0 before the introduction");
+  assert.equal(barnes.result.verses, undefined);
+  assert.equal((await restJson("commentary_lookup", { reference: "Romans 8:28", version: "Barnes" })).result.verses, "28");
+  assert.equal(tidyNameMeaning("The Father'S Joy"), "The Father's Joy");
+  assert.equal(tidyNameMeaning("A Teacher; Lofty; Mountain Of Strength"), "A Teacher; Lofty; Mountain of Strength");
+  assert.equal(tidyNameMeaning("Uncle, Or Father'S Brother"), "Uncle, or Father's Brother");
+  const praus = await restJson("lexicon_lookup", { strongs_number: "G4239", lexicon: "thayer" });
+  assert.match(praus.classicalDefinition, /see \*\*πρᾷός\*\*[\s\S]*G4235 — πρᾷός/, "Thayer pointer entries are followed");
+  assert.equal(translationOf("vvv"), undefined);
+  assert.equal(translationOf(" rest "), "rest");
+  const morph = await restJson("morphology_lookup", { reference: "Matthew 11:28" });
+  assert.ok(!JSON.stringify(morph).includes('"vvv"'), "placeholder translations are not exposed");
 
   console.log("\n🎉 Tool registry tests passed.");
 }
