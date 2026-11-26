@@ -87,6 +87,18 @@ export function parseReferenceString(refStr: string): ParsedReference | null {
   return null;
 }
 
+/**
+ * Canonical display form of a parsed reference, e.g. "John 3:16", "John 3:16-18",
+ * "Matthew 5:1-7:27" or "Psalm 23" (whole chapter). Abbreviations are expanded.
+ */
+export function formatReference(ref: ParsedReference): string {
+  const { bookName, chapterStart, verseStart, chapterEnd, verseEnd } = ref;
+  if (chapterStart !== chapterEnd) return `${bookName} ${chapterStart}:${verseStart}-${chapterEnd}:${verseEnd}`;
+  if (verseStart === 1 && verseEnd === 999) return `${bookName} ${chapterStart}`;
+  if (verseStart === verseEnd) return `${bookName} ${chapterStart}:${verseStart}`;
+  return `${bookName} ${chapterStart}:${verseStart}-${verseEnd}`;
+}
+
 export async function lookupBiblePassage(
   env: Env,
   version: string,
@@ -167,7 +179,7 @@ export async function lookupBiblePassage(
     stmt.free();
 
     if (verses.length === 0) {
-      return notFound(`No verses found for ${parsed.bookName} ${reference} in ${ver}`);
+      return notFound(`No verses found for ${formatReference(parsed)} in ${ver}`);
     }
 
     const formattedLines = verses.map(v => `[${v.book} ${v.chapter}:${v.verse} (${ver})] ${v.text}`);

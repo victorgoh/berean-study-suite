@@ -18,6 +18,7 @@ import {
 } from "../src/mcp/toolRegistry.js";
 import { getOpenApiSpec } from "../src/ui/openapi.js";
 import { internalError } from "../src/services/errors.js";
+import { formatReference, parseReferenceString } from "../src/services/bibleService.js";
 import { renderExplorerHtml } from "../src/ui/explorer.js";
 import { Env } from "../src/types.js";
 import { createLocalEnv } from "./lib/localEnv.js";
@@ -137,6 +138,17 @@ async function main() {
   console.error = quietConsole;
   assert.equal(internal.errorCode, "INTERNAL_ERROR");
   assert.doesNotMatch(internal.error, /SQLITE|Secret/);
+
+  console.log("13. References are shown once, in canonical form");
+  const fmt = (ref: string) => formatReference(parseReferenceString(ref)!);
+  assert.equal(fmt("Jn 3:16"), "John 3:16");
+  assert.equal(fmt("John 3:16-18"), "John 3:16-18");
+  assert.equal(fmt("Matt 5:1-7:27"), "Matthew 5:1-7:27");
+  assert.equal(fmt("Psalm 23"), "Psalms 23");
+  const missingVerse = (await (await post(envFor(), "bible_lookup", { reference: "Genesis 50:99" })).json()) as any;
+  assert.equal(missingVerse.error.message, "No verses found for Genesis 50:99 in BSB");
+  const henry = (await (await post(envFor(), "commentary_lookup", { reference: "John 3:16", version: "Henry" })).json()) as any;
+  if (henry.formattedText) assert.match(henry.formattedText, /^# \[Henry\] Commentary on John 3:16\n/);
 
   console.log("\n🎉 Tool registry tests passed.");
 }

@@ -1,5 +1,5 @@
 import { getDatabase } from "../db/sqliteEngine.js";
-import { parseReferenceString, ParsedReference } from "./bibleService.js";
+import { parseReferenceString, ParsedReference, formatReference } from "./bibleService.js";
 import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { resolveCommentary } from "../config/databaseMap.js";
 import { Env, CommentaryResult } from "../types.js";
@@ -175,7 +175,7 @@ export async function lookupCommentary(
 
     if (rows.length === 0) {
       return {
-        error: `VERSE_NOT_FOUND: No commentary found in c${cleanVer} for ${parsed.bookName} ${reference}. Request the chapter explicitly or choose another commentary.`,
+        error: `VERSE_NOT_FOUND: No commentary found in c${cleanVer} for ${formatReference(parsed)}. Request the chapter explicitly or choose another commentary.`,
         errorCode: "RESOURCE_UNAVAILABLE",
       };
     }
@@ -217,7 +217,7 @@ export async function lookupCommentary(
       }
     }
 
-    const formattedText = `# [${cleanVer}] Commentary on ${parsed.bookName} ${reference}\n\n` + commentaryOutput;
+    const formattedText = `# [${cleanVer}] Commentary on ${formatReference(parsed)}\n\n` + commentaryOutput;
 
     return {
       formattedText,
