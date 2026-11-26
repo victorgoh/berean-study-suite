@@ -2,24 +2,25 @@ import { getDatabase, getJsonFromR2 } from "../db/sqliteEngine.js";
 import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { findBestMatch } from "../utils/fuzzyMatch.js";
 import { Env, LocationResult } from "../types.js";
+import { dependencyUnavailable, internalError, notFound, type ServiceErrorFields } from "./errors.js";
 
 export async function lookupLocation(
   env: Env,
   locationQuery: string
-): Promise<{ error?: string; formattedText?: string; location?: string; result?: LocationResult }> {
+): Promise<ServiceErrorFields & { formattedText?: string; location?: string; result?: LocationResult }> {
   const index = await getJsonFromR2<Record<string, [string, string, string]>>(env, "data/lookup/locations_index.json");
   if (!index) {
-    return { error: "Location lookup index (locations_index.json) not available in R2." };
+    return dependencyUnavailable("Location lookup index (locations_index.json) not available in R2.");
   }
 
   const bestMatch = findBestMatch(locationQuery, Object.keys(index));
   if (!bestMatch) {
-    return { error: `Could not locate a matching Bible location for '${locationQuery}'.` };
+    return notFound(`Could not locate a matching Bible location for '${locationQuery}'.`);
   }
 
   const entry = index[bestMatch];
   if (!entry) {
-    return { error: `No coordinates found for '${bestMatch}'.` };
+    return notFound(`No coordinates found for '${bestMatch}'.`);
   }
 
   const [code, latStr, lonStr] = entry;
@@ -29,7 +30,7 @@ export async function lookupLocation(
 
   const { db, error: dbError } = await getDatabase(env, "data/exlb3.data");
   if (!db) {
-    return { error: dbError || "Location database (exlb3.data) not found in R2." };
+    return dependencyUnavailable(dbError || "Location database (exlb3.data) not found in R2.");
   }
 
   try {
@@ -68,6 +69,6 @@ export async function lookupLocation(
 
     return { location: bestMatch, formattedText, result: locResult };
   } catch (err: any) {
-    return { error: `Location query error: ${err.message}` };
+    return internalError("Location query", err);
   }
 }

@@ -3,6 +3,7 @@ import { lookupBiblePassage, parseReferenceString } from "./bibleService.js";
 import { lookupCommentary } from "./commentaryService.js";
 import { lookupCrossReferences } from "./xrefService.js";
 import { Env, StudyPackResponse } from "../types.js";
+import { invalidRequest, type ServiceErrorCode } from "./errors.js";
 
 function cleanEmbeddedCommentary(rawText: string): string {
   if (!rawText) return "";
@@ -30,12 +31,13 @@ export async function lookupOtQuotations(
   reference: string
 ): Promise<{
   error?: string;
+  errorCode?: ServiceErrorCode;
   formattedText?: string;
   records?: OtInNtRecord[];
 }> {
   const parsed = parseReferenceString(reference);
   if (!parsed) {
-    return { error: `Invalid Scripture reference '${reference}'.` };
+    return invalidRequest(`Invalid Scripture reference '${reference}'.`);
   }
 
   const isOT = parsed.bookNumber <= 39;
@@ -89,6 +91,7 @@ export async function lookupOtQuotations(
   if (records.length === 0) {
     return {
       error: `No direct OT/NT quotation mappings found for '${reference}'.`,
+      errorCode: "RESOURCE_UNAVAILABLE",
       formattedText: `# OT Quotations in the NT: ${reference}\n\n*No direct canonical quotation or allusion recorded for this reference.*`
     };
   }

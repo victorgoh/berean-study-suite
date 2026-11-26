@@ -1,3 +1,5 @@
+import type { ServiceErrorCode } from "./services/errors.js";
+
 export interface Env {
   BIBLEMATE_DATA?: R2Bucket;
   BEREAN_DATA?: R2Bucket;
@@ -123,4 +125,5 @@ export interface StudyPackResponse {
   metadata?: StudyPackMetadata;
   result?: any;
   error?: string;
+  errorCode?: ServiceErrorCode;
 }

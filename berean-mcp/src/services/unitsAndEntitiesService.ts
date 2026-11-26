@@ -1,5 +1,6 @@
 import { getDatabase } from "../db/sqliteEngine.js";
 import { Env } from "../types.js";
+import { invalidRequest, type ServiceErrorCode } from "./errors.js";
 
 export interface DisambiguatedEntity {
   id?: number;
@@ -34,12 +35,13 @@ export async function lookupEntityDisambiguation(
   name: string
 ): Promise<{
   error?: string;
+  errorCode?: ServiceErrorCode;
   formattedText?: string;
   entities?: DisambiguatedEntity[];
 }> {
   const cleanName = name.trim();
   if (!cleanName) {
-    return { error: "Entity name parameter is required." };
+    return invalidRequest("Entity name parameter is required.");
   }
 
   let entities: DisambiguatedEntity[] = [];
@@ -85,6 +87,7 @@ export async function lookupEntityDisambiguation(
   if (entities.length === 0) {
     return {
       error: `No disambiguated entities found for '${cleanName}'.`,
+      errorCode: "RESOURCE_UNAVAILABLE",
       formattedText: `# Entity Disambiguation: ${cleanName}\n\n*No specific disambiguation records found for '${cleanName}'.*`
     };
   }
@@ -118,12 +121,13 @@ export async function convertAncientUnits(
   amount: number = 1
 ): Promise<{
   error?: string;
+  errorCode?: ServiceErrorCode;
   formattedText?: string;
   units?: BiblicalUnit[];
 }> {
   const cleanUnit = unitName.trim();
   if (!cleanUnit) {
-    return { error: "Unit name parameter is required." };
+    return invalidRequest("Unit name parameter is required.");
   }
 
   let units: BiblicalUnit[] = [];
@@ -169,6 +173,7 @@ export async function convertAncientUnits(
   if (units.length === 0) {
     return {
       error: `No biblical units found matching '${cleanUnit}'.`,
+      errorCode: "RESOURCE_UNAVAILABLE",
       formattedText: `# Biblical Unit Converter: ${cleanUnit}\n\n*No biblical weights, measures, or currency units found for '${cleanUnit}'.*`
     };
   }

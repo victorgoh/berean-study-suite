@@ -3,6 +3,7 @@ import { findBestMatch, decodeHtmlEntities } from "../utils/fuzzyMatch.js";
 import { OFFICIAL_BOOK_NAMES, raw_mappings } from "../mcp/constants.js";
 import { lookupBiblePassage } from "./bibleService.js";
 import { Env } from "../types.js";
+import { dependencyUnavailable, internalError, notFound, type ServiceErrorFields } from "./errors.js";
 
 const STOP_WORDS = new Set([
   "parallels",
@@ -103,15 +104,15 @@ export async function lookupParallels(
   query: string,
   includeScriptureText: boolean = false,
   bibleVersion: string = "NET"
-): Promise<{ error?: string; formattedText?: string; title?: string; passages?: string[] }> {
+): Promise<ServiceErrorFields & { formattedText?: string; title?: string; passages?: string[] }> {
   const index = await getJsonFromR2<Record<string, [string, string][]>>(env, "data/lookup/parallels_index.json");
   if (!index) {
-    return { error: "Parallels lookup index (parallels_index.json) not available in R2." };
+    return dependencyUnavailable("Parallels lookup index (parallels_index.json) not available in R2.");
   }
 
   const { db, error: dbError } = await getDatabase(env, "collections3.sqlite");
   if (!db) {
-    return { error: dbError || "Collections database (collections3.sqlite) not found in R2." };
+    return dependencyUnavailable(dbError || "Collections database (collections3.sqlite) not found in R2.");
   }
 
   const queryClean = query.trim().toLowerCase();
@@ -198,7 +199,7 @@ export async function lookupParallels(
   }
 
   if (!selectedTitle || targetPairs.length === 0) {
-    return { error: `Could not locate parallel passages for '${query}'.` };
+    return notFound(`Could not locate parallel passages for '${query}'.`);
   }
 
   try {
@@ -218,7 +219,7 @@ export async function lookupParallels(
     }
 
     if (allPassages.length === 0) {
-      return { error: `No parallel passages found for '${selectedTitle}'.` };
+      return notFound(`No parallel passages found for '${selectedTitle}'.`);
     }
 
     const title = decodeHtmlEntities(selectedTitle);
@@ -241,6 +242,6 @@ export async function lookupParallels(
 
     return { title, formattedText: lines.join("\n"), passages: allPassages };
   } catch (err: any) {
-    return { error: `Parallel passages query error: ${err.message}` };
+    return internalError("Parallel passages query", err);
   }
 }

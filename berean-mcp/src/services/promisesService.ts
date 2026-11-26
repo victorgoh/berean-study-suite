@@ -3,6 +3,7 @@ import { findBestMatch, decodeHtmlEntities } from "../utils/fuzzyMatch.js";
 import { OFFICIAL_BOOK_NAMES } from "../mcp/constants.js";
 import { lookupBiblePassage } from "./bibleService.js";
 import { Env } from "../types.js";
+import { dependencyUnavailable, internalError, notFound, type ServiceErrorFields } from "./errors.js";
 
 function decodeBcvArgs(args: number[]): string | null {
   if (args.length === 3) {
@@ -51,25 +52,25 @@ export async function lookupPromises(
   topic: string,
   includeScriptureText: boolean = false,
   bibleVersion: string = "NET"
-): Promise<{ error?: string; formattedText?: string; topic?: string; passages?: string[] }> {
+): Promise<ServiceErrorFields & { formattedText?: string; topic?: string; passages?: string[] }> {
   const index = await getJsonFromR2<Record<string, [string, string][]>>(env, "data/lookup/promises_index.json");
   if (!index) {
-    return { error: "Promises lookup index (promises_index.json) not available in R2." };
+    return dependencyUnavailable("Promises lookup index (promises_index.json) not available in R2.");
   }
 
   const bestMatch = findBestMatch(topic, Object.keys(index));
   if (!bestMatch) {
-    return { error: `Could not locate biblical promises for topic '${topic}'.` };
+    return notFound(`Could not locate biblical promises for topic '${topic}'.`);
   }
 
   const pairs = index[bestMatch];
   if (!pairs || pairs.length === 0) {
-    return { error: `No promise records found for '${bestMatch}'.` };
+    return notFound(`No promise records found for '${bestMatch}'.`);
   }
 
   const { db, error: dbError } = await getDatabase(env, "collections3.sqlite");
   if (!db) {
-    return { error: dbError || "Collections database (collections3.sqlite) not found in R2." };
+    return dependencyUnavailable(dbError || "Collections database (collections3.sqlite) not found in R2.");
   }
 
   try {
@@ -89,7 +90,7 @@ export async function lookupPromises(
     }
 
     if (allPassages.length === 0) {
-      return { error: `No biblical promise passages found for '${bestMatch}'.` };
+      return notFound(`No biblical promise passages found for '${bestMatch}'.`);
     }
 
     const title = decodeHtmlEntities(bestMatch);
@@ -113,6 +114,6 @@ export async function lookupPromises(
 
     return { topic: title, formattedText: lines.join("\n"), passages: allPassages };
   } catch (err: any) {
-    return { error: `Biblical promises query error: ${err.message}` };
+    return internalError("Biblical promises query", err);
   }
 }

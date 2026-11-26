@@ -1,6 +1,7 @@
 import { getDatabase } from "../db/sqliteEngine.js";
 import { resolveBookNumber, OFFICIAL_BOOK_NAMES } from "../mcp/constants.js";
 import { Env, BibleVerse } from "../types.js";
+import { dependencyUnavailable, internalError, invalidRequest, notFound, type ServiceErrorFields } from "./errors.js";
 
 export interface ParsedReference {
   bookName: string;
@@ -90,10 +91,10 @@ export async function lookupBiblePassage(
   env: Env,
   version: string,
   reference: string
-): Promise<{ error?: string; verses?: BibleVerse[]; formattedText?: string }> {
+): Promise<ServiceErrorFields & { verses?: BibleVerse[]; formattedText?: string }> {
   const parsed = parseReferenceString(reference);
   if (!parsed) {
-    return { error: `Could not parse passage reference: "${reference}"` };
+    return invalidRequest(`Could not parse passage reference: "${reference}"`);
   }
 
   let ver = version.toUpperCase();
@@ -123,7 +124,7 @@ export async function lookupBiblePassage(
   }
 
   if (!db) {
-    return { error: dbError || `Bible translation database not found for '${ver}' (path: ${r2Key})` };
+    return dependencyUnavailable(dbError || `Bible translation database not found for '${ver}' (path: ${r2Key})`);
   }
 
   try {
@@ -166,7 +167,7 @@ export async function lookupBiblePassage(
     stmt.free();
 
     if (verses.length === 0) {
-      return { error: `No verses found for ${parsed.bookName} ${reference} in ${ver}` };
+      return notFound(`No verses found for ${parsed.bookName} ${reference} in ${ver}`);
     }
 
     const formattedLines = verses.map(v => `[${v.book} ${v.chapter}:${v.verse} (${ver})] ${v.text}`);
@@ -174,6 +175,6 @@ export async function lookupBiblePassage(
 
     return { verses, formattedText };
   } catch (err: any) {
-    return { error: `Query failed: ${err.message}` };
+    return internalError("Bible passage query", err);
   }
 }

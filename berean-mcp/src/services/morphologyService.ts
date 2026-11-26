@@ -1,14 +1,15 @@
 import { getDatabase } from "../db/sqliteEngine.js";
 import { parseReferenceString } from "./bibleService.js";
 import { Env, MorphologyWord } from "../types.js";
+import { dependencyUnavailable, internalError, invalidRequest, notFound, type ServiceErrorFields } from "./errors.js";
 
 export async function lookupMorphology(
   env: Env,
   reference: string
-): Promise<{ error?: string; formattedText?: string; words?: MorphologyWord[] }> {
+): Promise<ServiceErrorFields & { formattedText?: string; words?: MorphologyWord[] }> {
   const parsed = parseReferenceString(reference);
   if (!parsed) {
-    return { error: `Invalid reference for morphology lookup: '${reference}'` };
+    return invalidRequest(`Invalid reference for morphology lookup: '${reference}'`);
   }
 
   let words: MorphologyWord[] = [];
@@ -40,15 +41,15 @@ export async function lookupMorphology(
         }
         stmt.free();
       } catch (sqlErr: any) {
-        return { error: `Morphology query error: ${sqlErr.message}` };
+        return internalError("Morphology query", sqlErr);
       }
     } else if (!env.MORPHOLOGY_DB) {
-      return { error: dbError || "Morphology database not available." };
+      return dependencyUnavailable(dbError || "Morphology database not available.");
     }
   }
 
   if (words.length === 0) {
-    return { error: `No morphology records found for ${parsed.bookName} ${parsed.chapterStart}:${parsed.verseStart}` };
+    return notFound(`No morphology records found for ${parsed.bookName} ${parsed.chapterStart}:${parsed.verseStart}`);
   }
 
   const tableRows = words.map((w) =>

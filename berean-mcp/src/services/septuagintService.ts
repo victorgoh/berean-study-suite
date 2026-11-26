@@ -4,6 +4,7 @@ import { lookupCommentary } from "./commentaryService.js";
 import { lookupCrossReferences } from "./xrefService.js";
 import { lookupOtQuotations } from "./otInNtService.js";
 import { Env, StudyPackResponse } from "../types.js";
+import { dependencyUnavailable, internalError, invalidRequest, type ServiceErrorCode } from "./errors.js";
 
 function cleanEmbeddedCommentary(rawText: string): string {
   if (!rawText) return "";
@@ -30,21 +31,22 @@ export async function lookupSeptuagint(
   reference: string
 ): Promise<{
   error?: string;
+  errorCode?: ServiceErrorCode;
   formattedText?: string;
   verses?: LxxVerse[];
 }> {
   const parsed = parseReferenceString(reference);
   if (!parsed) {
-    return { error: `Invalid Scripture reference '${reference}'.` };
+    return invalidRequest(`Invalid Scripture reference '${reference}'.`);
   }
 
   if (parsed.bookNumber > 39) {
-    return { error: `The Septuagint (LXX) covers the Old Testament (Books 1-39). '${parsed.bookName}' is in the New Testament.` };
+    return invalidRequest(`The Septuagint (LXX) covers the Old Testament (Books 1-39). '${parsed.bookName}' is in the New Testament.`);
   }
 
   const { db, error: dbError } = await getDatabase(env, "bibles/LXX.bible");
   if (!db) {
-    return { error: dbError || "Septuagint database (LXX.bible) not found." };
+    return dependencyUnavailable(dbError || "Septuagint database (LXX.bible) not found.");
   }
 
   try {
@@ -80,6 +82,7 @@ export async function lookupSeptuagint(
     if (verses.length === 0) {
       return {
         error: `No Septuagint (LXX) records found for ${reference}.`,
+        errorCode: "RESOURCE_UNAVAILABLE",
         formattedText: `# Septuagint (LXX): ${reference}\n\n*No specific LXX entry recorded for this passage.*`
       };
     }
@@ -101,7 +104,7 @@ export async function lookupSeptuagint(
       verses
     };
   } catch (err: any) {
-    return { error: `Septuagint lookup error: ${err.message}` };
+    return internalError("Septuagint lookup", err);
   }
 }
 

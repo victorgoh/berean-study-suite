@@ -3,14 +3,15 @@ import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { findBestMatch } from "../utils/fuzzyMatch.js";
 import { lookupDictionary } from "./dictionaryService.js";
 import { Env } from "../types.js";
+import { invalidRequest, notFound, type ServiceErrorFields } from "./errors.js";
 
 export async function lookupEncyclopedia(
   env: Env,
   term: string,
   source: string = "isbe"
-): Promise<{ error?: string; formattedText?: string; title?: string }> {
+): Promise<ServiceErrorFields & { formattedText?: string; title?: string }> {
   if (!term || !term.trim()) {
-    return { error: "Please provide a term to lookup in the encyclopedia." };
+    return invalidRequest("Please provide a term to lookup in the encyclopedia.");
   }
 
   const cleanTerm = term.trim();
@@ -71,5 +72,5 @@ export async function lookupEncyclopedia(
     return tyndaleFallback;
   }
 
-  return { error: `No encyclopedia or dictionary entry found matching '${cleanTerm}'.` };
+  return notFound(`No encyclopedia or dictionary entry found matching '${cleanTerm}'.`);
 }

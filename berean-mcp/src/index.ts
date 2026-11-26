@@ -1,7 +1,8 @@
 import "./polyfills.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { createMcpServer, MCP_TOOL_COUNTS } from "./mcp/server.js";
-import { TOOLS, TOOLS_BY_NAME, validateRestArgs, formatValidationError } from "./mcp/toolRegistry.js";
+import { TOOLS, TOOLS_BY_NAME, validateRestArgs, formatValidationError, type ServiceResult } from "./mcp/toolRegistry.js";
+import { HTTP_STATUS_FOR_ERROR, type ServiceErrorCode } from "./services/errors.js";
 import { renderExplorerHtml } from "./ui/explorer.js";
 import { renderScalarHtml } from "./ui/scalar.js";
 import { renderSwaggerHtml } from "./ui/swagger.js";
@@ -16,15 +17,15 @@ function jsonResponse(payload: unknown, corsHeaders: Record<string, string>, sta
   });
 }
 
-function restServiceResponse(result: any, corsHeaders: Record<string, string>): Response {
-  if (!result?.error) return jsonResponse(result, corsHeaders);
-  const message = String(result.error);
-  let code = "REQUEST_FAILED";
-  let status = 400;
-  if (/not found|not available|not installed/i.test(message)) { code = "RESOURCE_UNAVAILABLE"; status = 404; }
-  if (/database|R2|D1|storage/i.test(message)) { code = "DEPENDENCY_UNAVAILABLE"; status = 503; }
-  if (/query failed|exception|internal/i.test(message)) { code = "INTERNAL_ERROR"; status = 500; }
-  return jsonResponse({ error: { code, message, retryable: status >= 500 } }, corsHeaders, status);
+/**
+ * Returns a service result as REST JSON. Failures use the service's typed
+ * `errorCode` for the HTTP status; an untagged error is treated as a bad request.
+ */
+function restServiceResponse(result: ServiceResult, corsHeaders: Record<string, string>): Response {
+  if (!result.error) return jsonResponse(result, corsHeaders);
+  const code: ServiceErrorCode = result.errorCode ?? "REQUEST_FAILED";
+  const status = HTTP_STATUS_FOR_ERROR[code];
+  return jsonResponse({ error: { code, message: String(result.error), retryable: status >= 500 } }, corsHeaders, status);
 }
 
 function rateLimitResponse(corsHeaders: Record<string, string>, retryAfter: number, jsonRpcId?: unknown): Response {

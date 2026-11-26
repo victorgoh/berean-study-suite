@@ -2,6 +2,7 @@ import { getDatabase } from "../db/sqliteEngine.js";
 import { resolveBookNumber, OFFICIAL_BOOK_NAMES } from "../mcp/constants.js";
 import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { Env, BookAnalysisResult } from "../types.js";
+import { dependencyUnavailable, internalError, invalidRequest, notFound, type ServiceErrorFields } from "./errors.js";
 
 function formatBookGuideContent(content: string, detail: "summary" | "full"): string {
   const markdown = cleanHtmlToMarkdown(content || "");
@@ -22,16 +23,16 @@ export async function lookupBookAnalysis(
   env: Env,
   bookName: string,
   detail: "summary" | "full" = "summary"
-): Promise<{ error?: string; formattedText?: string; result?: BookAnalysisResult }> {
+): Promise<ServiceErrorFields & { formattedText?: string; result?: BookAnalysisResult }> {
   const bookNum = resolveBookNumber(bookName);
   if (!bookNum) {
-    return { error: `Unrecognized book name: '${bookName}'` };
+    return invalidRequest(`Unrecognized book name: '${bookName}'`);
   }
 
   const officialName = OFFICIAL_BOOK_NAMES[bookNum] || bookName;
   const { db, error: dbError } = await getDatabase(env, "data/tyndale_book_intros.data");
   if (!db) {
-    return { error: dbError || "Tyndale Book Guide database (tyndale_book_intros.data) not found in storage." };
+    return dependencyUnavailable(dbError || "Tyndale Book Guide database (tyndale_book_intros.data) not found in storage.");
   }
 
   try {
@@ -45,7 +46,7 @@ export async function lookupBookAnalysis(
     stmt.free();
 
     if (sections.length === 0) {
-      return { error: `No Tyndale ${detail} book guide found for ${officialName}.` };
+      return notFound(`No Tyndale ${detail} book guide found for ${officialName}.`);
     }
 
     const label = detail === "full" ? "Full Introduction" : "Book Summary";
@@ -59,6 +60,6 @@ export async function lookupBookAnalysis(
       }
     };
   } catch (err: any) {
-    return { error: `Book analysis query error: ${err.message}` };
+    return internalError("Book analysis query", err);
   }
 }

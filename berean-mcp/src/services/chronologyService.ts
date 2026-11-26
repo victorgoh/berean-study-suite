@@ -1,5 +1,6 @@
 import { getJsonFromR2 } from "../db/sqliteEngine.js";
 import { Env } from "../types.js";
+import { dependencyUnavailable, invalidRequest, notFound, type ServiceErrorFields } from "./errors.js";
 
 const PERIOD_SYNONYMS: Record<string, string[]> = {
   patriarch: ["abram", "abraham", "sarah", "sarai", "isaac", "jacob", "esau", "joseph", "ishmael", "rebekah", "leah", "rachel", "gen 11", "gen 12", "gen 15", "gen 17", "gen 21", "gen 25", "gen 28", "gen 29", "gen 35", "gen 37", "gen 41", "gen 47", "gen 50"],
@@ -25,15 +26,15 @@ const PERIOD_SYNONYMS: Record<string, string[]> = {
 export async function lookupChronology(
   env: Env,
   query: string
-): Promise<{ error?: string; formattedText?: string; sectionMatches?: Record<string, string[]> }> {
+): Promise<ServiceErrorFields & { formattedText?: string; sectionMatches?: Record<string, string[]> }> {
   const chronoData = await getJsonFromR2<Record<string, string[]>>(env, "data/lookup/chronology.json");
   if (!chronoData) {
-    return { error: "Chronology dataset (chronology.json) not available in R2." };
+    return dependencyUnavailable("Chronology dataset (chronology.json) not available in R2.");
   }
 
   const queryClean = query.trim().toLowerCase();
   if (!queryClean) {
-    return { error: "Chronology search query is required." };
+    return invalidRequest("Chronology search query is required.");
   }
 
   const rawTokens = queryClean.split(/\s+/).filter((t) => t.length >= 2);
@@ -83,7 +84,7 @@ export async function lookupChronology(
   }
 
   if (totalMatches === 0) {
-    return { error: `No chronological events matching '${query}' were found.` };
+    return notFound(`No chronological events matching '${query}' were found.`);
   }
 
   const mdBlocks: string[] = [];

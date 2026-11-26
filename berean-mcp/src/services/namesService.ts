@@ -1,6 +1,7 @@
 import { getJsonFromR2 } from "../db/sqliteEngine.js";
 import { levenshteinDistance } from "../utils/fuzzyMatch.js";
 import { Env } from "../types.js";
+import { dependencyUnavailable, invalidRequest, notFound, type ServiceErrorFields } from "./errors.js";
 
 interface NameEntry {
   name: string;
@@ -10,15 +11,15 @@ interface NameEntry {
 export async function lookupBibleNames(
   env: Env,
   query: string
-): Promise<{ error?: string; formattedText?: string; matches?: NameEntry[] }> {
+): Promise<ServiceErrorFields & { formattedText?: string; matches?: NameEntry[] }> {
   const namesData = await getJsonFromR2<NameEntry[]>(env, "data/lookup/bible_names.json");
   if (!namesData) {
-    return { error: "Bible names data (bible_names.json) not available in R2." };
+    return dependencyUnavailable("Bible names data (bible_names.json) not available in R2.");
   }
 
   const queryClean = query.trim().toLowerCase();
   if (!queryClean) {
-    return { error: "Search query is required." };
+    return invalidRequest("Search query is required.");
   }
 
   const tokens = queryClean.split(/\s+/).filter((t) => t.length >= 2);
@@ -39,7 +40,7 @@ export async function lookupBibleNames(
   }
 
   if (matches.length === 0) {
-    return { error: `No biblical names matching '${query}' were found.` };
+    return notFound(`No biblical names matching '${query}' were found.`);
   }
 
   // Sort: exact matches first

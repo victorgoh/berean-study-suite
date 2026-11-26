@@ -1,6 +1,7 @@
 import { getDatabase } from "../db/sqliteEngine.js";
 import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { Env } from "../types.js";
+import { notFound, type ServiceErrorCode } from "./errors.js";
 
 export interface StepLexiconRow {
   strongs: string;
@@ -25,6 +26,7 @@ export async function lookupLexiconEntry(
   lexicon: string = "step"
 ): Promise<{
   error?: string;
+  errorCode?: ServiceErrorCode;
   formattedText?: string;
   definition?: string;
   stepEntries?: StepLexiconRow[];
@@ -123,7 +125,7 @@ export async function lookupLexiconEntry(
 
   // 3. If neither produced results, return error
   if (stepEntries.length === 0 && !classicalDef) {
-    return { error: `Lexicon entry not found for '${strongsNumber}' in requested lexicons (${targetLexicon}).` };
+    return notFound(`Lexicon entry not found for '${strongsNumber}' in requested lexicons (${targetLexicon}).`);
   }
 
   // 4. Format Combined Markdown

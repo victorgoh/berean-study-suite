@@ -1,6 +1,7 @@
 import { getJsonFromR2 } from "../db/sqliteEngine.js";
 import { lookupBiblePassage } from "./bibleService.js";
 import { Env, DailyReadingPlan } from "../types.js";
+import { dependencyUnavailable, notFound, type ServiceErrorFields } from "./errors.js";
 
 function getDayOfYear(dateStr?: string): { day: number; dateFormatted: string } {
   let targetDate: Date;
@@ -27,16 +28,16 @@ export async function getDailyReading(
   dateStr?: string,
   includeScriptureText: boolean = true,
   bibleVersion: string = "NET"
-): Promise<{ error?: string; formattedText?: string; plan?: DailyReadingPlan }> {
+): Promise<ServiceErrorFields & { formattedText?: string; plan?: DailyReadingPlan }> {
   const planData = await getJsonFromR2<Record<string, string>>(env, "data/lookup/daily_readings.json");
   if (!planData) {
-    return { error: "Daily reading plan data (daily_readings.json) not available in R2." };
+    return dependencyUnavailable("Daily reading plan data (daily_readings.json) not available in R2.");
   }
 
   const { day, dateFormatted } = getDayOfYear(dateStr);
   const rawReadings = planData[String(day)];
   if (!rawReadings) {
-    return { error: `No reading plan found for Day ${day}.` };
+    return notFound(`No reading plan found for Day ${day}.`);
   }
 
   const passages = rawReadings.split(",").map((p) => p.trim());

@@ -2,29 +2,30 @@ import { getDatabase, getJsonFromR2 } from "../db/sqliteEngine.js";
 import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { findBestMatch, decodeHtmlEntities } from "../utils/fuzzyMatch.js";
 import { Env, TopicResult } from "../types.js";
+import { dependencyUnavailable, internalError, notFound, type ServiceErrorFields } from "./errors.js";
 
 export async function lookupTopic(
   env: Env,
   topicQuery: string
-): Promise<{ error?: string; formattedText?: string; topic?: string; results?: TopicResult[] }> {
+): Promise<ServiceErrorFields & { formattedText?: string; topic?: string; results?: TopicResult[] }> {
   const index = await getJsonFromR2<Record<string, string[]>>(env, "data/lookup/exlbt_index.json");
   if (!index) {
-    return { error: "Topic lookup index (exlbt_index.json) not available in R2." };
+    return dependencyUnavailable("Topic lookup index (exlbt_index.json) not available in R2.");
   }
 
   const bestMatch = findBestMatch(topicQuery, Object.keys(index));
   if (!bestMatch) {
-    return { error: `Could not locate a matching Bible topic for '${topicQuery}'.` };
+    return notFound(`Could not locate a matching Bible topic for '${topicQuery}'.`);
   }
 
   const codes = index[bestMatch];
   if (!codes || codes.length === 0) {
-    return { error: `No topic code records found for '${bestMatch}'.` };
+    return notFound(`No topic code records found for '${bestMatch}'.`);
   }
 
   const { db, error: dbError } = await getDatabase(env, "data/exlb3.data");
   if (!db) {
-    return { error: dbError || "Topic database (exlb3.data) not found in R2." };
+    return dependencyUnavailable(dbError || "Topic database (exlb3.data) not found in R2.");
   }
 
   const results: TopicResult[] = [];
@@ -58,6 +59,6 @@ export async function lookupTopic(
 
     return { topic: decodedTitle, formattedText, results };
   } catch (err: any) {
-    return { error: `Topic study query error: ${err.message}` };
+    return internalError("Topic study query", err);
   }
 }

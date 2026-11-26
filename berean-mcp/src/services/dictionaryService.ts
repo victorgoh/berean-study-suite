@@ -2,6 +2,7 @@ import { getDatabase, getJsonFromR2 } from "../db/sqliteEngine.js";
 import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { findBestMatch } from "../utils/fuzzyMatch.js";
 import { Env } from "../types.js";
+import { invalidRequest, notFound, type ServiceErrorFields } from "./errors.js";
 
 const LEGACY_DICTIONARY_SOURCES: Record<string, { prefix: string; label: string }> = {
   easton: { prefix: "EAS", label: "Easton's Illustrated Bible Dictionary" },
@@ -32,9 +33,9 @@ export async function lookupDictionary(
   env: Env,
   term: string,
   source: string = "tyndale"
-): Promise<{ error?: string; formattedText?: string; title?: string; definition?: string }> {
+): Promise<ServiceErrorFields & { formattedText?: string; title?: string; definition?: string }> {
   if (!term || !term.trim()) {
-    return { error: "Please provide a term to lookup in the Bible dictionary." };
+    return invalidRequest("Please provide a term to lookup in the Bible dictionary.");
   }
 
   const cleanTerm = term.trim();
@@ -75,19 +76,19 @@ export async function lookupDictionary(
       console.warn("Tyndale dictionary SQLite query error:", err);
     }
 
-    return { error: `No entry found for '${term}' in the Tyndale Open Bible Dictionary.` };
+    return notFound(`No entry found for '${term}' in the Tyndale Open Bible Dictionary.`);
   }
 
   // 2. Query the combined legacy collection, filtering its stable source prefixes.
   const sourceMeta = LEGACY_DICTIONARY_SOURCES[cleanSource];
   const isCollection = cleanSource === "collection" || cleanSource === "all";
   if (!sourceMeta && !isCollection) {
-    return { error: `Unsupported Bible dictionary source: '${source}'.` };
+    return invalidRequest(`Unsupported Bible dictionary source: '${source}'.`);
   }
 
   const index = await getJsonFromR2<Record<string, string[]>>(env, "data/lookup/dictionaries_index.json");
   if (!index) {
-    return { error: `No Bible dictionary entry found matching '${term}'.` };
+    return notFound(`No Bible dictionary entry found matching '${term}'.`);
   }
 
   const availableTerms = isCollection
@@ -96,7 +97,7 @@ export async function lookupDictionary(
   const bestMatch = findBestMatch(cleanTerm, availableTerms);
   if (!bestMatch) {
     const label = isCollection ? "the Classic Bible Dictionary Collection" : sourceMeta.label;
-    return { error: `No entry found for '${term}' in ${label}.` };
+    return notFound(`No entry found for '${term}' in ${label}.`);
   }
 
   const paths = isCollection
@@ -104,7 +105,7 @@ export async function lookupDictionary(
     : index[bestMatch].filter((path) => path.startsWith(sourceMeta.prefix));
   if (!paths || paths.length === 0) {
     const label = isCollection ? "the Classic Bible Dictionary Collection" : sourceMeta.label;
-    return { error: `No entry found for '${bestMatch}' in ${label}.` };
+    return notFound(`No entry found for '${bestMatch}' in ${label}.`);
   }
 
   const results: Array<{ content: string; sourceLabel: string }> = [];
@@ -150,7 +151,7 @@ export async function lookupDictionary(
   }
 
   if (results.length === 0) {
-    return { error: `Could not retrieve dictionary content for '${bestMatch}'.` };
+    return notFound(`Could not retrieve dictionary content for '${bestMatch}'.`);
   }
 
   const formattedText = isCollection

@@ -1,20 +1,21 @@
 import { getDatabase } from "../db/sqliteEngine.js";
 import { parseReferenceString } from "./bibleService.js";
 import { Env } from "../types.js";
+import { dependencyUnavailable, internalError, invalidRequest, notFound, type ServiceErrorFields } from "./errors.js";
 
 export async function lookupCrossReferences(
   env: Env,
   reference: string,
   limit: number = 15
-): Promise<{ error?: string; references?: string[]; formattedText?: string }> {
+): Promise<ServiceErrorFields & { references?: string[]; formattedText?: string }> {
   const parsed = parseReferenceString(reference);
   if (!parsed) {
-    return { error: `Invalid verse reference for cross references: '${reference}'` };
+    return invalidRequest(`Invalid verse reference for cross references: '${reference}'`);
   }
 
   const { db, error: dbError } = await getDatabase(env, "cross-reference.sqlite");
   if (!db) {
-    return { error: dbError || "Cross-reference database (cross-reference.sqlite) not found in R2." };
+    return dependencyUnavailable(dbError || "Cross-reference database (cross-reference.sqlite) not found in R2.");
   }
 
   try {
@@ -23,7 +24,7 @@ export async function lookupCrossReferences(
 
     if (!stmt.step()) {
       stmt.free();
-      return { error: `No cross references found for ${parsed.bookName} ${parsed.chapterStart}:${parsed.verseStart}` };
+      return notFound(`No cross references found for ${parsed.bookName} ${parsed.chapterStart}:${parsed.verseStart}`);
     }
 
     const row = stmt.getAsObject() as { Information: string };
@@ -46,6 +47,6 @@ export async function lookupCrossReferences(
       formattedText: `# Cross References: ${parsed.bookName} ${parsed.chapterStart}:${parsed.verseStart} (TSK)\n\n${cleanText}`
     };
   } catch (err: any) {
-    return { error: `Cross reference lookup error: ${err.message}` };
+    return internalError("Cross reference lookup", err);
   }
 }

@@ -2,6 +2,7 @@ import { getDatabase } from "../db/sqliteEngine.js";
 import { resolveBookNumber, OFFICIAL_BOOK_NAMES } from "../mcp/constants.js";
 import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { Env, ChapterSummaryResult } from "../types.js";
+import { dependencyUnavailable, internalError, invalidRequest, notFound, type ServiceErrorFields } from "./errors.js";
 
 const CLARKE_STORAGE_PATH = "commentaries/cClarke.commentary";
 
@@ -26,16 +27,16 @@ export async function lookupChapterSummary(
   env: Env,
   bookName: string,
   chapter: number = 1
-): Promise<{ error?: string; formattedText?: string; result?: ChapterSummaryResult }> {
+): Promise<ServiceErrorFields & { formattedText?: string; result?: ChapterSummaryResult }> {
   const bookNum = resolveBookNumber(bookName);
   if (!bookNum) {
-    return { error: `Unrecognized book name: '${bookName}'` };
+    return invalidRequest(`Unrecognized book name: '${bookName}'`);
   }
 
   const officialName = OFFICIAL_BOOK_NAMES[bookNum] || bookName;
   const { db, error: dbError } = await getDatabase(env, CLARKE_STORAGE_PATH);
   if (!db) {
-    return { error: dbError || "Adam Clarke commentary database is not available in storage." };
+    return dependencyUnavailable(dbError || "Adam Clarke commentary database is not available in storage.");
   }
 
   try {
@@ -43,14 +44,14 @@ export async function lookupChapterSummary(
     stmt.bind([bookNum, chapter]);
     if (!stmt.step()) {
       stmt.free();
-      return { error: `No Adam Clarke chapter entry found for ${officialName} chapter ${chapter}.` };
+      return notFound(`No Adam Clarke chapter entry found for ${officialName} chapter ${chapter}.`);
     }
 
     const row = stmt.getAsObject() as { Scripture: string };
     stmt.free();
     const summaryText = cleanHtmlToMarkdown(extractChapterOpening(row.Scripture || "", bookNum, chapter));
     if (!summaryText) {
-      return { error: `No Adam Clarke chapter-opening synopsis found for ${officialName} chapter ${chapter}.` };
+      return notFound(`No Adam Clarke chapter-opening synopsis found for ${officialName} chapter ${chapter}.`);
     }
 
     const formattedText = `# Chapter Summary: ${officialName} Chapter ${chapter}\n\n${summaryText}\n\n---\n*Source: Adam Clarke's Commentary on the Bible (public domain).*`;
@@ -59,6 +60,6 @@ export async function lookupChapterSummary(
       result: { book: officialName, chapter, summaryText }
     };
   } catch (err: any) {
-    return { error: `Chapter summary query error: ${err.message}` };
+    return internalError("Chapter summary query", err);
   }
 }

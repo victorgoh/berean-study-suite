@@ -1,6 +1,7 @@
 import { getDatabase } from "../db/sqliteEngine.js";
 import { resolveBookNumber, OFFICIAL_BOOK_NAMES } from "../mcp/constants.js";
 import { Env, BibleVerse } from "../types.js";
+import { dependencyUnavailable, internalError, invalidRequest, type ServiceErrorFields } from "./errors.js";
 
 export async function searchBible(
   env: Env,
@@ -8,9 +9,9 @@ export async function searchBible(
   version: string = "NET",
   bookFilter?: string,
   limit: number = 50
-): Promise<{ error?: string; totalCount?: number; matches?: BibleVerse[]; formattedText?: string }> {
+): Promise<ServiceErrorFields & { totalCount?: number; matches?: BibleVerse[]; formattedText?: string }> {
   if (typeof query !== "string" || query.trim().length === 0 || query.length > 200) {
-    return { error: "Search query must be between 1 and 200 characters." };
+    return invalidRequest("Search query must be between 1 and 200 characters.");
   }
   limit = Math.min(Math.max(Number.isFinite(limit) ? Math.floor(limit) : 50, 1), 100);
   let ver = version.toUpperCase();
@@ -39,14 +40,14 @@ export async function searchBible(
   }
 
   if (!db) {
-    return { error: dbError || `Bible database for '${ver}' not found in R2.` };
+    return dependencyUnavailable(dbError || `Bible database for '${ver}' not found in R2.`);
   }
 
   let bookNum: number | null = null;
   if (bookFilter) {
     bookNum = resolveBookNumber(bookFilter);
     if (!bookNum) {
-      return { error: `Unrecognized book filter: '${bookFilter}'` };
+      return invalidRequest(`Unrecognized book filter: '${bookFilter}'`);
     }
   }
 
@@ -87,6 +88,6 @@ export async function searchBible(
 
     return { totalCount: matches.length, matches, formattedText };
   } catch (err: any) {
-    return { error: `Search error: ${err.message}` };
+    return internalError("Bible search", err);
   }
 }

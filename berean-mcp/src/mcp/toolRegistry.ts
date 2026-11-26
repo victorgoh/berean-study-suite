@@ -13,6 +13,7 @@
 import { z } from "zod";
 import * as S from "./tools.js";
 import { Env } from "../types.js";
+import type { ServiceErrorCode } from "../services/errors.js";
 import { getAvailableResources } from "../services/catalogService.js";
 import { lookupBiblePassage } from "../services/bibleService.js";
 import { searchBible } from "../services/searchService.js";
@@ -55,6 +56,8 @@ import { lookupEntityDisambiguation, convertAncientUnits } from "../services/uni
 /** Minimal shape shared by every service result. REST returns the object verbatim. */
 export interface ServiceResult {
   error?: unknown;
+  /** Typed failure category; REST maps it to an HTTP status (see services/errors.ts). */
+  errorCode?: ServiceErrorCode;
   formattedText?: string;
 }
 

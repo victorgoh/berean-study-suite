@@ -2,6 +2,7 @@ import { getDatabase, getJsonFromR2 } from "../db/sqliteEngine.js";
 import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { findBestMatch } from "../utils/fuzzyMatch.js";
 import { Env, CharacterResult } from "../types.js";
+import { dependencyUnavailable, internalError, notFound, type ServiceErrorFields } from "./errors.js";
 
 function getRelationshipTree(peopleDb: any, code: string, name: string): string {
   if (!code.startsWith("BP")) return "";
@@ -101,25 +102,25 @@ function getRelationshipTree(peopleDb: any, code: string, name: string): string 
 export async function lookupCharacter(
   env: Env,
   nameQuery: string
-): Promise<{ error?: string; formattedText?: string; character?: string; results?: CharacterResult[] }> {
+): Promise<ServiceErrorFields & { formattedText?: string; character?: string; results?: CharacterResult[] }> {
   const index = await getJsonFromR2<Record<string, string[]>>(env, "data/lookup/exlbp_index.json");
   if (!index) {
-    return { error: "Character lookup index (exlbp_index.json) not available in R2." };
+    return dependencyUnavailable("Character lookup index (exlbp_index.json) not available in R2.");
   }
 
   const bestMatch = findBestMatch(nameQuery, Object.keys(index));
   if (!bestMatch) {
-    return { error: `Could not locate a matching Bible character for '${nameQuery}'.` };
+    return notFound(`Could not locate a matching Bible character for '${nameQuery}'.`);
   }
 
   const codes = index[bestMatch];
   if (!codes || codes.length === 0) {
-    return { error: `No character code records found for '${bestMatch}'.` };
+    return notFound(`No character code records found for '${bestMatch}'.`);
   }
 
   const { db, error: dbError } = await getDatabase(env, "data/exlb3.data");
   if (!db) {
-    return { error: dbError || "Character database (exlb3.data) not found in R2." };
+    return dependencyUnavailable(dbError || "Character database (exlb3.data) not found in R2.");
   }
 
   const { db: peopleDb } = await getDatabase(env, "data/biblePeople.data");
@@ -164,6 +165,6 @@ export async function lookupCharacter(
     const formattedText = `# Bible Character Study: ${bestMatch}\n\n` + mdParts.join("\n\n");
     return { character: bestMatch, formattedText, results };
   } catch (err: any) {
-    return { error: `Character study query error: ${err.message}` };
+    return internalError("Character study query", err);
   }
 }

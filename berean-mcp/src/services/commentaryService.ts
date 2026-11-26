@@ -3,6 +3,7 @@ import { parseReferenceString, ParsedReference } from "./bibleService.js";
 import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { resolveCommentary } from "../config/databaseMap.js";
 import { Env, CommentaryResult } from "../types.js";
+import { dependencyUnavailable, internalError, invalidRequest, type ServiceErrorFields } from "./errors.js";
 
 function extractFromVidTags(text: string, book: number, chapter: number, targetVerses: Set<number>): string {
   const pattern = /<vid\s+id=["']v(\d+)\.(\d+)\.(\d+)["'][^>]*>[\s\S]*?<\/vid>/gi;
@@ -75,15 +76,15 @@ export async function lookupCommentary(
   env: Env,
   version: string = "Henry",
   reference: string
-): Promise<{ error?: string; formattedText?: string; result?: CommentaryResult }> {
+): Promise<ServiceErrorFields & { formattedText?: string; result?: CommentaryResult }> {
   const parsed = parseReferenceString(reference);
   if (!parsed) {
-    return { error: `Invalid passage reference for commentary: "${reference}"` };
+    return invalidRequest(`Invalid passage reference for commentary: "${reference}"`);
   }
 
   const meta = resolveCommentary(version);
   if (!meta) {
-    return { error: `Unknown commentary '${version}'. Choose a registered commentary from get_available_resources.` };
+    return invalidRequest(`Unknown commentary '${version}'. Choose a registered commentary from get_available_resources.`);
   }
 
   const cleanVer = meta.key;
@@ -111,7 +112,7 @@ export async function lookupCommentary(
   }
 
   if (!db) {
-    return { error: dbError || `Commentary database for '${cleanVer}' not found in storage (${storagePath}).` };
+    return dependencyUnavailable(dbError || `Commentary database for '${cleanVer}' not found in storage (${storagePath}).`);
   }
 
   try {
@@ -174,7 +175,8 @@ export async function lookupCommentary(
 
     if (rows.length === 0) {
       return {
-        error: `VERSE_NOT_FOUND: No commentary found in c${cleanVer} for ${parsed.bookName} ${reference}. Request the chapter explicitly or choose another commentary.`
+        error: `VERSE_NOT_FOUND: No commentary found in c${cleanVer} for ${parsed.bookName} ${reference}. Request the chapter explicitly or choose another commentary.`,
+        errorCode: "RESOURCE_UNAVAILABLE",
       };
     }
 
@@ -228,6 +230,6 @@ export async function lookupCommentary(
       }
     };
   } catch (err: any) {
-    return { error: `Commentary query error: ${err.message}` };
+    return internalError("Commentary query", err);
   }
 }

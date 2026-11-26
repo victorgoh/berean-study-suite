@@ -166,9 +166,10 @@ export async function lookupInterlinear(
       }
       stmt.free();
     } catch (err: any) {
+      console.error("Interlinear query failed:", err);
       return {
-        formattedText: `# Inline Interlinear Study Pack: ${reference}\n\n*Error executing interlinear query: ${err.message}*`,
-        sections: { error: err.message }
+        formattedText: `# Inline Interlinear Study Pack: ${reference}\n\n*Error: the interlinear query failed due to an internal error.*`,
+        sections: { error: "Interlinear query failed due to an internal error." }
       };
     }
   }

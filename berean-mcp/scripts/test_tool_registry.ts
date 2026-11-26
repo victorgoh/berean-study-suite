@@ -17,6 +17,7 @@ import {
   applyRestAliases
 } from "../src/mcp/toolRegistry.js";
 import { getOpenApiSpec } from "../src/ui/openapi.js";
+import { internalError } from "../src/services/errors.js";
 import { renderExplorerHtml } from "../src/ui/explorer.js";
 import { Env } from "../src/types.js";
 import { createLocalEnv } from "./lib/localEnv.js";
@@ -114,6 +115,28 @@ async function main() {
   const catalog = await call(envFor("ai"), "/tools/get_available_resources?category=study_packs");
   assert.equal(catalog.status, 200);
   assert.match(((await catalog.json()) as any).formattedText, /sermon_study_pack/);
+
+  console.log("11. REST: typed service errors map to documented HTTP codes");
+  const expectError = async (res: Response, status: number, code: string) => {
+    assert.equal(res.status, status);
+    const body = (await res.json()) as any;
+    assert.equal(body.error.code, code);
+    assert.equal(body.error.retryable, status >= 500);
+    return body.error.message as string;
+  };
+  await expectError(await post(envFor(), "bible_lookup", { reference: "not a reference" }), 400, "REQUEST_FAILED");
+  await expectError(await post(envFor(), "septuagint_lookup", { reference: "John 3:16" }), 400, "REQUEST_FAILED");
+  await expectError(await post(envFor(), "bible_lookup", { reference: "Genesis 50:99" }), 404, "RESOURCE_UNAVAILABLE");
+  const noStorage = { ...envFor(), BIBLEMATE_DATA: undefined } as unknown as Env;
+  await expectError(await post(noStorage, "cross_references", { reference: "John 3:16" }), 503, "DEPENDENCY_UNAVAILABLE");
+
+  console.log("12. Internal errors never expose the underlying message");
+  const quietConsole = console.error;
+  console.error = () => {};
+  const internal = internalError("Commentary query", new Error("SQLITE_ERROR: no such table: Secret"));
+  console.error = quietConsole;
+  assert.equal(internal.errorCode, "INTERNAL_ERROR");
+  assert.doesNotMatch(internal.error, /SQLITE|Secret/);
 
   console.log("\n🎉 Tool registry tests passed.");
 }

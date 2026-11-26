@@ -2,6 +2,7 @@ import { BIBLE_REGISTRY, COMMENTARIES_LIST, LEXICON_REGISTRY } from "../config/d
 import { RESOURCE_DEFINITIONS } from "../mcp/resources.js";
 import { WORKFLOW_PROMPTS } from "../mcp/prompts.js";
 import { Env } from "../types.js";
+import type { ServiceErrorFields } from "./errors.js";
 
 export interface ResourceCatalogOptions {
   category?: "all" | "bibles" | "commentaries" | "lexicons" | "study_packs" | "personas" | "skills" | "workflows" | "rules";
@@ -11,7 +12,7 @@ export interface ResourceCatalogOptions {
 export async function getAvailableResources(
   env: Env,
   options: ResourceCatalogOptions = { category: "all" }
-): Promise<{ error?: string; catalog?: any; formattedText?: string }> {
+): Promise<ServiceErrorFields & { catalog?: any; formattedText?: string }> {
   const cat = options.category || "all";
   const includeStudyPacks = options.includeStudyPacks !== false;
 
