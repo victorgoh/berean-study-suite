@@ -27,8 +27,9 @@
     "test:catena": "tsx scripts/test_catena_conversion.ts data/commentaries/cCatena.commentary",
     "test:ecf": "tsx scripts/test_ecf_conversion.ts \"data/commentaries/cECF_{sharded}.commentary\"",
     "test:explorer": "tsx scripts/test_explorer_ui.ts",
-    "test:smoke": "npm run test:phase4 && npm run test:commentary-ranges && npm run test:ecf && npm run test:explorer",
-    "test": "npm run test:smoke"
+    "test:smoke": "npm run test:mcp-http && npm run test:phase4 && npm run test:commentary-ranges && npm run test:ecf && npm run test:explorer",
+    "test": "npm run test:smoke",
+    "test:mcp-http": "tsx scripts/test_streamable_http.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.1",

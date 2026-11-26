@@ -6,7 +6,6 @@ if (typeof (globalThis as any).self === "undefined") {
 }
 
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
-import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { createMcpServer, MCP_TOOL_COUNTS } from "./mcp/server.js";
 import { lookupBiblePassage } from "./services/bibleService.js";
 import { searchBible } from "./services/searchService.js";
@@ -54,9 +53,7 @@ import { renderScalarHtml } from "./ui/scalar.js";
 import { renderSwaggerHtml } from "./ui/swagger.js";
 import { getOpenApiSpec } from "./ui/openapi.js";
 import { Env } from "./types.js";
-
-// Keep active transports map in memory (per isolate)
-const activeTransports = new Map<string, WebStandardStreamableHTTPServerTransport>();
+import { checkRateLimits, toolCallsInJsonRpc } from "./rateLimit.js";
 
 function jsonResponse(payload: unknown, corsHeaders: Record<string, string>, status = 200): Response {
   return new Response(JSON.stringify(payload, null, 2), {
@@ -76,38 +73,32 @@ function restServiceResponse(result: any, corsHeaders: Record<string, string>): 
   return jsonResponse({ error: { code, message, retryable: status >= 500 } }, corsHeaders, status);
 }
 
-function rateLimitResponse(corsHeaders: Record<string, string>, retryAfter: number): Response {
+function rateLimitResponse(corsHeaders: Record<string, string>, retryAfter: number, jsonRpcId?: unknown): Response {
+  const headers = { ...corsHeaders, "Retry-After": String(retryAfter) };
+  if (jsonRpcId !== undefined) {
+    // MCP clients expect a JSON-RPC envelope even on HTTP errors.
+    return jsonResponse({
+      jsonrpc: "2.0",
+      id: jsonRpcId,
+      error: { code: -32029, message: `Rate limit exceeded. Retry after ${retryAfter} seconds.`, data: { retryable: true, retryAfter } }
+    }, headers, 429);
+  }
   return jsonResponse({
     error: {
       code: "RATE_LIMITED",
       message: "Too many requests. Please retry later.",
       retryable: true
     }
-  }, { ...corsHeaders, "Retry-After": String(retryAfter) }, 429);
+  }, headers, 429);
 }
 
-async function enforceRateLimits(request: Request, url: URL, env: Env, corsHeaders: Record<string, string>): Promise<Response | null> {
-  const isApi = url.pathname === "/mcp" || url.pathname.startsWith("/tools/");
-  if (!isApi) return null;
-  const ip = request.headers.get("CF-Connecting-IP") || "anonymous";
-  const expensive = url.pathname === "/mcp" || /(?:commentary|search|study_pack|devotional|sermon|exegesis|word_study|topic_study|prayer|covenant|interlinear|septuagint)/i.test(url.pathname);
-  const key = `${ip}:burst`;
-  try {
-    if (env.MCP_BURST_LIMITER) {
-      const burst = await env.MCP_BURST_LIMITER.limit({ key });
-      if (!burst.success) return rateLimitResponse(corsHeaders, 30);
-    }
-    const limiter = expensive ? env.MCP_EXPENSIVE_LIMITER : env.MCP_RATE_LIMITER;
-    if (limiter) {
-      const result = await limiter.limit({ key: `${ip}:${expensive ? "expensive" : "api"}` });
-      if (!result.success) return rateLimitResponse(corsHeaders, expensive ? 120 : 60);
-    }
-  } catch (error) {
-    // Keep local development and emergency deployments available if a binding
-    // is temporarily unavailable; Cloudflare WAF remains an outer safeguard.
-    console.error("Rate-limit binding error:", error);
-  }
-  return null;
+function jsonRpcErrorResponse(corsHeaders: Record<string, string>, status: number, code: number, message: string, extra: Record<string, string> = {}): Response {
+  return jsonResponse({ jsonrpc: "2.0", id: null, error: { code, message } }, { ...corsHeaders, ...extra }, status);
+}
+
+/** Single JSON-RPC message id (for error envelopes); null for batches or missing ids. */
+function jsonRpcIdOf(body: unknown): unknown {
+  return body && typeof body === "object" && !Array.isArray(body) && "id" in body ? (body as { id: unknown }).id : null;
 }
 
 async function checkResourceAvailability(env: Env): Promise<Record<string, string>> {
@@ -146,7 +137,7 @@ export default {
 
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization, mcp-session-id, last-event-id, mcp-protocol-version, x-session-id",
       "Access-Control-Expose-Headers": "mcp-session-id, mcp-protocol-version"
     };
@@ -158,13 +149,31 @@ export default {
       });
     }
 
-    const limited = await enforceRateLimits(request, url, env, corsHeaders);
-    if (limited) return limited;
-
-    // Bound REST request bodies before parsing to protect the Worker from oversized input.
+    // Bound request bodies before parsing to protect the Worker from oversized input.
     const contentLength = Number(request.headers.get("content-length") || 0);
     if (request.method === "POST" && contentLength > 256 * 1024) {
       return jsonResponse({ error: { code: "REQUEST_TOO_LARGE", message: "Request body exceeds the 256 KiB limit." } }, corsHeaders, 413);
+    }
+
+    // MCP POST bodies are parsed up front so rate limiting can tell tool calls
+    // apart from protocol messages (initialize, tools/list, notifications, ...).
+    let mcpBody: unknown;
+    if (url.pathname === "/mcp" && request.method === "POST") {
+      try {
+        mcpBody = await request.json();
+      } catch {
+        return jsonRpcErrorResponse(corsHeaders, 400, -32700, "Parse error: request body must be valid JSON.");
+      }
+    }
+
+    const isToolRoute = url.pathname.startsWith("/tools/");
+    if (isToolRoute || url.pathname === "/mcp") {
+      const clientKey = request.headers.get("CF-Connecting-IP") || "anonymous";
+      const toolNames = isToolRoute ? [url.pathname.slice("/tools/".length)] : toolCallsInJsonRpc(mcpBody);
+      const limited = await checkRateLimits(env, clientKey, toolNames);
+      if (limited) {
+        return rateLimitResponse(corsHeaders, limited.retryAfter, url.pathname === "/mcp" ? jsonRpcIdOf(mcpBody) : undefined);
+      }
     }
 
     // Deployment-aware health endpoints. Liveness is dependency-free.
@@ -520,123 +529,64 @@ export default {
       return restServiceResponse(res, corsHeaders);
     }
 
-    // --- MCP Streamable HTTP endpoint ---
+    // --- MCP Streamable HTTP endpoint (stateless) ---
+    // Cloudflare spreads requests across isolates, so in-memory MCP sessions
+    // cannot be shared: a session created on one isolate is unknown on the next
+    // and the SDK rejects it with "Server not initialized". Every POST therefore
+    // gets its own server + transport, and no session id is issued or required.
     if (url.pathname === "/mcp") {
-      // Handle GET requests on /mcp
       if (request.method === "GET") {
         const accept = request.headers.get("accept") || "";
-        const sessionId = request.headers.get("mcp-session-id");
-
-        // If an MCP client probes for standalone SSE stream support without an established session,
-        // return 405 Method Not Allowed as per MCP Streamable HTTP specification.
-        if (accept.includes("text/event-stream") && !sessionId) {
+        // No standalone SSE stream is offered; the spec allows 405 here.
+        if (accept.includes("text/event-stream") || request.headers.get("mcp-session-id")) {
           return new Response("Method Not Allowed", {
             status: 405,
-            headers: {
-              "Allow": "POST, OPTIONS",
-              ...corsHeaders
-            }
+            headers: { "Allow": "POST, OPTIONS", ...corsHeaders }
           });
         }
 
-        // If a client or browser sends a plain GET request without requesting an SSE stream, return instant JSON status
-        if (!sessionId) {
-          return new Response(JSON.stringify({
-            status: "Berean MCP Server Online",
-            protocol: "Model Context Protocol (MCP) Streamable HTTP",
-            endpoint: "/mcp",
-            instructions: "Send JSON-RPC 2.0 POST requests to /mcp with standard initialize or tool calls.",
-            toolsCount: env.MCP_PROFILE === "human" ? MCP_TOOL_COUNTS.human : MCP_TOOL_COUNTS.ai,
-            studyPacksCount: env.MCP_PROFILE === "human" ? MCP_TOOL_COUNTS.studyPacks : 0,
-            specializedToolsCount: MCP_TOOL_COUNTS.specialized,
-            profile: env.MCP_PROFILE || "ai"
-          }, null, 2), {
-            headers: { "Content-Type": "application/json", ...corsHeaders }
-          });
-        }
-      }
-
-      // Evict oldest transports if Map exceeds 8 active sessions to protect isolate memory
-      if (activeTransports.size > 8) {
-        const oldestKey = activeTransports.keys().next().value;
-        if (oldestKey) {
-          try {
-            const oldTransport = activeTransports.get(oldestKey);
-            oldTransport?.close();
-          } catch (_) {}
-          activeTransports.delete(oldestKey);
-        }
-      }
-
-      const sessionId = request.headers.get("mcp-session-id");
-      let transport: WebStandardStreamableHTTPServerTransport | undefined;
-      let parsedBody: unknown;
-
-      if (request.method === "POST") {
-        parsedBody = await request.json().catch(() => ({}));
-      }
-
-      if (sessionId && activeTransports.has(sessionId)) {
-        transport = activeTransports.get(sessionId)!;
-      } else if (!sessionId && request.method === "POST" && isInitializeRequest(parsedBody)) {
-        transport = new WebStandardStreamableHTTPServerTransport({
-          sessionIdGenerator: () => crypto.randomUUID(),
-          enableJsonResponse: true,
-          onsessioninitialized: (sid) => {
-            activeTransports.set(sid, transport!);
-          },
-          onsessionclosed: (sid) => {
-            activeTransports.delete(sid);
-          }
+        // A plain GET (e.g. a browser) gets an instant JSON status.
+        return new Response(JSON.stringify({
+          status: "Berean MCP Server Online",
+          protocol: "Model Context Protocol (MCP) Streamable HTTP",
+          endpoint: "/mcp",
+          instructions: "Send JSON-RPC 2.0 POST requests to /mcp with standard initialize or tool calls.",
+          toolsCount: env.MCP_PROFILE === "human" ? MCP_TOOL_COUNTS.human : MCP_TOOL_COUNTS.ai,
+          studyPacksCount: env.MCP_PROFILE === "human" ? MCP_TOOL_COUNTS.studyPacks : 0,
+          specializedToolsCount: MCP_TOOL_COUNTS.specialized,
+          profile: env.MCP_PROFILE || "ai"
+        }, null, 2), {
+          headers: { "Content-Type": "application/json", ...corsHeaders }
         });
-        transport.onclose = () => {
-          if (transport?.sessionId) {
-            activeTransports.delete(transport.sessionId);
-          }
-        };
-
-        const server = createMcpServer(env);
-        await server.connect(transport);
-      } else if (sessionId) {
-        // Graceful re-hydration for any HTTP method with sessionId across Cloudflare edge isolates
-        transport = new WebStandardStreamableHTTPServerTransport({
-          sessionIdGenerator: () => sessionId,
-          enableJsonResponse: true,
-          onsessioninitialized: (sid) => {
-            activeTransports.set(sid, transport!);
-          },
-          onsessionclosed: (sid) => {
-            activeTransports.delete(sid);
-          }
-        });
-        transport.onclose = () => {
-          if (transport?.sessionId) {
-            activeTransports.delete(transport.sessionId);
-          }
-        };
-
-        const server = createMcpServer(env);
-        await server.connect(transport);
-        activeTransports.set(sessionId, transport);
-      } else {
-        // Stateless fallback
-        transport = new WebStandardStreamableHTTPServerTransport({
-          sessionIdGenerator: () => crypto.randomUUID(),
-          enableJsonResponse: true
-        });
-        const server = createMcpServer(env);
-        await server.connect(transport);
       }
 
-      const response = await transport.handleRequest(request, { parsedBody });
-      const responseHeaders = new Headers(response.headers);
-      Object.entries(corsHeaders).forEach(([k, v]) => responseHeaders.set(k, v));
+      if (request.method !== "POST") {
+        // DELETE (session termination) is meaningless without sessions.
+        return jsonRpcErrorResponse(corsHeaders, 405, -32000, "Method not allowed. This MCP server is stateless; use POST.", { "Allow": "GET, POST, OPTIONS" });
+      }
 
-      return new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: responseHeaders
+      const server = createMcpServer(env);
+      const transport = new WebStandardStreamableHTTPServerTransport({
+        sessionIdGenerator: undefined,
+        enableJsonResponse: true
       });
+
+      try {
+        await server.connect(transport);
+        const response = await transport.handleRequest(request, { parsedBody: mcpBody });
+        const responseHeaders = new Headers(response.headers);
+        Object.entries(corsHeaders).forEach(([k, v]) => responseHeaders.set(k, v));
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: responseHeaders
+        });
+      } catch (error) {
+        console.error("MCP request failed:", error);
+        return jsonRpcErrorResponse(corsHeaders, 500, -32603, "Internal server error.");
+      } finally {
+        await server.close().catch(() => {});
+      }
     }
 
     return new Response("Not Found", { status: 404, headers: corsHeaders });
