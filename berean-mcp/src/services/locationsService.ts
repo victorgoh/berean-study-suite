@@ -3,6 +3,7 @@ import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { findBestMatch } from "../utils/fuzzyMatch.js";
 import { Env, LocationResult } from "../types.js";
 import { dependencyUnavailable, internalError, notFound, type ServiceErrorFields } from "./errors.js";
+import { tidySourceText } from "../utils/sourceText.js";
 
 export async function lookupLocation(
   env: Env,
@@ -54,9 +55,9 @@ export async function lookupLocation(
     const formattedText =
       `# Bible Location Study: ${bestMatch}\n\n` +
       `**Coordinates**: Latitude \`${lat}\`, Longitude \`${lon}\`\n` +
-      `**Map Link**: [Click HERE for a Live Google Map](${mapUrl})\n\n` +
+      `**Map**: [Open in Google Maps](${mapUrl})\n\n` +
       `### Historical & Archaeological Description\n\n` +
-      desc;
+      tidySourceText(desc);
 
     const locResult: LocationResult = {
       name: bestMatch,

@@ -58,6 +58,36 @@ export function decodeHtmlEntities(str: string): string {
     .normalize("NFC");
 }
 
+/**
+ * True when `phrase` occurs in `text` as whole words: "the book of romans"
+ * contains "romans", but "grace" does not contain "race".
+ */
+function containsWholeWords(text: string, phrase: string): boolean {
+  if (!phrase) return false;
+  let from = 0;
+  while (true) {
+    const at = text.indexOf(phrase, from);
+    if (at < 0) return false;
+    const before = at === 0 ? "" : text[at - 1];
+    const after = text[at + phrase.length] ?? "";
+    if (!/[\p{L}\p{N}]/u.test(before) && !/[\p{L}\p{N}]/u.test(after)) return true;
+    from = at + 1;
+  }
+}
+
+/** The names an index key stands for: the last step of a "a > b" path, split on "/" alternatives. */
+function exactNames(cleanedKey: string): string[] {
+  const steps = cleanedKey.split(">");
+  return steps[steps.length - 1].split("/").map((name) => name.trim());
+}
+
+/** True when `match` is only a spelling near-miss for `query` (not equal, not containing it as a word). */
+export function isNearMiss(query: string, match: string, keyTransform?: (raw: string) => string): boolean {
+  const q = query.trim().toLowerCase();
+  const m = (keyTransform ? keyTransform(match) : decodeHtmlEntities(match)).toLowerCase();
+  return !exactNames(m).includes(q) && !containsWholeWords(m, q) && !containsWholeWords(q, m) && !m.includes(q);
+}
+
 export function findBestMatch(
   query: string,
   candidates: string[],
@@ -68,17 +98,15 @@ export function findBestMatch(
 
   const transform = keyTransform || ((k) => decodeHtmlEntities(k).toLowerCase());
 
-  // 1. Exact match
+  // 1a. Exact match on the whole entry ("Humility" before "... > Humility").
   for (const raw of candidates) {
-    const cleaned = transform(raw).toLowerCase();
-    if (cleaned === queryClean) {
-      return raw;
-    }
-    // Check leaf / split by '>' or '/'
-    const parts = cleaned.split(/[>/]/).map((p) => p.trim());
-    if (parts.length > 0 && parts[parts.length - 1] === queryClean) {
-      return raw;
-    }
+    if (transform(raw).toLowerCase() === queryClean) return raw;
+  }
+  // 1b. Entries can be a path ("Topic > Subtopic"), whose last step is the
+  // entry's name, and a name can list alternatives ("Saul/Paul/Mercurius");
+  // any one alternative of the last step matching exactly counts.
+  for (const raw of candidates) {
+    if (exactNames(transform(raw).toLowerCase()).includes(queryClean)) return raw;
   }
 
   // 2. Substring containment match
@@ -90,7 +118,7 @@ export function findBestMatch(
 
     if (cleaned.includes(queryClean) || (leaf && leaf.includes(queryClean))) {
       partials.push(raw);
-    } else if (queryClean.includes(cleaned) || (leaf && queryClean.includes(leaf))) {
+    } else if (containsWholeWords(queryClean, cleaned) || (leaf && containsWholeWords(queryClean, leaf))) {
       if (leaf.length >= 4 || cleaned.length >= 4) {
         partials.push(raw);
       }
@@ -100,7 +128,10 @@ export function findBestMatch(
   if (partials.length === 1) {
     return partials[0];
   } else if (partials.length > 1) {
-    partials.sort((a, b) => transform(a).length - transform(b).length);
+    // Prefer entries containing the query as a whole word ("Paul" in "Saul/Paul")
+    // over a mere substring ("Paul" in "Paulus"), then the shortest.
+    const wholeWord = (raw: string) => (containsWholeWords(transform(raw).toLowerCase(), queryClean) ? 0 : 1);
+    partials.sort((a, b) => wholeWord(a) - wholeWord(b) || transform(a).length - transform(b).length);
     return partials[0];
   }
 
@@ -114,9 +145,12 @@ export function findBestMatch(
     const targets = [cleaned, ...parts];
 
     for (const target of targets) {
-      if (!target) continue;
+      // A near-miss spelling must start with the same letter: "abrahm" can
+      // match "abraham", but "grace" must not match "race".
+      if (!target || target[0] !== queryClean[0]) continue;
       const dist = levenshteinDistance(queryClean, target);
-      if (dist < minDistance) {
+      // On a tie, prefer the shorter entry ("Humility" over "... > Humility").
+      if (dist < minDistance || (dist === minDistance && bestMatch !== null && cleaned.length < transform(bestMatch).length)) {
         minDistance = dist;
         bestMatch = raw;
       }

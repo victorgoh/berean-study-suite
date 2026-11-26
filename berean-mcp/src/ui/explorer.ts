@@ -932,6 +932,9 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       .markdown-table-wrap { overflow: visible; }
       .results-body th, .results-body td { border-color: #999; }
     }
+    .chapter-nav { display: flex; justify-content: space-between; gap: .5rem; margin: .25rem 0 1rem; }
+    .chapter-nav:last-child { margin: 1rem 0 .25rem; }
+    @media print { .chapter-nav { display: none !important; } }
     .suggestion-list { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-top: .75rem; }
     .result-rule { border: 0; border-top: 1px solid var(--surface-border); margin: 1rem 0; }
 
@@ -2105,6 +2108,35 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       showResultsView(config.btnLabel + " · " + q);
     }
 
+    // ----- Previous / next chapter for Read Scripture -------------------------
+    function addChapterNavigation(navigation) {
+      const build = () => {
+        const nav = document.createElement("nav");
+        nav.className = "chapter-nav";
+        nav.setAttribute("aria-label", "Chapter navigation");
+        [["previous", "‹ "], ["next", ""]].forEach(([key, prefix]) => {
+          const target = navigation[key];
+          if (!target) {
+            nav.append(document.createElement("span"));
+            return;
+          }
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "action-btn chapter-nav-btn";
+          button.textContent = key === "previous" ? prefix + target : target + " ›";
+          button.setAttribute("aria-label", (key === "previous" ? "Previous chapter: " : "Next chapter: ") + target);
+          button.addEventListener("click", () => {
+            queryInput.value = target;
+            executeStudy();
+          });
+          nav.append(button);
+        });
+        return nav;
+      };
+      resultsBody.prepend(build());
+      resultsBody.append(build());
+    }
+
     // ----- Clickable Scripture references -----------------------------------
     // References in results (e.g. "John 6:37", "Isaiah 55:1-3") become links.
     // A click shows the passage in a small preview; ctrl/cmd-click or the
@@ -2387,6 +2419,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         closeRefPreview(false);
         linkifyReferences(resultsBody);
         linkifyStrongs(resultsBody);
+        if (activeMode === "scripture" && parsed.navigation) addChapterNavigation(parsed.navigation);
 
         enhanceResultNavigation(isSectionedResult, md);
         showResultsView(requestSummary(config, q, payload));
@@ -2594,10 +2627,16 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
       html = html.replace(/^#{4,6} *$/gim, '');
 
+      // Links: [text](https://...) — web links only, opened in a new tab.
+      html = html.replace(new RegExp(B + "[([^" + B + "]" + B + "n]+)" + B + "]" + B + "((https?://[^)" + B + "s]+)" + B + ")", "g"),
+        '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
       // Bold & Italic
-      html = html.replace(new RegExp(B + "\\\\*\\\\*\\\\*(.*?)\\\\*\\\\*\\\\*", "gim"), '<strong><em>$1</em></strong>');
-      html = html.replace(new RegExp(B + "\\\\*\\\\*(.*?)\\\\*\\\\*", "gim"), '<strong>$1</strong>');
-      html = html.replace(new RegExp(B + "\\\\*(.*?)\\\\*", "gim"), '<em>$1</em>');
+      // "* item" at the start of a line is a bullet, not italics.
+      html = html.replace(/^\\* +/gm, "• ");
+      html = html.replace(new RegExp("\\\\*\\\\*\\\\*(.+?)\\\\*\\\\*\\\\*", "gm"), '<strong><em>$1</em></strong>');
+      html = html.replace(new RegExp("\\\\*\\\\*(.+?)\\\\*\\\\*", "gm"), '<strong>$1</strong>');
+      html = html.replace(new RegExp("\\\\*([^*\\\\s](?:[^*]*?[^*\\\\s])?)\\\\*", "gm"), '<em>$1</em>');
 
       // Lists
       html = html.replace(/^• (.*$)/gim, '<li>$1</li>');

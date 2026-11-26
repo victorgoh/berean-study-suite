@@ -80,6 +80,29 @@ async function appendExtraCommentators(
   return { text: extraText, nextSectionIdx: currentIdx };
 }
 
+/**
+ * Fixed reflection prompts (inductive Bible study and the ACTS prayer pattern).
+ * They are templates, not generated interpretation: the reader supplies the
+ * answers, which keeps the server a retrieval tool.
+ */
+function reflectionQuestions(reference: string): string {
+  return [
+    `- **Observe:** Read ${reference} slowly, more than once. Which words or phrases stand out? What does the passage show about God?`,
+    `- **Interpret:** What did this mean for its first readers? Which note, commentary or cross-reference above helps most?`,
+    `- **Apply:** What is one truth to believe, one thing to do, or one thing to stop doing this week?`,
+    `- **Respond:** Turn what you have read into a short prayer of your own.`
+  ].join("\n");
+}
+
+function prayerOutline(reference: string): string {
+  return [
+    `- **Adoration:** Praise God for who He is as ${reference} shows Him.`,
+    `- **Confession:** Where does this passage show your need of His grace? Confess it honestly.`,
+    `- **Thanksgiving:** Thank Him for His faithfulness and for what He promises in this passage.`,
+    `- **Supplication:** Ask for what this passage invites you to ask, for yourself and for others.`
+  ].join("\n");
+}
+
 export async function getSermonStudyPack(
   env: Env,
   reference: string,
@@ -233,6 +256,10 @@ export async function getDevotionalStudyPack(
   const fetchedKeys = ["TNotes", "MHCC"];
   const extra = await appendExtraCommentators(env, reference, extraCommentators, fetchedKeys, sections, sectionIdx);
   text += extra.text;
+
+  const questions = reflectionQuestions(reference);
+  sections["reflection_questions"] = questions;
+  text += `## ${extra.nextSectionIdx}. Questions for Reflection\n${questions}\n\n`;
 
   const tip = `> [!TIP]\n> Use this data pack with the **Compassionate Pastor** persona to draft a 7-section daily devotional with historical insight, keyword meditation, 3 practical action steps, and a 1st-person closing prayer.\n`;
   return {
@@ -461,6 +488,10 @@ export async function getPrayerGuideStudyPack(
   const fetchedKeys = ["Wesley", isPsalm ? "MHCC" : "Benson"];
   const extra = await appendExtraCommentators(env, reference, extraCommentators, fetchedKeys, sections, sectionIdx);
   text += extra.text;
+
+  const outline = prayerOutline(reference);
+  sections["prayer_outline"] = outline;
+  text += `## ${extra.nextSectionIdx}. A Pattern for Prayer (ACTS)\n${outline}\n\n`;
 
   const tip = `> [!TIP]\n> Use this data pack with the **Compassionate Pastor** persona to write personal, first-person prayers ("I", "we") following the ACTS model (Adoration, Confession, Thanksgiving, Supplication).\n`;
   return {

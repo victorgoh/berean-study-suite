@@ -101,7 +101,8 @@ export async function lookupEntityDisambiguation(
     markdownLines.push(`* **Type / Era:** ${e.entity_type} — *${e.role_era}*`);
     if (e.original_lemma) markdownLines.push(`* **Original Lemma:** ${e.original_lemma} (${e.strongs || "—"})`);
     if (e.relationships) markdownLines.push(`* **Lineage & Relationships:** ${e.relationships}`);
-    markdownLines.push(`* **Key Biblical Passages:** \`${e.key_passages}\``);
+    // Plain text (not code) so readers' tools can turn the references into links.
+    markdownLines.push(`* **Key Biblical Passages:** ${e.key_passages}`);
     markdownLines.push(`* **Biographical Overview:** ${e.summary}`);
     markdownLines.push("");
   }

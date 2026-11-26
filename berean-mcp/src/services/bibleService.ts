@@ -1,5 +1,5 @@
 import { getDatabase } from "../db/sqliteEngine.js";
-import { resolveBookNumber, OFFICIAL_BOOK_NAMES } from "../mcp/constants.js";
+import { resolveBookNumber, OFFICIAL_BOOK_NAMES, CHAPTER_COUNTS } from "../mcp/constants.js";
 import { Env, BibleVerse } from "../types.js";
 import { dependencyUnavailable, internalError, invalidRequest, notFound, type ServiceErrorFields } from "./errors.js";
 
@@ -99,11 +99,26 @@ export function formatReference(ref: ParsedReference): string {
   return `${bookName} ${chapterStart}:${verseStart}-${verseEnd}`;
 }
 
+export interface ChapterNavigation {
+  previous?: string;
+  next?: string;
+}
+
+/** The chapters before and after a passage, crossing book boundaries (Malachi 4 → Matthew 1). */
+export function chapterNavigation(ref: ParsedReference): ChapterNavigation {
+  const nav: ChapterNavigation = {};
+  if (ref.chapterStart > 1) nav.previous = `${ref.bookName} ${ref.chapterStart - 1}`;
+  else if (ref.bookNumber > 1) nav.previous = `${OFFICIAL_BOOK_NAMES[ref.bookNumber - 1]} ${CHAPTER_COUNTS[ref.bookNumber - 1]}`;
+  if (ref.chapterEnd < (CHAPTER_COUNTS[ref.bookNumber] ?? 0)) nav.next = `${ref.bookName} ${ref.chapterEnd + 1}`;
+  else if (ref.bookNumber < 66) nav.next = `${OFFICIAL_BOOK_NAMES[ref.bookNumber + 1]} 1`;
+  return nav;
+}
+
 export async function lookupBiblePassage(
   env: Env,
   version: string,
   reference: string
-): Promise<ServiceErrorFields & { verses?: BibleVerse[]; formattedText?: string }> {
+): Promise<ServiceErrorFields & { verses?: BibleVerse[]; formattedText?: string; navigation?: ChapterNavigation }> {
   const parsed = parseReferenceString(reference);
   if (!parsed) {
     return invalidRequest(`Could not parse passage reference: "${reference}"`);
@@ -185,7 +200,7 @@ export async function lookupBiblePassage(
     const formattedLines = verses.map(v => `[${v.book} ${v.chapter}:${v.verse} (${ver})] ${v.text}`);
     const formattedText = formattedLines.join("\n");
 
-    return { verses, formattedText };
+    return { verses, formattedText, navigation: chapterNavigation(parsed) };
   } catch (err: any) {
     return internalError("Bible passage query", err);
   }

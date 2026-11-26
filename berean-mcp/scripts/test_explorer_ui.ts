@@ -39,5 +39,19 @@ assert.doesNotMatch(clientScript, /updateContextualControls\(\);\s*executeStudy\
 assert.match(clientScript, /get\("run"\) === "1"\) \{\s*executeStudy\(\);/, "Only links with run=1 run the study on load");
 assert.match(clientScript, /link\.searchParams\.set\("run", "1"\)/, "Copy link adds run=1");
 assert.match(clientScript, /let popoverPinned = false;/, "A click pins the tool menu open instead of toggling it closed");
+assert.match(clientScript, /function addChapterNavigation\(navigation\)/, "Read Scripture offers previous/next chapter");
+assert.match(clientScript, /function linkifyReferences\(root\)/, "Bible references in results become links");
+assert.match(clientScript, /target="_blank" rel="noopener noreferrer">\$1<\/a>/, "Markdown web links render as links");
 
 console.log("Explorer UI regression tests passed.");
+
+// The result formatter renders bold, italics and bullets correctly.
+const formatterCode = clientScript.slice(clientScript.indexOf("function renderMarkdownTables("), clientScript.indexOf("// Result actions"));
+const formatMarkdown = new Function(formatterCode + "; return formatMarkdown;")() as (md: string) => string;
+assert.equal(formatMarkdown("Plain *italic* and **bold** here."), "<p>Plain <em>italic</em> and <strong>bold</strong> here.</p>");
+assert.match(formatMarkdown("- **Observe:** Read it.\n- **Apply:** Do it."), /<ul><li><strong>Observe:<\/strong> Read it\.<\/li><li><strong>Apply:<\/strong> Do it\.<\/li><\/ul>/);
+assert.match(formatMarkdown("* **Type:** Person — *Apostle*"), /<li><strong>Type:<\/strong> Person — <em>Apostle<\/em><\/li>/);
+assert.equal(formatMarkdown("2 * 3 = 6 and 4 * 5"), "<p>2 * 3 = 6 and 4 * 5</p>");
+assert.match(formatMarkdown("**Map**: [Open in Google Maps](https://maps.google.com/?q=1,2)"), /<a href="https:\/\/maps\.google\.com\/\?q=1,2" target="_blank" rel="noopener noreferrer">Open in Google Maps<\/a>/);
+assert.doesNotMatch(formatMarkdown("[click](javascript:alert(1))"), /<a /, "only web links become anchors");
+console.log("Explorer formatter checks passed.");

@@ -1,6 +1,6 @@
 import { getDatabase, getJsonFromR2 } from "../db/sqliteEngine.js";
 import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
-import { findBestMatch } from "../utils/fuzzyMatch.js";
+import { decodeHtmlEntities, findBestMatch, isNearMiss } from "../utils/fuzzyMatch.js";
 import { Env } from "../types.js";
 import { invalidRequest, notFound, type ServiceErrorFields } from "./errors.js";
 
@@ -98,6 +98,13 @@ export async function lookupDictionary(
   if (!bestMatch) {
     const label = isCollection ? "the Classic Bible Dictionary Collection" : sourceMeta.label;
     return notFound(`No entry found for '${term}' in ${label}.`);
+  }
+  // A short word that only resembles an entry is usually a different word
+  // ("Grace" vs "Grape"); say so instead of returning the wrong article.
+  // Longer misspellings ("Atonment") still find their entry.
+  if (isNearMiss(cleanTerm, bestMatch) && cleanTerm.trim().length < 7) {
+    const label = isCollection ? "the Classic Bible Dictionary Collection" : sourceMeta.label;
+    return notFound(`No entry found for '${term}' in ${label}. The closest entry is '${decodeHtmlEntities(bestMatch)}'.`);
   }
 
   const paths = isCollection

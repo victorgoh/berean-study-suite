@@ -3,6 +3,7 @@ import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { findBestMatch } from "../utils/fuzzyMatch.js";
 import { Env, CharacterResult } from "../types.js";
 import { dependencyUnavailable, internalError, notFound, type ServiceErrorFields } from "./errors.js";
+import { tidySourceText } from "../utils/sourceText.js";
 
 function getRelationshipTree(peopleDb: any, code: string, name: string): string {
   if (!code.startsWith("BP")) return "";
@@ -150,10 +151,9 @@ export async function lookupCharacter(
 
       results.push({ name: bestMatch, code, content: entryMd, familyTree: treeMd });
 
+      // Internal entry codes stay in the structured result, not the reader's text.
       if (codes.length > 1) {
-        mdParts.push(`\n## Individual ${i + 1} (Code: \`${code}\`)\n`);
-      } else {
-        mdParts.push(`\n**Entry Code**: \`${code}\`\n`);
+        mdParts.push(`\n## Individual ${i + 1}\n`);
       }
 
       mdParts.push(entryMd);
@@ -162,7 +162,7 @@ export async function lookupCharacter(
       }
     }
 
-    const formattedText = `# Bible Character Study: ${bestMatch}\n\n` + mdParts.join("\n\n");
+    const formattedText = tidySourceText(`# Bible Character Study: ${bestMatch}\n\n` + mdParts.join("\n\n"));
     return { character: bestMatch, formattedText, results };
   } catch (err: any) {
     return internalError("Character study query", err);

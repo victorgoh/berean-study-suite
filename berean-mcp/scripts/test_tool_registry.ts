@@ -284,6 +284,29 @@ async function main() {
   assert.deepEqual(pair.versions, ["KJV", "BSB"]);
   assert.equal(pair.verses.length, 2);
 
+  console.log("20. Priority-3 content clean-up");
+  const david = (await restJ("character_lookup", { name: "David" })).body.formattedText as string;
+  assert.doesNotMatch(david, /Entry Code|Click for more details|Ocurrence|Occurence\b|Occurences/);
+  assert.match(david, /First Occurrence:\*\* Ruth 4:17/);
+  assert.doesNotMatch(david, /[a-z0-9][.:;][A-Z][a-z]/, "sentences are separated by a space");
+  const joy = (await restJ("topic_study", { query: "Joy" })).body.formattedText as string;
+  assert.doesNotMatch(joy, /Code: |UNCLASSIFIED|Habbakkuk|^\* /m);
+  assert.match((await restJ("location_lookup", { location: "Capernaum" })).body.formattedText, /\[Open in Google Maps\]\(https:/);
+  // Matching: alternative names, exact entries first, no wrong short near-misses.
+  assert.equal((await restJ("character_lookup", { name: "Paul" })).body.character, "Saul/Paul/Mercurius");
+  assert.equal((await restJ("character_lookup", { name: "Abrahm" })).body.character, "Abram/Abraham", "typos still match");
+  assert.match((await restJ("topic_study", { query: "Humility" })).body.formattedText, /^# Topic Study: Humility\n/);
+  const smithGrace = await restJ("theological_dictionary", { term: "Grace", source: "smith" });
+  assert.equal(smithGrace.status, 404);
+  assert.match(smithGrace.body.error.message, /closest entry is 'Grape'/);
+  assert.match((await restJ("theological_dictionary", { term: "Atonment", source: "easton" })).body.formattedText, /: Atonement/);
+  // Reflection prompts.
+  assert.match((await restJ("devotional_study_pack", { reference: "Matthew 11:28-30" })).body.formattedText, /Questions for Reflection\n- \*\*Observe:\*\* Read Matthew 11:28-30/);
+  assert.match((await restJ("prayer_guide_study_pack", { reference: "Psalm 23" })).body.formattedText, /A Pattern for Prayer \(ACTS\)\n- \*\*Adoration:\*\*/);
+  // Chapter navigation.
+  assert.deepEqual((await restJ("bible_lookup", { reference: "Malachi 4:1" })).body.navigation, { previous: "Malachi 3", next: "Matthew 1" });
+  assert.deepEqual((await restJ("bible_lookup", { reference: "Genesis 1:1" })).body.navigation, { next: "Genesis 2" });
+
   console.log("\n🎉 Tool registry tests passed.");
 }
 

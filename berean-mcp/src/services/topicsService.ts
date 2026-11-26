@@ -3,6 +3,7 @@ import { cleanHtmlToMarkdown } from "../utils/htmlCleaner.js";
 import { findBestMatch, decodeHtmlEntities } from "../utils/fuzzyMatch.js";
 import { Env, TopicResult } from "../types.js";
 import { dependencyUnavailable, internalError, notFound, type ServiceErrorFields } from "./errors.js";
+import { tidySourceText } from "../utils/sourceText.js";
 
 export async function lookupTopic(
   env: Env,
@@ -49,13 +50,13 @@ export async function lookupTopic(
       results.push({ topic: bestMatch, code, content: entryMd });
 
       if (codes.length > 1) {
-        mdParts.push(`\n## Subtopic ${i + 1} (Code: \`${code}\`)\n`);
+        mdParts.push(`\n## Subtopic ${i + 1}\n`);
       }
       mdParts.push(entryMd);
     }
 
     const decodedTitle = decodeHtmlEntities(bestMatch);
-    const formattedText = `# Topic Study: ${decodedTitle}\n\n` + mdParts.join("\n\n");
+    const formattedText = tidySourceText(`# Topic Study: ${decodedTitle}\n\n` + mdParts.join("\n\n"));
 
     return { topic: decodedTitle, formattedText, results };
   } catch (err: any) {
