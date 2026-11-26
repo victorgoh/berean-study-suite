@@ -1,7 +1,7 @@
 import { getDatabase } from "../db/sqliteEngine.js";
 import { parseReferenceString } from "./bibleService.js";
 import { Env, MorphologyWord } from "../types.js";
-import { translationOf } from "../utils/morphology.js";
+import { strongsOf, translationOf } from "../utils/morphology.js";
 import { dependencyUnavailable, internalError, invalidRequest, notFound, type ServiceErrorFields } from "./errors.js";
 
 export async function lookupMorphology(
@@ -19,7 +19,7 @@ export async function lookupMorphology(
   if (env.MORPHOLOGY_DB) {
     try {
       const stmt = env.MORPHOLOGY_DB.prepare(
-        "SELECT Word, Transliteration, Gloss, Morphology, Lexeme, Translation FROM morphology WHERE Book = ? AND Chapter = ? AND Verse = ? ORDER BY WordID ASC"
+        "SELECT Word, LexicalEntry, Transliteration, Gloss, Morphology, Lexeme, Translation FROM morphology WHERE Book = ? AND Chapter = ? AND Verse = ? ORDER BY WordID ASC"
       ).bind(parsed.bookNumber, parsed.chapterStart, parsed.verseStart);
       const res = await stmt.all<MorphologyWord>();
       words = res.results || [];
@@ -34,7 +34,7 @@ export async function lookupMorphology(
     if (db) {
       try {
         const stmt = db.prepare(
-          "SELECT Word, Transliteration, Gloss, Morphology, Lexeme, Translation FROM morphology WHERE Book = ? AND Chapter = ? AND Verse = ? ORDER BY WordID ASC"
+          "SELECT Word, LexicalEntry, Transliteration, Gloss, Morphology, Lexeme, Translation FROM morphology WHERE Book = ? AND Chapter = ? AND Verse = ? ORDER BY WordID ASC"
         );
         stmt.bind([parsed.bookNumber, parsed.chapterStart, parsed.verseStart]);
         while (stmt.step()) {
@@ -49,20 +49,24 @@ export async function lookupMorphology(
     }
   }
 
-  words = words.map((w) => ({ ...w, Translation: translationOf(w.Translation) }));
+  words = words.map(({ LexicalEntry, ...w }) => ({
+    ...w,
+    Strongs: strongsOf(LexicalEntry),
+    Translation: translationOf(w.Translation)
+  }));
 
   if (words.length === 0) {
     return notFound(`No morphology records found for ${parsed.bookName} ${parsed.chapterStart}:${parsed.verseStart}`);
   }
 
   const tableRows = words.map((w) =>
-    `| ${w.Word || ""} | ${w.Transliteration || ""} | ${w.Gloss || w.Translation || ""} | ${w.Morphology || ""} | ${w.Lexeme || ""} |`
+    `| ${w.Word || ""} | ${w.Transliteration || ""} | ${w.Gloss || w.Translation || ""} | ${w.Morphology || ""} | ${w.Lexeme || ""} | ${w.Strongs || ""} |`
   );
 
   const formattedText =
     `# Morphology & Parsing: ${parsed.bookName} ${parsed.chapterStart}:${parsed.verseStart}\n\n` +
-    `| Original | Transliteration | Gloss/Meaning | Morphology | Lemma |\n` +
-    `| :--- | :--- | :--- | :--- | :--- |\n` +
+    `| Original | Transliteration | Gloss/Meaning | Morphology | Lemma | Strong's |\n` +
+    `| :--- | :--- | :--- | :--- | :--- | :--- |\n` +
     tableRows.join("\n");
 
   return { words, formattedText };

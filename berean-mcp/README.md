@@ -139,7 +139,7 @@ For AI-facing MCP use, request one commentary at a time and specify the preferre
 
 #### Scripture Texts & Translations
 15. **`bible_lookup`**: A verse, range or whole chapter in BSB (default), NET, KJV, WEB, ASV, OHGB or LXX.
-16. **`bible_search`**: Find verses containing a word or phrase in one translation, optionally within one book; supports `*` wildcards and `+` / `|`.
+16. **`bible_search`**: Find verses containing a word or phrase in one translation, optionally within one book; supports `*` wildcards and reports the total number of matches.
 17. **`parallel_passages`**: Gospel harmonies and Old/New Testament parallel accounts, optionally with full text.
 18. **`daily_reading`**: The reading plan's passages for today or a given date, optionally with full text.
 

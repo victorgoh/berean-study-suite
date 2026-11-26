@@ -10,3 +10,11 @@ export function translationOf(raw: string | null | undefined): string | undefine
   const text = raw?.trim();
   return !text || text === UNTRANSLATED_MARKER ? undefined : text;
 }
+
+/**
+ * The Strong's number in a morphology LexicalEntry, e.g. "G2872," → "G2872" and
+ * "E70002,H7225," → "H7225" (Hebrew entries also carry an internal E-number).
+ */
+export function strongsOf(lexicalEntry: string | null | undefined): string | undefined {
+  return lexicalEntry?.match(/\b([GH]\d{1,5}[A-Za-z]?)\b/)?.[1]?.toUpperCase();
+}

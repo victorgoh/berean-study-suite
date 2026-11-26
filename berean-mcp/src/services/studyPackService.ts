@@ -10,6 +10,7 @@ import { lookupInterlinear, getInterlinearStudyPack } from "./interlinearService
 import { lookupOtQuotations, getOtInNtStudyPack } from "./otInNtService.js";
 import { lookupSeptuagint, getSeptuagintStudyPack } from "./septuagintService.js";
 import { Env, StudyPackResponse } from "../types.js";
+import { aiNoteFrom } from "../utils/aiNote.js";
 
 /**
  * Strips outer H1 headers (e.g. `# [Author] Commentary on ...`)
@@ -124,9 +125,8 @@ export async function getSermonStudyPack(
   text += extra.text;
 
   const tip = `> [!TIP]\n> Use this data pack with the **Passionate Evangelist** persona to construct a compelling 3-point homiletical outline, poignant illustrations, and a direct gospel call to faith.\n`;
-  text += tip;
-
   return {
+    aiNote: aiNoteFrom(tip),
     formattedText: text,
     sections,
     metadata: {
@@ -235,9 +235,8 @@ export async function getDevotionalStudyPack(
   text += extra.text;
 
   const tip = `> [!TIP]\n> Use this data pack with the **Compassionate Pastor** persona to draft a 7-section daily devotional with historical insight, keyword meditation, 3 practical action steps, and a 1st-person closing prayer.\n`;
-  text += tip;
-
   return {
+    aiNote: aiNoteFrom(tip),
     formattedText: text,
     sections,
     metadata: {
@@ -338,9 +337,8 @@ export async function getPassageExegesisPack(
   text += extra.text;
 
   const tip = `> [!TIP]\n> Use this data pack with the **OT/NT Bible Scholar** persona to write rigorous academic exegesis, resolve textual variants, and unpack original language syntax.\n`;
-  text += tip;
-
   return {
+    aiNote: aiNoteFrom(tip),
     formattedText: text,
     sections,
     metadata: {
@@ -399,9 +397,8 @@ export async function getLessonCreatorStudyPack(
   text += extra.text;
 
   const tip = `> [!TIP]\n> Use this data pack with the **Biblical Content Interpreter** or **Bible Teacher** persona to construct small group study guides, Sunday School curricula, and interactive discussion questions.\n`;
-  text += tip;
-
   return {
+    aiNote: aiNoteFrom(tip),
     formattedText: text,
     sections,
     metadata: {
@@ -466,9 +463,8 @@ export async function getPrayerGuideStudyPack(
   text += extra.text;
 
   const tip = `> [!TIP]\n> Use this data pack with the **Compassionate Pastor** persona to write personal, first-person prayers ("I", "we") following the ACTS model (Adoration, Confession, Thanksgiving, Supplication).\n`;
-  text += tip;
-
   return {
+    aiNote: aiNoteFrom(tip),
     formattedText: text,
     sections,
     metadata: {
@@ -543,9 +539,8 @@ export async function getCovenantTheologyPack(
   text += extra.text;
 
   const tip = `> [!TIP]\n> Use this data pack with the **Biblical Theologian** or **Systematic Theologian** persona to trace how Old Testament types, covenants, and promises culminate in Jesus Christ.\n`;
-  text += tip;
-
   return {
+    aiNote: aiNoteFrom(tip),
     formattedText: text,
     sections,
     metadata: {
@@ -568,6 +563,14 @@ export async function getWordStudyPack(
   const isNT = parsed ? parsed.bookNumber >= 40 : false;
 
   const lexiconRes = await lookupLexiconEntry(env, strongsNumber, lexicon);
+  // The definition is the heart of a word study: without it, report an error
+  // rather than a "successful" pack whose only content is the failure message.
+  if (lexiconRes.error) {
+    const hint = /^[GH]\d+[A-Za-z]?$/i.test(strongsNumber.trim())
+      ? ""
+      : " Word studies take a Strong's number such as G26 or H7965; morphology_lookup on a verse shows each word's number.";
+    return { formattedText: "", error: lexiconRes.error + hint, errorCode: lexiconRes.errorCode ?? "RESOURCE_UNAVAILABLE" };
+  }
   const morphRes = reference ? await lookupMorphology(env, reference) : null;
   const robRes = reference && isNT ? await lookupCommentary(env, "Rob", reference) : null;
   const vincentRes = reference && isNT ? await lookupCommentary(env, "Vincent", reference) : null;
@@ -600,9 +603,8 @@ export async function getWordStudyPack(
   }
 
   const tip = `> [!IMPORTANT]\n> **Linguistic Guardrail**: Strictly avoid Illegitimate Totality Transfer. A word's semantic range represents all potential lexical possibilities across the corpus, but the author intends only ONE specific sense in context. Let the immediate syntax, grammar, and discourse context determine the single intended meaning.\n`;
-  text += tip;
-
   return {
+    aiNote: aiNoteFrom(tip),
     formattedText: text,
     sections,
     metadata: {
@@ -639,9 +641,8 @@ export async function getTopicStudyPack(
   }
 
   const tip = `> [!TIP]\n> Use this data pack with the **Systematic Theologian** or **Verse Scripter** persona to construct a scripturally-anchored doctrinal exposition.\n`;
-  text += tip;
-
   return {
+    aiNote: aiNoteFrom(tip),
     formattedText: text,
     sections,
     metadata: {

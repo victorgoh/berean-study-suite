@@ -29,6 +29,8 @@ function trimForStructured(value: unknown): unknown {
   // Composite services keep a second, section-keyed Markdown representation.
   // It is useful to the Explorer but duplicates the text for MCP clients.
   delete copy.sections;
+  // Appended to the MCP text instead (see appendAiNote).
+  delete copy.aiNote;
   return copy;
 }
 
@@ -88,12 +90,17 @@ export function normalizeMcpToolResult(result: unknown, input: unknown): Record<
   const mode = getMode(input);
   const budget = MAX_CHARS[mode];
   const structured = trimForStructured(result);
-  const text =
+  const baseText =
     typeof result.formattedText === "string"
       ? result.formattedText
       : typeof result.text === "string"
         ? result.text
         : JSON.stringify(structured);
+  // Study packs carry a suggestion meant only for AI assistants (src/utils/aiNote.ts).
+  const text =
+    typeof result.aiNote === "string" && result.aiNote
+      ? `${baseText.trimEnd()}\n\n> **Note for AI assistants:** ${result.aiNote}`
+      : baseText;
 
   // Long result: return one page of text. Structured data is left out because
   // it usually repeats the same content and would blow the budget.

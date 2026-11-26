@@ -220,6 +220,40 @@ async function main() {
   const morph = await restJson("morphology_lookup", { reference: "Matthew 11:28" });
   assert.ok(!JSON.stringify(morph).includes('"vvv"'), "placeholder translations are not exposed");
 
+  console.log("17. Priority-1 fixes from the Explorer/MCP audit");
+  const restJ = async (tool: string, body: unknown) => {
+    const res = await post(envFor(), tool, body);
+    return { status: res.status, body: (await res.json()) as any };
+  };
+  // AI-only notes stay out of REST/Explorer results but reach MCP clients.
+  const devo = await restJ("devotional_study_pack", { reference: "Matthew 11:28-30" });
+  assert.equal(devo.status, 200);
+  assert.doesNotMatch(devo.body.formattedText, /persona|\[!TIP\]/i, "reader-facing text has no AI tip");
+  assert.match(devo.body.aiNote, /Compassionate Pastor/);
+  const devoMcp = (await rpc(envFor("human"), "tools/call", { name: "devotional_study_pack", arguments: { reference: "Matthew 11:28-30", output_mode: "full" } })).result;
+  assert.match(devoMcp.content[0].text, /Note for AI assistants:\*\* Use this data pack with the \*\*Compassionate Pastor\*\*/);
+  assert.doesNotMatch((await restJ("cross_references", { reference: "Matthew 11:28", limit: 3 })).body.formattedText, /Increase limit/);
+  // Search reports the real total, not the display limit.
+  const search = (await restJ("bible_search", { query: "weary", limit: 3 })).body;
+  assert.equal(search.matches.length, 3);
+  assert.ok(search.totalCount > 3, `totalCount ${search.totalCount}`);
+  assert.match(search.formattedText, new RegExp(`^Found ${search.totalCount} matches .*; showing the first 3:`));
+  // MCP clients get usage instructions when they connect.
+  const init = await rpc(envFor(), "initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "t", version: "1" } });
+  assert.match(init.result.instructions, /bible_lookup/);
+  assert.match(init.result.instructions, /page: 2/);
+  // Morphology exposes Strong's numbers.
+  const morphWords = (await restJ("morphology_lookup", { reference: "Matthew 11:28" })).body.words as any[];
+  assert.equal(morphWords.find((w) => w.Lexeme === "ἀναπαύω")?.Strongs, "G373");
+  assert.ok(morphWords.every((w) => !("LexicalEntry" in w)), "raw LexicalEntry is not exposed");
+  // A word study with no lexicon entry is an error, with a hint for non-Strong's input.
+  const ws = await restJ("word_study_pack", { strongs_number: "rest" });
+  assert.equal(ws.status, 404);
+  assert.match(ws.body.error.message, /Strong's number such as G26/);
+  const wsMcp = (await rpc(envFor("human"), "tools/call", { name: "word_study_pack", arguments: { strongs_number: "rest" } })).result;
+  assert.equal(wsMcp.isError, true);
+  assert.equal((await restJ("word_study_pack", { strongs_number: "G373" })).status, 200);
+
   console.log("\n🎉 Tool registry tests passed.");
 }
 

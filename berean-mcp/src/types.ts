@@ -52,6 +52,8 @@ export interface MorphologyWord {
   Verse: number;
   Word: string;
   LexicalEntry?: string;
+  /** Strong's number derived from LexicalEntry, e.g. "G2872". */
+  Strongs?: string;
   MorphologyCode?: string;
   Morphology?: string;
   Lexeme?: string;
@@ -121,6 +123,8 @@ export interface StudyPackMetadata {
 
 export interface StudyPackResponse {
   formattedText: string;
+  /** Suggestion for AI assistants; added to MCP responses only (see utils/aiNote.ts). */
+  aiNote?: string;
   sections?: Record<string, string>;
   metadata?: StudyPackMetadata;
   result?: any;

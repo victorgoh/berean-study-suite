@@ -4,6 +4,7 @@ import { lookupCommentary } from "./commentaryService.js";
 import { lookupCrossReferences } from "./xrefService.js";
 import { Env, StudyPackResponse } from "../types.js";
 import { invalidRequest, type ServiceErrorCode } from "./errors.js";
+import { aiNoteFrom } from "../utils/aiNote.js";
 
 function cleanEmbeddedCommentary(rawText: string): string {
   if (!rawText) return "";
@@ -215,9 +216,8 @@ export async function getOtInNtStudyPack(
 
   // Persona Tip Callout
   const tip = `> [!TIP]\n> Use this data pack with the **Biblical Theologian** or **NT Bible Scholar** persona to evaluate apostolic hermeneutics, Christological fulfillment, and original language translation nuances between the Hebrew MT, Greek LXX, and Greek NT.\n`;
-  formattedText += tip;
-
   return {
+    aiNote: aiNoteFrom(tip),
     formattedText,
     sections,
     records,

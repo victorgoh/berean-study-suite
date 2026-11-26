@@ -1686,14 +1686,17 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     const resultsBottomActions = document.getElementById("results-bottom-actions");
     const sampleTagsContainer = document.getElementById("sample-tags-container");
 
-    // Load / Save Preferred Bible Version from localStorage
-    const savedVersion = localStorage.getItem("berean_preferred_version");
-    if (savedVersion) {
-      prefVersionSelect.value = savedVersion;
+    // Remember the preferred Bible version. Storage can be unavailable (some
+    // private-browsing modes or blocked site data throw on access), so every
+    // read and write is guarded and the page works without it.
+    function readStoredVersion() {
+      try { return localStorage.getItem("berean_preferred_version"); } catch { return null; }
     }
-    prefVersionSelect.addEventListener("change", () => {
-      localStorage.setItem("berean_preferred_version", prefVersionSelect.value);
-    });
+    function storeVersion(value) {
+      try { localStorage.setItem("berean_preferred_version", value); } catch { /* not remembered */ }
+    }
+    setSelectValue(prefVersionSelect, readStoredVersion());
+    prefVersionSelect.addEventListener("change", () => storeVersion(prefVersionSelect.value));
 
     function setSelectValue(select, value) {
       if (!value) return;
@@ -1769,7 +1772,14 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       }
     }
 
+    // A menu opened by hover or focus is a preview; a click or tap "pins" it.
+    // Without this, a click after the hover that already opened the menu
+    // toggled it closed, and on touch screens (where a tap fires hover, focus
+    // and click together) the menu never stayed open.
+    let popoverPinned = false;
+
     function closeToolPopover(returnFocus = false) {
+      popoverPinned = false;
       toolPopover.classList.remove("open");
       catTabs.forEach(tab => tab.setAttribute("aria-expanded", "false"));
       if (returnFocus && currentCategoryTab) currentCategoryTab.focus();
@@ -1858,11 +1868,21 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
 
     catTabs.forEach(tab => {
       const category = tab.getAttribute("data-cat");
-      tab.addEventListener("mouseenter", () => openToolPopover(category, tab));
-      tab.addEventListener("focus", () => openToolPopover(category, tab));
+      const isOpenFor = () => toolPopover.classList.contains("open") && tab.getAttribute("aria-expanded") === "true";
+      const preview = () => {
+        if (isOpenFor()) return; // keep the open menu (and any expanded "More study tools")
+        popoverPinned = false;
+        openToolPopover(category, tab);
+      };
+      tab.addEventListener("mouseenter", preview);
+      tab.addEventListener("focus", preview);
       tab.addEventListener("click", () => {
-        if (toolPopover.classList.contains("open") && tab.getAttribute("aria-expanded") === "true") closeToolPopover();
-        else openToolPopover(category, tab);
+        if (isOpenFor() && popoverPinned) {
+          closeToolPopover();
+          return;
+        }
+        if (!isOpenFor()) openToolPopover(category, tab);
+        popoverPinned = true;
       });
       tab.addEventListener("keydown", event => {
         if (event.key === "ArrowDown") {

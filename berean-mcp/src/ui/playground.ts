@@ -1451,7 +1451,7 @@ export function renderPlaygroundHtml(): string {
     }
 
     btnClearHistory.addEventListener("click", () => {
-      localStorage.removeItem("berean_history");
+      try { localStorage.removeItem("berean_history"); } catch {}
       loadHistory();
     });
 

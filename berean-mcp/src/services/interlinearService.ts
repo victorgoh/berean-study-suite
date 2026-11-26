@@ -3,6 +3,7 @@ import { parseReferenceString } from "./bibleService.js";
 import { lookupLexiconEntry } from "./lexiconService.js";
 import { Env, MorphologyWord, StudyPackResponse } from "../types.js";
 import { translationOf } from "../utils/morphology.js";
+import { aiNoteFrom } from "../utils/aiNote.js";
 
 // Common stop-words for Greek and Hebrew that are excluded from default "rare_and_notable" glossary
 const GREEK_COMMON_LEMMAS = new Set([
@@ -374,7 +375,6 @@ export async function lookupInterlinear(
   }
 
   const tip = `> [!TIP]\n> Use this data pack with the **Biblical Linguistic Analyst** or **Biblical Translator** persona to evaluate syntax, word order, verbal aspect, and discourse flow in the original biblical languages.\n`;
-  formattedText += tip;
 
   const result: InterlinearResult = {
     reference,
@@ -387,6 +387,7 @@ export async function lookupInterlinear(
 
   return {
     formattedText,
+    aiNote: aiNoteFrom(tip),
     sections,
     metadata: {
       title: `Inline Interlinear Study Pack: ${reference}`,

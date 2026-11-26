@@ -55,16 +55,17 @@ export async function searchBible(
     // Process search query tokens (support wildcards like * into %)
     const cleanedQuery = query.replace(/\*/g, "%").trim();
     
-    let sql = "SELECT Book, Chapter, Verse, Scripture FROM Verses WHERE ";
-    const params: (string | number)[] = [];
+    const where = bookNum ? "Book = ? AND Scripture LIKE ?" : "Scripture LIKE ?";
+    const whereParams: (string | number)[] = bookNum ? [bookNum, `%${cleanedQuery}%`] : [`%${cleanedQuery}%`];
 
-    if (bookNum) {
-      sql += "Book = ? AND ";
-      params.push(bookNum);
-    }
+    // Total number of matching verses, independent of the display limit.
+    const countStmt = db.prepare(`SELECT COUNT(*) AS n FROM Verses WHERE ${where}`);
+    countStmt.bind(whereParams);
+    const totalCount = countStmt.step() ? Number((countStmt.getAsObject() as { n: number }).n) : 0;
+    countStmt.free();
 
-    sql += "Scripture LIKE ? ORDER BY Book ASC, Chapter ASC, Verse ASC LIMIT ?";
-    params.push(`%${cleanedQuery}%`, limit);
+    const sql = `SELECT Book, Chapter, Verse, Scripture FROM Verses WHERE ${where} ORDER BY Book ASC, Chapter ASC, Verse ASC LIMIT ?`;
+    const params: (string | number)[] = [...whereParams, limit];
 
     const stmt = db.prepare(sql);
     stmt.bind(params);
@@ -84,9 +85,14 @@ export async function searchBible(
     stmt.free();
 
     const formattedLines = matches.map(m => `• ${m.book} ${m.chapter}:${m.verse} (${ver}): ${m.text}`);
-    const formattedText = `Found ${matches.length} matches for "${query}" in ${ver}${bookFilter ? ` [${bookFilter}]` : ""}:\n\n` + formattedLines.join("\n");
+    const scope = `"${query}" in ${ver}${bookFilter ? ` [${bookFilter}]` : ""}`;
+    const heading =
+      matches.length < totalCount
+        ? `Found ${totalCount} matches for ${scope}; showing the first ${matches.length}:`
+        : `Found ${totalCount} matches for ${scope}:`;
+    const formattedText = `${heading}\n\n` + formattedLines.join("\n");
 
-    return { totalCount: matches.length, matches, formattedText };
+    return { totalCount, matches, formattedText };
   } catch (err: any) {
     return internalError("Bible search", err);
   }

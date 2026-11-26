@@ -165,7 +165,7 @@ larger pages, or the human Explorer to read long articles in one view.
 ### 📖 Granular Tools
 
 - **`bible_lookup`**: A verse, range or whole chapter in BSB (default), NET, KJV, WEB, ASV, OHGB (original Hebrew/Greek) or LXX.
-- **`bible_search`**: Find verses containing a word or phrase in one translation, optionally within one book; supports `*` wildcards and `+` / `|`.
+- **`bible_search`**: Find verses containing a word or phrase in one translation, optionally within one book; supports `*` wildcards and reports the total number of matches.
 - **`commentary_lookup`**: Query an active commentary with `reference` and `version`. Call `get_available_resources(category="commentaries")` first for current keys, aliases, scope, and descriptions. Examples include `Henry`, `Pulpit`, `ECF`, `Catena`, `Kretzmann`, and `Schaff`. Check each resource's recorded source and licence before redistribution.
 - **`cross_references`**: Treasury of Scripture Knowledge (TSK) cross-references grouped by the word they connect to; `limit` caps how many are returned.
 - **`morphology_lookup`**: Word-by-word grammatical tagging, lemma roots, transliterations, and glosses for any Old or New Testament verse.

@@ -5,6 +5,7 @@ import { lookupCrossReferences } from "./xrefService.js";
 import { lookupOtQuotations } from "./otInNtService.js";
 import { Env, StudyPackResponse } from "../types.js";
 import { dependencyUnavailable, internalError, invalidRequest, type ServiceErrorCode } from "./errors.js";
+import { aiNoteFrom } from "../utils/aiNote.js";
 
 function cleanEmbeddedCommentary(rawText: string): string {
   if (!rawText) return "";
@@ -204,9 +205,8 @@ export async function getSeptuagintStudyPack(
 
   // Persona Callout Tip
   const tip = `> [!TIP]\n> Use this data pack with the **Bible Textual Critic** or **OT Bible Scholar** persona to examine how Second Temple Jewish translators rendered Hebrew idioms into Koine Greek and how these readings influenced the New Testament writers.\n`;
-  formattedText += tip;
-
   return {
+    aiNote: aiNoteFrom(tip),
     formattedText,
     sections,
     lxxVerses,

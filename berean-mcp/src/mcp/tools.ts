@@ -123,7 +123,7 @@ export const BibleLookupSchema = {
 };
 
 export const BibleSearchSchema = {
-  query: z.string().describe("Word or phrase to search for. Supports wildcards (*) and combinations (+, |)"),
+  query: z.string().describe("Word or phrase to search for. Use * as a wildcard, e.g. 'rest*'"),
   version: z.string().default("BSB").describe("Bible version to search in, e.g. BSB, NET, KJV, WEB"),
   book_filter: z.string().optional().describe("Optional book name to restrict search, e.g., 'Romans', 'Genesis'"),
   limit: z.number().default(50).describe("Maximum number of matching verses to return")

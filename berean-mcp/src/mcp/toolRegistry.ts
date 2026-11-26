@@ -201,7 +201,7 @@ export const TOOLS: readonly ToolDefinition[] = [
     description:
       "Study one Greek or Hebrew word by Strong's number: lexicon definitions; with a reference, its parsing in that verse, plus A. T. Robertson and Marvin Vincent's notes for New Testament verses.",
     schema: S.WordStudyPackSchema,
-    mcpErrors: "never",
+    mcpErrors: "on_empty",
     restAliases: { strongs: "strongs_number", query: "strongs_number", ...PASSAGE },
     run: (env, a) => getWordStudyPack(env, a.strongs_number, a.reference, a.lexicon)
   }),
@@ -292,7 +292,7 @@ export const TOOLS: readonly ToolDefinition[] = [
     title: "Bible Search",
     tier: "specialized",
     description:
-      "Find verses containing a word or phrase in one translation, optionally limited to one book. Supports * wildcards and + (and) / | (or). Returns matching verses with references.",
+      "Find verses containing a word or phrase in one translation, optionally limited to one book. Use * as a wildcard (e.g. 'rest*'). Returns the total number of matches and the first `limit` verses.",
     schema: S.BibleSearchSchema,
     mcpErrors: "on_error",
     restAliases: { text: "query", book: "book_filter" },
@@ -361,7 +361,7 @@ export const TOOLS: readonly ToolDefinition[] = [
     title: "Morphology Lookup",
     tier: "specialized",
     description:
-      "Word-by-word Greek or Hebrew parsing for a verse: original word, lemma, transliteration, gloss, and grammar (tense, voice, mood, case, number).",
+      "Word-by-word Greek or Hebrew parsing for a verse: original word, lemma, Strong's number, transliteration, gloss, and grammar (tense, voice, mood, case, number). Use the Strong's number with lexicon_lookup.",
     schema: S.MorphologyLookupSchema,
     mcpErrors: "on_error",
     restAliases: PASSAGE,

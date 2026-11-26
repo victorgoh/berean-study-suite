@@ -49,11 +49,28 @@ async function runMcpTool(tool: ToolDefinition, env: Env, args: Record<string, u
   return normalizeMcpToolResult(result, args) as CallToolResult;
 }
 
+/**
+ * Sent to clients in the `initialize` result. MCP clients typically give this
+ * to the model as guidance on how to use the server as a whole.
+ */
+export const SERVER_INSTRUCTIONS = [
+  "Berean is a read-only Bible study server: Scripture texts, classic public-domain commentaries, Greek and Hebrew lexicons and morphology, Bible dictionaries, cross-references and background resources. It retrieves sources; it does not write interpretations.",
+  "Quote Scripture only from bible_lookup (or a tool that returns verse text), never from memory, and give the translation, e.g. [John 3:16 (BSB)].",
+  "Call get_available_resources first when you need a valid Bible version, commentary key or lexicon; commentary_lookup takes one commentary per call.",
+  "For a word study, call morphology_lookup on the verse to get each word's Strong's number, then call lexicon_lookup with that number.",
+  "Long results come in pages: when a response ends with 'Part 1 of N', call the tool again with the same arguments and page: 2. Use output_mode 'full' for larger pages.",
+  "Errors begin with a code: REQUEST_FAILED (fix the arguments), RESOURCE_UNAVAILABLE (nothing matched; try another query or source), DEPENDENCY_UNAVAILABLE or INTERNAL_ERROR (retry later).",
+  "Cite the source of each commentary, dictionary or lexicon you use."
+].join("\n");
+
 export function createMcpServer(env: Env) {
-  const server = new McpServer({
-    name: "berean-mcp",
-    version: "1.0.0"
-  });
+  const server = new McpServer(
+    {
+      name: "berean-mcp",
+      version: "1.0.0"
+    },
+    { instructions: SERVER_INSTRUCTIONS }
+  );
 
   // --- Register Tools (from the shared registry; study packs only in the human profile) ---
   // Every tool also accepts `output_mode` and `page`, which control response size and paging.

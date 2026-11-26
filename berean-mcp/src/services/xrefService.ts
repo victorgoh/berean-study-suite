@@ -69,7 +69,7 @@ export async function lookupCrossReferences(
       lines.push(`• **${group.label}:** ${items.join(", ")}`);
     }
     if (references.length < total) {
-      lines.push(`\n*Showing ${references.length} of ${total} references. Increase limit to see more.*`);
+      lines.push(`\n*Showing ${references.length} of ${total} references.*`);
     }
 
     return {
