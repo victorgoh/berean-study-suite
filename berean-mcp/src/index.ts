@@ -7,47 +7,7 @@ if (typeof (globalThis as any).self === "undefined") {
 
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { createMcpServer, MCP_TOOL_COUNTS } from "./mcp/server.js";
-import { lookupBiblePassage } from "./services/bibleService.js";
-import { searchBible } from "./services/searchService.js";
-import { lookupCrossReferences } from "./services/xrefService.js";
-import { lookupLexiconEntry } from "./services/lexiconService.js";
-import { lookupMorphology } from "./services/morphologyService.js";
-import { lookupInterlinear } from "./services/interlinearService.js";
-import { lookupCommentary } from "./services/commentaryService.js";
-import { lookupTopic } from "./services/topicsService.js";
-import { lookupCharacter } from "./services/charactersService.js";
-import { lookupLocation } from "./services/locationsService.js";
-import { lookupDictionary } from "./services/dictionaryService.js";
-import { lookupEncyclopedia } from "./services/encyclopediaService.js";
-import { lookupParallels } from "./services/parallelsService.js";
-import { lookupPromises } from "./services/promisesService.js";
-import { lookupBookAnalysis } from "./services/bookAnalysisService.js";
-import { lookupChapterSummary } from "./services/chapterSummaryService.js";
-import { lookupBibleNames } from "./services/namesService.js";
-import { lookupChronology } from "./services/chronologyService.js";
-import { getDailyReading } from "./services/dailyReadService.js";
-import { getAvailableResources } from "./services/catalogService.js";
-import {
-  getSermonStudyPack,
-  getIllustrationStudyPack,
-  getDevotionalStudyPack,
-  getPassageExegesisPack,
-  getWordStudyPack,
-  getTopicStudyPack,
-  getCommentaryStudyPack,
-  getLessonCreatorStudyPack,
-  getPrayerGuideStudyPack,
-  getCovenantTheologyPack,
-  getInterlinearStudyPack,
-  getOtInNtStudyPack,
-  lookupOtQuotations,
-  getSeptuagintStudyPack,
-  lookupSeptuagint
-} from "./services/studyPackService.js";
-import {
-  lookupEntityDisambiguation,
-  convertAncientUnits
-} from "./services/unitsAndEntitiesService.js";
+import { TOOLS, TOOLS_BY_NAME, validateRestArgs, formatValidationError } from "./mcp/toolRegistry.js";
 import { renderExplorerHtml } from "./ui/explorer.js";
 import { renderScalarHtml } from "./ui/scalar.js";
 import { renderSwaggerHtml } from "./ui/swagger.js";
@@ -99,6 +59,58 @@ function jsonRpcErrorResponse(corsHeaders: Record<string, string>, status: numbe
 /** Single JSON-RPC message id (for error envelopes); null for batches or missing ids. */
 function jsonRpcIdOf(body: unknown): unknown {
   return body && typeof body === "object" && !Array.isArray(body) && "id" in body ? (body as { id: unknown }).id : null;
+}
+
+/**
+ * REST access to a registry tool. Arguments are validated with the tool's Zod
+ * schema after legacy aliases (e.g. `passage` for `reference`) are applied.
+ */
+async function handleRestTool(request: Request, url: URL, env: Env, corsHeaders: Record<string, string>): Promise<Response> {
+  const tool = TOOLS_BY_NAME.get(url.pathname.slice("/tools/".length));
+  if (!tool) {
+    return jsonResponse({ error: { code: "UNKNOWN_TOOL", message: "Unknown tool.", retryable: false } }, corsHeaders, 404);
+  }
+
+  const methods = tool.restMethods ?? ["POST"];
+  if (!methods.includes(request.method as "GET" | "POST")) {
+    return jsonResponse(
+      { error: { code: "METHOD_NOT_ALLOWED", message: `Use ${methods.join(" or ")} for /tools/${tool.name}.`, retryable: false } },
+      { ...corsHeaders, Allow: methods.join(", ") },
+      405
+    );
+  }
+
+  let input: Record<string, unknown> = {};
+  if (request.method === "GET") {
+    input = Object.fromEntries(url.searchParams);
+  } else {
+    const raw = await request.text();
+    if (raw.trim()) {
+      try {
+        const parsed: unknown = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("not an object");
+        input = parsed as Record<string, unknown>;
+      } catch {
+        return jsonResponse({ error: { code: "INVALID_JSON", message: "Request body must be a JSON object.", retryable: false } }, corsHeaders, 400);
+      }
+    }
+  }
+
+  const parsed = validateRestArgs(tool, input);
+  if (!parsed.success) {
+    return jsonResponse(
+      { error: { code: "INVALID_ARGUMENTS", message: formatValidationError(parsed.error), retryable: false } },
+      corsHeaders,
+      400
+    );
+  }
+
+  try {
+    return restServiceResponse(await tool.run(env, parsed.data, { surface: "rest" }), corsHeaders);
+  } catch (error) {
+    console.error(`REST tool '${tool.name}' failed:`, error);
+    return jsonResponse({ error: { code: "INTERNAL_ERROR", message: "Internal error while running the tool.", retryable: true } }, corsHeaders, 500);
+  }
 }
 
 async function checkResourceAvailability(env: Env): Promise<Record<string, string>> {
@@ -256,44 +268,7 @@ export default {
             swagger_playground: "/swagger",
             mcp: "/mcp",
             openapi: "/openapi.json",
-            tools: {
-              get_available_resources: "/tools/get_available_resources",
-              sermon_study_pack: "/tools/sermon_study_pack",
-              illustration_study_pack: "/tools/illustration_study_pack",
-              lesson_creator_study_pack: "/tools/lesson_creator_study_pack",
-              devotional_study_pack: "/tools/devotional_study_pack",
-              prayer_guide_study_pack: "/tools/prayer_guide_study_pack",
-              passage_exegesis_pack: "/tools/passage_exegesis_pack",
-              word_study_pack: "/tools/word_study_pack",
-              interlinear_study_pack: "/tools/interlinear_study_pack",
-              septuagint_study_pack: "/tools/septuagint_study_pack",
-              ot_in_nt_study_pack: "/tools/ot_in_nt_study_pack",
-              covenant_theology_pack: "/tools/covenant_theology_pack",
-              commentary_study_pack: "/tools/commentary_study_pack",
-              topic_study_pack: "/tools/topic_study_pack",
-              bible_lookup: "/tools/bible_lookup",
-              bible_search: "/tools/bible_search",
-              parallel_passages: "/tools/parallel_passages",
-              daily_reading: "/tools/daily_reading",
-              commentary_lookup: "/tools/commentary_lookup",
-              cross_references: "/tools/cross_references",
-              lexicon_lookup: "/tools/lexicon_lookup",
-              morphology_lookup: "/tools/morphology_lookup",
-              interlinear_lookup: "/tools/interlinear_lookup",
-              septuagint_lookup: "/tools/septuagint_lookup",
-              ot_quotations_lookup: "/tools/ot_quotations_lookup",
-              theological_dictionary: "/tools/theological_dictionary",
-              topic_study: "/tools/topic_study",
-              biblical_promises: "/tools/biblical_promises",
-              character_lookup: "/tools/character_lookup",
-              location_lookup: "/tools/location_lookup",
-              entity_disambiguation: "/tools/entity_disambiguation",
-              convert_ancient_units: "/tools/convert_ancient_units",
-              bible_names: "/tools/bible_names",
-              chronology: "/tools/chronology",
-              book_analysis: "/tools/book_analysis",
-              chapter_summary: "/tools/chapter_summary"
-            }
+            tools: Object.fromEntries(TOOLS.map((tool) => [tool.name, `/tools/${tool.name}`]))
           }
         }, null, 2),
         {
@@ -305,228 +280,11 @@ export default {
       );
     }
 
-    // Public MCP Instance: No API key requirement enforced
+    // Public instance: no API key is required; rate limits apply (see rateLimit.ts).
 
-    // --- REST Endpoints for Direct / MCP Tool Invocations ---
-    if (url.pathname === "/tools/get_available_resources" && (request.method === "POST" || request.method === "GET")) {
-      const body = request.method === "POST" ? (await request.json().catch(() => ({}))) as any : {};
-      const category = body.category || url.searchParams.get("category") || "all";
-      const res = await getAvailableResources(env, { category });
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/bible_lookup" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupBiblePassage(env, body.version || "BSB", body.reference || body.passage || "");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/bible_search" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await searchBible(env, body.query || body.text || "", body.version || "BSB", body.book_filter || body.book, body.limit || 50);
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/commentary_lookup" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupCommentary(env, body.version || body.commentary || "Henry", body.reference || body.passage || "");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/cross_references" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupCrossReferences(env, body.reference || body.passage || "", body.limit || 15);
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/lexicon_lookup" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupLexiconEntry(env, body.strongs_number || body.strongs || body.query || "", body.lexicon || "strongs");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/morphology_lookup" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupMorphology(env, body.reference || body.passage || "");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/topic_study" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupTopic(env, body.query || body.topic || body.term || "");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/character_lookup" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupCharacter(env, body.name || body.query || body.character || "");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/location_lookup" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupLocation(env, body.location || body.query || body.name || "");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/theological_dictionary" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const term = body.term || body.query || body.word || "";
-      const res = body.source === "isbe"
-        ? await lookupEncyclopedia(env, term, "isbe")
-        : await lookupDictionary(env, term, body.source || "easton");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/parallel_passages" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupParallels(env, body.query || body.reference || body.passage || "", body.include_text ?? true, body.version || "BSB");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/biblical_promises" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupPromises(env, body.topic || body.category || body.query || "", body.include_text ?? true, body.version || "BSB");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/book_analysis" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const detail = body.detail === "full" ? "full" : "summary";
-      const res = await lookupBookAnalysis(env, body.book || body.query || "", detail);
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/chapter_summary" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupChapterSummary(env, body.book || body.query || "", body.chapter || 1);
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/bible_names" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupBibleNames(env, body.query || body.name || body.search || "");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/chronology" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupChronology(env, body.query || body.period || body.event || "");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/daily_reading" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getDailyReading(env, body.date, body.include_text ?? true, body.version || "BSB");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/sermon_study_pack" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getSermonStudyPack(env, body.reference || body.passage || "Romans 8:1-4", body.version || "BSB", body.include_xrefs ?? true);
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/illustration_study_pack" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getIllustrationStudyPack(env, body.reference || body.passage || "Romans 8:28", body.version || "BSB", body.include_xrefs ?? true);
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/devotional_study_pack" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getDevotionalStudyPack(env, body.reference || body.passage || "Psalm 23", body.version || "BSB");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/passage_exegesis_pack" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getPassageExegesisPack(env, body.reference || body.passage || "John 1:1-5", body.version || "BSB", body.include_original ?? true);
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/word_study_pack" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getWordStudyPack(env, body.strongs_number || body.strongs || body.query || "G2842", body.reference || body.passage, body.lexicon || "strongs");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/topic_study_pack" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getTopicStudyPack(env, body.topic || body.query || "Justification", body.version || "BSB");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/commentary_study_pack" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getCommentaryStudyPack(env, body.reference || body.passage || "Romans 8:28", body.commentators, body.order_mode);
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/lesson_creator_study_pack" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getLessonCreatorStudyPack(env, body.reference || body.passage || "Luke 15:11-32", body.version || "BSB");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/prayer_guide_study_pack" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getPrayerGuideStudyPack(env, body.reference || body.passage || "Psalm 23", body.version || "BSB");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/covenant_theology_pack" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getCovenantTheologyPack(env, body.reference || body.passage || "Genesis 15", body.version || "BSB");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/interlinear_study_pack" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getInterlinearStudyPack(env, body.reference || body.passage || "Philippians 4:4-8", body.glossary_filter, body.gloss_color, body.display_mode || body.displayMode);
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/interlinear_lookup" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupInterlinear(env, body.reference || body.passage || "Philippians 4:4-8", body.glossary_filter, body.gloss_color, body.display_mode || body.displayMode);
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/ot_in_nt_study_pack" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getOtInNtStudyPack(env, body.reference || body.passage || "Hebrews 8:8-12", body.version || "BSB");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/ot_quotations_lookup" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupOtQuotations(env, body.reference || body.passage || "Hebrews 8:8");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/septuagint_study_pack" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await getSeptuagintStudyPack(env, body.reference || body.passage || "Genesis 1:1-5", body.version || "BSB");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/septuagint_lookup" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupSeptuagint(env, body.reference || body.passage || "Genesis 1:1");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/entity_disambiguation" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await lookupEntityDisambiguation(env, body.name || "Mary");
-      return restServiceResponse(res, corsHeaders);
-    }
-
-    if (url.pathname === "/tools/convert_ancient_units" && request.method === "POST") {
-      const body = (await request.json().catch(() => ({}))) as any;
-      const res = await convertAncientUnits(env, body.unit || "Talent", body.amount || 1);
-      return restServiceResponse(res, corsHeaders);
+    // --- REST tool endpoints: POST /tools/<name> (GET where a tool allows it) ---
+    if (url.pathname.startsWith("/tools/")) {
+      return handleRestTool(request, url, env, corsHeaders);
     }
 
     // --- MCP Streamable HTTP endpoint (stateless) ---

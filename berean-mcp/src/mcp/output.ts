@@ -83,8 +83,8 @@ export function normalizeMcpToolResult(result: unknown, input: unknown): Record<
 
   return {
     structuredContent: structuredResult,
-    // MCP recommends serialized structured content in a text block for
-    // backwards compatibility with clients that do not read structuredContent.
-    content: [{ type: "text", text: mode === "compact" ? JSON.stringify(structuredResult) : text }]
+    // The text block always carries the readable Markdown. Output modes only set
+    // the size budget; machine-readable fields travel in structuredContent.
+    content: [{ type: "text", text }]
   };
 }
