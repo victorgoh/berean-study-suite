@@ -14,7 +14,8 @@ import {
   MCP_TOOL_COUNTS,
   mcpToolsForProfile,
   mcpErrorFor,
-  applyRestAliases
+  applyRestAliases,
+  clearResultCache
 } from "../src/mcp/toolRegistry.js";
 import { getOpenApiSpec } from "../src/ui/openapi.js";
 import { internalError } from "../src/services/errors.js";
@@ -306,6 +307,31 @@ async function main() {
   // Chapter navigation.
   assert.deepEqual((await restJ("bible_lookup", { reference: "Malachi 4:1" })).body.navigation, { previous: "Malachi 3", next: "Matthew 1" });
   assert.deepEqual((await restJ("bible_lookup", { reference: "Genesis 1:1" })).body.navigation, { next: "Genesis 2" });
+
+  console.log("21. Priority-4: caching, prompts, passage resources, site files");
+  clearResultCache();
+  const cacheMiss = await post(envFor(), "bible_lookup", { reference: "Romans 8:28" });
+  const cacheHit = await post(envFor(), "bible_lookup", { reference: "Romans 8:28" });
+  assert.equal(cacheMiss.headers.get("X-Berean-Cache"), "miss");
+  assert.equal(cacheHit.headers.get("X-Berean-Cache"), "hit");
+  assert.deepEqual(await cacheMiss.json(), await cacheHit.json(), "a cached answer is identical");
+  assert.equal((await post(envFor(), "daily_reading", { include_text: false })).headers.get("X-Berean-Cache"), "miss");
+  assert.equal((await post(envFor(), "daily_reading", { include_text: false })).headers.get("X-Berean-Cache"), "miss", "daily_reading is not cached");
+  const prompts = (await rpc(envFor(), "prompts/list")).result.prompts.map((p: any) => p.name);
+  for (const hidden of ["berean-init", "berean-check", "docx-export", "image-generation"]) assert.ok(!prompts.includes(hidden), hidden + " is hidden");
+  assert.ok(prompts.includes("compassionate-pastor"));
+  const templates = (await rpc(envFor(), "resources/templates/list")).result.resourceTemplates;
+  assert.ok(templates.some((t: any) => t.uriTemplate === "berean://passage/{version}/{reference}"));
+  const passage = (await rpc(envFor(), "resources/read", { uri: "berean://passage/KJV/John%2011%3A35" })).result.contents[0];
+  assert.equal(passage.text, "[John 11:35 (KJV)] Jesus wept.");
+  const completion = (await rpc(envFor(), "completion/complete", { ref: { type: "ref/resource", uri: "berean://passage/{version}/{reference}" }, argument: { name: "version", value: "K" } })).result.completion;
+  assert.deepEqual(completion.values, ["KJV"]);
+  const robots = await (await call(envFor(), "/robots.txt")).text();
+  assert.match(robots, /Disallow: \/tools\/\nDisallow: \/mcp\nSitemap: http:\/\/localhost\/sitemap\.xml/);
+  assert.match(await (await call(envFor(), "/sitemap.xml")).text(), /<loc>http:\/\/localhost\/<\/loc>/);
+  const page = await call(envFor(), "/", { headers: { Accept: "text/html" } });
+  assert.equal(page.headers.get("Cache-Control"), "public, max-age=300");
+  assert.match(await page.text(), /<link rel="canonical" href="http:\/\/localhost\/">/);
 
   console.log("\n🎉 Tool registry tests passed.");
 }

@@ -37,6 +37,8 @@ Keep two things in mind when deploying:
 
 To restrict a deployment to people who have a key, set the optional `API_KEY` secret with `npx wrangler secret put API_KEY` (see [optional API key](agent-mcp-server-design.md#optional-api-key)). Without it the API is public. The Explorer cannot fetch results on a key-protected deployment.
 
+The Worker serves `robots.txt` (the Explorer and docs are indexable; `/tools/` and `/mcp` are not) and `sitemap.xml`, and the Explorer page carries a description and link-preview tags. Repeated tool answers are cached in memory per isolate (see [MCP server design](agent-mcp-server-design.md#result-cache)).
+
 The service is designed to run on the Workers Free plan (10 ms CPU per request, 128 MB memory, 100,000 requests per day). Avoid features that require a paid plan.
 
 ## Verify and roll back

@@ -1,7 +1,7 @@
 import "./polyfills.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { createMcpServer, MCP_TOOL_COUNTS } from "./mcp/server.js";
-import { TOOLS, TOOLS_BY_NAME, validateRestArgs, formatValidationError, type ServiceResult } from "./mcp/toolRegistry.js";
+import { TOOLS, TOOLS_BY_NAME, validateRestArgs, formatValidationError, runTool, type ServiceResult } from "./mcp/toolRegistry.js";
 import { HTTP_STATUS_FOR_ERROR, type ServiceErrorCode } from "./services/errors.js";
 import { renderExplorerHtml } from "./ui/explorer.js";
 import { renderScalarHtml } from "./ui/scalar.js";
@@ -102,7 +102,8 @@ async function handleRestTool(request: Request, url: URL, env: Env, corsHeaders:
   }
 
   try {
-    return restServiceResponse(await tool.run(env, parsed.data, { surface: "rest" }), corsHeaders);
+    const { result, cached } = await runTool(tool, env, parsed.data, { surface: "rest" });
+    return restServiceResponse(result, { ...corsHeaders, "X-Berean-Cache": cached ? "hit" : "miss" });
   } catch (error) {
     console.error(`REST tool '${tool.name}' failed:`, error);
     return jsonResponse({ error: { code: "INTERNAL_ERROR", message: "Internal error while running the tool.", retryable: true } }, corsHeaders, 500);
@@ -147,7 +148,7 @@ export default {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization, x-api-key, mcp-session-id, last-event-id, mcp-protocol-version, x-session-id",
-      "Access-Control-Expose-Headers": "mcp-session-id, mcp-protocol-version"
+      "Access-Control-Expose-Headers": "mcp-session-id, mcp-protocol-version, X-Berean-Cache"
     };
 
     // CORS preflight
@@ -225,9 +226,25 @@ export default {
       return new Response(JSON.stringify(spec, null, 2), {
         headers: {
           "Content-Type": "application/json",
+          "Cache-Control": "public, max-age=3600",
           ...corsHeaders
         }
       });
+    }
+
+    // Search engines: index the Explorer and docs, not the API endpoints.
+    if (url.pathname === "/robots.txt") {
+      return new Response(
+        `User-agent: *\nAllow: /\nDisallow: /tools/\nDisallow: /mcp\nSitemap: ${url.origin}/sitemap.xml\n`,
+        { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=86400" } }
+      );
+    }
+    if (url.pathname === "/sitemap.xml") {
+      const pages = ["/", "/docs"].map((path) => `  <url><loc>${url.origin}${path}</loc></url>`).join("\n");
+      return new Response(
+        `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n</urlset>\n`,
+        { headers: { "Content-Type": "application/xml; charset=utf-8", "Cache-Control": "public, max-age=86400" } }
+      );
     }
 
     const analyticsSnippet = env.ANALYTICS_SNIPPET || (env.CF_BEACON_TOKEN ? `<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "${env.CF_BEACON_TOKEN}"}'></script><!-- End Cloudflare Web Analytics -->` : "");
@@ -256,9 +273,12 @@ export default {
     const acceptHeader = request.headers.get("Accept") || "";
     const isBrowserHtmlRequest = acceptHeader.includes("text/html") || acceptHeader.includes("*/*");
     if (url.pathname === "/study" || url.pathname === "/app" || (url.pathname === "/" && isBrowserHtmlRequest && !acceptHeader.startsWith("application/json"))) {
-      return new Response(renderExplorerHtml(analyticsSnippet), {
+      return new Response(renderExplorerHtml(analyticsSnippet, url.origin), {
         headers: {
           "Content-Type": "text/html; charset=utf-8",
+          // Same page for everyone; "/" also serves JSON health, so vary on Accept.
+          "Cache-Control": "public, max-age=300",
+          Vary: "Accept",
           ...corsHeaders
         }
       });

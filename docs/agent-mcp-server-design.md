@@ -68,6 +68,33 @@ document (`src/ui/openapi.ts`) and the Explorer configuration are still written
 by hand; `npm run test:registry` fails if either lists a tool the registry does
 not.
 
+## Result cache
+
+`runTool()` in `toolRegistry.ts` keeps an in-memory cache per Worker isolate,
+shared by MCP and REST. The library is read-only, so repeating a question gives
+the same answer. Keys are the tool name, surface (MCP or REST) and arguments,
+ignoring `output_mode` and `page`. Successes and the deterministic errors
+`REQUEST_FAILED` and `RESOURCE_UNAVAILABLE` are cached for 6 hours (at most 300
+entries and about 8 MB; entries over 400 KB are skipped). `daily_reading` is
+never cached because its default date changes. REST responses report
+`X-Berean-Cache: hit` or `miss`. A deploy starts new isolates, which clears it.
+
+## Prompts and resources
+
+`prompts/list` offers the study personas and workflow prompts. The workflow
+commands that only work inside the project's IDE workspace (`berean-init`,
+`berean-check`, `docx-export`, `image-generation`) are not offered over MCP.
+
+Besides the fixed resources (`berean://rules/typography`, personas, skills,
+canon and reading-plan data), the resource template
+`berean://passage/{version}/{reference}` returns a passage as Markdown, e.g.
+`berean://passage/KJV/John%2011%3A35`. The reference is URL-encoded; `version`
+supports completion (BSB, NET, KJV, WEB, ASV, OHGB, LXX).
+
+Tools do not declare `outputSchema`: a tool with an output schema must return
+`structuredContent` on every call, but paged and text-only results deliberately
+send text alone (see above).
+
 ## Stateless MCP transport
 
 `/mcp` implements Streamable HTTP without sessions. Each `POST` gets its own MCP

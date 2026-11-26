@@ -30,6 +30,10 @@ Use **Copy results** to copy the original formatted text. **Copy link** copies a
 
 Bible references inside results (for example "John 6:37" or "Isaiah 55:1-3") are links: click one to preview the passage in your chosen translation, or ctrl/cmd-click to open it as its own search. In word-related results, Strong's numbers open a word study.
 
+Read Scripture shows previous and next chapter buttons above and below the passage. Place results include a map (OpenStreetMap). The devotional and prayer guides end with reflection questions and an ACTS prayer pattern.
+
+Use **A−** and **A+** at the top of the page to change the text size, and the theme button to switch between Auto (follows your device), Light and Dark. **Save** keeps a study in your saved list; your recent and saved studies appear below the search box. These settings and lists are stored only in your browser on this device.
+
 If you enter something that is not a passage into a passage tool (for example "comfort in grief" in Read Scripture), the Explorer suggests tools that can handle it, such as Search the Bible, Promises or the Bible Dictionary. **Print** excludes the search interface, navigation, and footer, and prints the complete result with collapsed sections expanded.
 
 Starting a new request cancels an unfinished earlier request so that an older response cannot replace newer results. A request that runs for more than one minute stops with an option to retry or choose a more focused lookup.

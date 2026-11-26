@@ -592,3 +592,94 @@ export function mcpErrorFor(tool: ToolDefinition, result: ServiceResult): string
   if (tool.mcpErrors === "on_empty" && result.formattedText) return null;
   return String(result.error);
 }
+
+// -----------------------------------------------------------------------------
+// Result cache (per Worker isolate)
+// -----------------------------------------------------------------------------
+// The library is read-only, so the same question always gets the same answer.
+// Caching repeated answers saves R2/D1 reads and CPU (the free plan allows
+// 10 ms of CPU per request). Deploys start new isolates, which clears it.
+
+const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+const CACHE_MAX_ENTRIES = 300;
+const CACHE_MAX_TOTAL_CHARS = 8_000_000;
+const CACHE_MAX_ENTRY_CHARS = 400_000;
+/** Answers that change over time (daily_reading defaults to today). */
+const UNCACHED_TOOLS = new Set(["daily_reading"]);
+/** Arguments that only shape the MCP presentation, not the answer. */
+const PRESENTATION_ARGS = new Set(["output_mode", "page"]);
+/** Failures that are a property of the request, so repeating it gives the same answer. */
+const CACHEABLE_ERRORS = new Set<ServiceErrorCode>(["REQUEST_FAILED", "RESOURCE_UNAVAILABLE"]);
+
+interface CacheEntry {
+  result: ServiceResult;
+  size: number;
+  expires: number;
+}
+const resultCache = new Map<string, CacheEntry>();
+let resultCacheChars = 0;
+
+function stableJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value as Record<string, unknown>)
+      .sort()
+      .map((k) => `${JSON.stringify(k)}:${stableJson((value as Record<string, unknown>)[k])}`)
+      .join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function cacheKey(tool: ToolDefinition, args: Record<string, unknown>, ctx: ToolContext): string {
+  const relevant = Object.fromEntries(Object.entries(args).filter(([k]) => !PRESENTATION_ARGS.has(k)));
+  return `${tool.name}|${ctx.surface}|${stableJson(relevant)}`;
+}
+
+function evict(key: string): void {
+  const entry = resultCache.get(key);
+  if (!entry) return;
+  resultCacheChars -= entry.size;
+  resultCache.delete(key);
+}
+
+/** Empties the result cache (used by tests). */
+export function clearResultCache(): void {
+  resultCache.clear();
+  resultCacheChars = 0;
+}
+
+/**
+ * Runs a tool through the result cache. Returns the (shared, read-only) result
+ * and whether it came from the cache.
+ */
+export async function runTool(
+  tool: ToolDefinition,
+  env: Env,
+  args: Record<string, unknown>,
+  ctx: ToolContext
+): Promise<{ result: ServiceResult; cached: boolean }> {
+  if (UNCACHED_TOOLS.has(tool.name)) {
+    return { result: await tool.run(env, args as never, ctx), cached: false };
+  }
+  const key = cacheKey(tool, args, ctx);
+  const hit = resultCache.get(key);
+  if (hit && hit.expires > Date.now()) {
+    resultCache.delete(key); // re-insert as most recently used
+    resultCache.set(key, hit);
+    return { result: hit.result, cached: true };
+  }
+  if (hit) evict(key);
+
+  const result = await tool.run(env, args as never, ctx);
+  const cacheable = !result.error || (result.errorCode !== undefined && CACHEABLE_ERRORS.has(result.errorCode));
+  const size = JSON.stringify(result).length;
+  if (cacheable && size <= CACHE_MAX_ENTRY_CHARS) {
+    resultCache.set(key, { result, size, expires: Date.now() + CACHE_TTL_MS });
+    resultCacheChars += size;
+    for (const oldest of resultCache.keys()) {
+      if (resultCache.size <= CACHE_MAX_ENTRIES && resultCacheChars <= CACHE_MAX_TOTAL_CHARS) break;
+      evict(oldest);
+    }
+  }
+  return { result, cached: false };
+}

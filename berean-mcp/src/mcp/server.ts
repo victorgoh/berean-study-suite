@@ -1,10 +1,11 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { lookupBiblePassage } from "../services/bibleService.js";
 import type { CallToolResult, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import { BEREAN_PERSONAS, WORKFLOW_PROMPTS } from "./prompts.js";
 import { RESOURCE_DEFINITIONS, getResourceContent } from "./resources.js";
 import { OutputModeSchema } from "./tools.js";
 import { normalizeMcpToolResult } from "./output.js";
-import { mcpErrorFor, mcpToolsForProfile, type ServiceResult, type ToolDefinition } from "./toolRegistry.js";
+import { mcpErrorFor, mcpToolsForProfile, runTool, type ServiceResult, type ToolDefinition } from "./toolRegistry.js";
 import type { ServiceErrorCode } from "../services/errors.js";
 import { Env } from "../types.js";
 import { z } from "zod";
@@ -35,11 +36,17 @@ function mcpError(code: ServiceErrorCode, message: string): CallToolResult {
   return { isError: true, content: [{ type: "text", text: `Error (${code}): ${message}\n${ERROR_HINTS[code]}` }] };
 }
 
+/** Workflow prompts that only work inside the project's IDE workspace. */
+const IDE_ONLY_PROMPTS = new Set(["berean-init", "berean-check", "docx-export", "image-generation"]);
+
+/** Translations offered for berean://passage/{version}/{reference}. */
+const PASSAGE_VERSIONS = ["BSB", "NET", "KJV", "WEB", "ASV", "OHGB", "LXX"];
+
 /** Runs a registry tool and shapes its service result for MCP. */
 async function runMcpTool(tool: ToolDefinition, env: Env, args: Record<string, unknown>): Promise<CallToolResult> {
   let result: ServiceResult;
   try {
-    result = await tool.run(env, args, { surface: "mcp" });
+    ({ result } = await runTool(tool, env, args, { surface: "mcp" }));
   } catch (error) {
     console.error(`MCP tool '${tool.name}' failed:`, error);
     return mcpError("INTERNAL_ERROR", `${tool.title} failed due to an internal error.`);
@@ -113,6 +120,9 @@ export function createMcpServer(env: Env) {
   }
 
   for (const workflow of Object.values(WORKFLOW_PROMPTS)) {
+    // Commands for the project's IDE workspace (scaffolding, Word export, image
+    // generation) make no sense in chat clients such as Claude Desktop.
+    if (IDE_ONLY_PROMPTS.has(workflow.name)) continue;
     server.prompt(
       workflow.name,
       workflow.description,
@@ -158,6 +168,30 @@ export function createMcpServer(env: Env) {
       }
     );
   }
+
+  // --- Passage resources: berean://passage/{version}/{reference} -------------
+  // Lets clients attach a passage directly, e.g. berean://passage/BSB/John%203%3A16
+  server.resource(
+    "bible-passage",
+    new ResourceTemplate("berean://passage/{version}/{reference}", {
+      list: undefined,
+      complete: {
+        version: (value) => PASSAGE_VERSIONS.filter((v) => v.toLowerCase().startsWith((value ?? "").toLowerCase()))
+      }
+    }),
+    {
+      title: "Bible passage",
+      description: "A Bible passage as text. version: BSB, NET, KJV, WEB, ASV, OHGB or LXX; reference: URL-encoded, e.g. John%203%3A16.",
+      mimeType: "text/markdown"
+    },
+    async (uri, variables) => {
+      const version = String(variables.version ?? "BSB").toUpperCase();
+      const reference = decodeURIComponent(String(variables.reference ?? ""));
+      const result = await lookupBiblePassage(env, version, reference);
+      const text = result.formattedText ?? `Error (${result.errorCode ?? "REQUEST_FAILED"}): ${result.error ?? "Passage not found."}`;
+      return { contents: [{ uri: uri.href, mimeType: "text/markdown", text }] };
+    }
+  );
 
   return server;
 }

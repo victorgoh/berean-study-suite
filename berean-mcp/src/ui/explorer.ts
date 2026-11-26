@@ -24,13 +24,47 @@ const BOOK_LINK_PATTERN = [
   .map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/ /g, " +"))
   .join("|");
 
-export function renderExplorerHtml(analyticsSnippet: string = ""): string {
+const SITE_DESCRIPTION =
+  "Free Bible study companion: read and compare translations, explore classic commentaries, Greek and Hebrew word studies, cross-references, Bible dictionaries, people, places and timelines.";
+
+/** Escapes text for use inside an HTML attribute. */
+function attr(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+/**
+ * @param analyticsSnippet optional analytics markup for the <head>
+ * @param origin the site's origin (e.g. "https://example.workers.dev") for canonical and link-preview URLs
+ */
+export function renderExplorerHtml(analyticsSnippet: string = "", origin: string = ""): string {
+  const pageUrl = origin ? origin + "/" : "";
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Berean Bible Study Explorer — Companion for Spiritual Growth & Scripture Learning</title>
+  <meta name="description" content="${attr(SITE_DESCRIPTION)}">
+  <meta name="theme-color" content="#f7f7f5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#161614" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Berean Study Suite">
+  <meta property="og:title" content="Berean Bible Study Explorer">
+  <meta property="og:description" content="${attr(SITE_DESCRIPTION)}">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Berean Bible Study Explorer">
+  <meta name="twitter:description" content="${attr(SITE_DESCRIPTION)}">${pageUrl ? `
+  <meta property="og:url" content="${attr(pageUrl)}">
+  <link rel="canonical" href="${attr(pageUrl)}">` : ""}
+  <script>
+    // Apply the reader's saved theme and text size before first paint.
+    try {
+      var savedTheme = localStorage.getItem("berean_theme");
+      if (savedTheme === "light" || savedTheme === "dark") document.documentElement.setAttribute("data-theme", savedTheme);
+      var savedScale = parseFloat(localStorage.getItem("berean_text_scale") || "");
+      if (savedScale >= 0.85 && savedScale <= 1.4) document.documentElement.style.setProperty("--reading-scale", String(savedScale));
+    } catch (e) { /* storage unavailable: defaults apply */ }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -51,6 +85,71 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       --text-dim: #85857e;
       --input-bg: #ffffff;
       --card-radius: 10px;
+      --header-bg: rgba(255,255,255,.94);
+      --popover-bg: #ffffff;
+      --results-header-bg: #fafaf8;
+      --footer-bg: #f1f1ed;
+      --btn-bg: #30302d;
+      --btn-bg-hover: #111110;
+      --btn-text: #ffffff;
+      --focus-border: #777770;
+      --focus-ring: rgba(48,48,45,.10);
+      --shadow: rgba(0,0,0,.10);
+      --reading-scale: 1;
+    }
+
+    /* Dark theme: follows the system setting unless the reader picks Light or Dark. */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #161614;
+        --surface: #1f1f1d;
+        --surface-border: #3a3a36;
+        --surface-hover: #2a2a27;
+        --accent-gold: #e6e6e0;
+        --accent-gold-hover: #ffffff;
+        --accent-gold-bg: #2a2a27;
+        --accent-gold-border: #5a5a54;
+        --text-main: #ecece6;
+        --text-muted: #b6b6ae;
+        --text-dim: #93938c;
+        --input-bg: #1a1a18;
+        --header-bg: rgba(22,22,20,.94);
+        --popover-bg: #252523;
+        --results-header-bg: #232321;
+        --footer-bg: #1a1a18;
+        --btn-bg: #e6e6e0;
+        --btn-bg-hover: #ffffff;
+        --btn-text: #161614;
+        --focus-border: #93938c;
+        --focus-ring: rgba(230,230,224,.18);
+        --shadow: rgba(0,0,0,.45);
+        color-scheme: dark;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #161614;
+      --surface: #1f1f1d;
+      --surface-border: #3a3a36;
+      --surface-hover: #2a2a27;
+      --accent-gold: #e6e6e0;
+      --accent-gold-hover: #ffffff;
+      --accent-gold-bg: #2a2a27;
+      --accent-gold-border: #5a5a54;
+      --text-main: #ecece6;
+      --text-muted: #b6b6ae;
+      --text-dim: #93938c;
+      --input-bg: #1a1a18;
+      --header-bg: rgba(22,22,20,.94);
+      --popover-bg: #252523;
+      --results-header-bg: #232321;
+      --footer-bg: #1a1a18;
+      --btn-bg: #e6e6e0;
+      --btn-bg-hover: #ffffff;
+      --btn-text: #161614;
+      --focus-border: #93938c;
+      --focus-ring: rgba(230,230,224,.18);
+      --shadow: rgba(0,0,0,.45);
+      color-scheme: dark;
     }
 
     * {
@@ -83,7 +182,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     /* Top Navigation Header */
     header {
       border-bottom: 1px solid var(--surface-border);
-      background: rgba(255,255,255,.94);
+      background: var(--header-bg);
       position: sticky;
       top: 0;
       z-index: 50;
@@ -788,7 +887,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     .cat-tab { color: var(--text-muted); border-color: transparent; border-radius: 6px; padding: .45rem .7rem; font-weight: 600; }
     .cat-tab:hover, .cat-tab.active { color: var(--text-main); background: var(--surface-hover); border-color: var(--surface-border); }
     .mode-pills { display: none !important; }
-    .tool-popover { display: none; position: absolute; z-index: 20; top: calc(100% + .35rem); left: 0; min-width: 250px; max-width: min(500px, 94vw); padding: .35rem; background: #fff; border: 1px solid var(--surface-border); border-radius: 8px; box-shadow: 0 10px 24px rgba(0,0,0,.10); opacity: 0; transform: translateY(-4px); transition: opacity .16s ease, transform .16s ease; }
+    .tool-popover { display: none; position: absolute; z-index: 20; top: calc(100% + .35rem); left: 0; min-width: 250px; max-width: min(500px, 94vw); padding: .35rem; background: var(--popover-bg); border: 1px solid var(--surface-border); border-radius: 8px; box-shadow: 0 10px 24px var(--shadow); opacity: 0; transform: translateY(-4px); transition: opacity .16s ease, transform .16s ease; }
     .tool-popover.open { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); opacity: 1; transform: translateY(0); }
     .tool-option, .tool-more-toggle { border: 0; background: transparent; color: var(--text-muted); text-align: left; padding: .55rem .65rem; border-radius: 5px; font: 500 .78rem/1.25 'Plus Jakarta Sans', sans-serif; cursor: pointer; }
     .tool-option:hover, .tool-option.active, .tool-more-toggle:hover { background: var(--surface-hover); color: var(--text-main); }
@@ -796,24 +895,24 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     .tool-help { color: var(--text-muted); font-size: .79rem; line-height: 1.5; min-height: 1.2em; }
     .search-row { margin-top: .3rem; }
     .search-input-wrapper input, .sub-select { color: var(--text-main); border-color: var(--surface-border); background: var(--input-bg); border-radius: 7px; }
-    .search-input-wrapper input:focus { border-color: #777770; box-shadow: 0 0 0 3px rgba(48,48,45,.10); }
-    .sub-select option { background: #fff; color: var(--text-main); }
-    .btn-study { background: #30302d; color: #fff; border-radius: 7px; box-shadow: none; }
-    .btn-study:hover { background: #111110; box-shadow: none; transform: none; }
+    .search-input-wrapper input:focus { border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--focus-ring); }
+    .sub-select option { background: var(--surface); color: var(--text-main); }
+    .btn-study { background: var(--btn-bg); color: var(--btn-text); border-radius: 7px; box-shadow: none; }
+    .btn-study:hover { background: var(--btn-bg-hover); box-shadow: none; transform: none; }
     .card-footer { border-color: var(--surface-border); }
     .pref-version-wrapper, .sample-tag { background: transparent; border-color: var(--surface-border); color: var(--text-muted); }
     .pref-version-select { color: var(--text-main); }
-    .pref-version-select option { background: #fff; color: var(--text-main); }
+    .pref-version-select option { background: var(--surface); color: var(--text-main); }
     .sample-tag:hover { background: var(--surface-hover); border-color: var(--accent-gold-border); color: var(--text-main); }
-    .results-card { background: #fff; border-color: var(--surface-border); box-shadow: 0 4px 18px rgba(0,0,0,.04); backdrop-filter: none; }
-    .results-header { background: #fafaf8; border-color: var(--surface-border); }
+    .results-card { background: var(--surface); border-color: var(--surface-border); box-shadow: 0 4px 18px rgba(0,0,0,.04); backdrop-filter: none; }
+    .results-header { background: var(--results-header-bg); border-color: var(--surface-border); }
     .results-title, .results-body { color: var(--text-main); }
     .action-btn { background: transparent; border-color: var(--surface-border); color: var(--text-muted); }
     .action-btn:hover { color: var(--text-main); background: var(--surface-hover); border-color: var(--accent-gold-border); }
     .results-body h2, .results-body th, .verse-badge { color: var(--text-main); }
     .results-body blockquote, .verse-badge { background: var(--surface-hover); border-color: var(--accent-gold-border); }
     .results-body th, .results-body td { border-color: var(--surface-border); }
-    .site-footer { background: #f1f1ed; border-color: var(--surface-border); }
+    .site-footer { background: var(--footer-bg); border-color: var(--surface-border); }
     .footer-title { color: var(--text-main); }
     .footer-links a { color: var(--text-muted); }
     @media (max-width: 640px) {
@@ -932,6 +1031,34 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       .markdown-table-wrap { overflow: visible; }
       .results-body th, .results-body td { border-color: #999; }
     }
+    .results-body { font-size: calc(1.05rem * var(--reading-scale)); }
+    .ref-preview { font-size: calc(.95rem * var(--reading-scale)); }
+    .reader-controls { display: flex; align-items: center; gap: .35rem; margin-left: auto; }
+    .reader-btn { border: 1px solid var(--surface-border); background: transparent; color: var(--text-muted); border-radius: 6px; padding: .3rem .55rem; font: 600 .78rem/1.2 'Plus Jakarta Sans', sans-serif; cursor: pointer; }
+    .reader-btn:hover, .reader-btn:focus-visible { color: var(--text-main); background: var(--surface-hover); }
+    @media print { .reader-controls { display: none !important; } }
+    .results-body a:not(.ref-link) { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+    /* margin: auto restores native dialog centring (the page resets all margins to 0). */
+    .info-dialog { margin: auto; max-width: min(620px, calc(100vw - 32px)); border: 1px solid var(--surface-border); border-radius: 10px; padding: 1.25rem 1.5rem; background: var(--surface); color: var(--text-main); box-shadow: 0 16px 40px var(--shadow); line-height: 1.6; }
+    .info-dialog::backdrop { background: rgba(0,0,0,.35); }
+    .info-dialog-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: .75rem; }
+    .info-dialog h2 { font-size: 1.15rem; }
+    .info-dialog ol { padding-left: 1.2rem; display: grid; gap: .6rem; }
+    .info-dialog p { margin-top: .6rem; }
+    .info-dialog a { color: var(--text-main); }
+    .info-dialog-note { color: var(--text-muted); font-size: .92rem; }
+    .my-studies { display: grid; gap: .45rem; margin-top: .75rem; padding-top: .75rem; border-top: 1px solid var(--surface-border); }
+    .my-studies-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; font-size: .78rem; color: var(--text-muted); }
+    .my-studies-row[hidden], .my-studies[hidden] { display: none; }
+    .my-studies-label { font-weight: 600; }
+    .my-studies-list { display: inline-flex; gap: .4rem; flex-wrap: wrap; }
+    .my-studies-clear { border: 0; background: none; color: var(--text-dim); font-size: .75rem; cursor: pointer; text-decoration: underline; }
+    #btn-save[aria-pressed="true"] { color: var(--text-main); border-color: var(--accent-gold-border); }
+    .place-map { margin: 1rem 0 1.25rem; }
+    .place-map iframe { width: 100%; height: 320px; border: 1px solid var(--surface-border); border-radius: 8px; }
+    .place-map figcaption { font-size: .8rem; color: var(--text-muted); margin-top: .35rem; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .place-map figcaption a { color: inherit; }
+    @media print { .place-map { display: none; } }
     .chapter-nav { display: flex; justify-content: space-between; gap: .5rem; margin: .25rem 0 1rem; }
     .chapter-nav:last-child { margin: 1rem 0 .25rem; }
     @media print { .chapter-nav { display: none !important; } }
@@ -941,7 +1068,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     /* Clickable Scripture references and their preview */
     .ref-link { color: inherit; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; cursor: pointer; }
     .ref-link:hover, .ref-link:focus-visible { text-decoration-style: solid; }
-    .ref-preview { position: absolute; z-index: 40; width: min(440px, calc(100vw - 32px)); max-height: 60vh; overflow: auto; padding: .85rem 1rem; background: var(--surface); border: 1px solid var(--surface-border); border-radius: 8px; box-shadow: 0 10px 28px rgba(0,0,0,.14); font-size: .95rem; line-height: 1.55; color: var(--text-main); }
+    .ref-preview { position: absolute; z-index: 40; width: min(440px, calc(100vw - 32px)); max-height: 60vh; overflow: auto; padding: .85rem 1rem; background: var(--popover-bg); border: 1px solid var(--surface-border); border-radius: 8px; box-shadow: 0 10px 28px var(--shadow); font-size: .95rem; line-height: 1.55; color: var(--text-main); }
     .ref-preview[hidden] { display: none; }
     .ref-preview-head { display: flex; justify-content: space-between; align-items: baseline; gap: .75rem; margin-bottom: .4rem; font-weight: 600; }
     .ref-preview-close { border: 0; background: none; font-size: 1.2rem; line-height: 1; cursor: pointer; color: var(--text-muted); padding: .1rem .3rem; }
@@ -968,6 +1095,11 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
           <p>A Companion for Spiritual Growth, Daily Reflection & Learning God's Word</p>
         </div>
       </a>
+      <div class="reader-controls" role="group" aria-label="Reading settings">
+        <button type="button" class="reader-btn" id="btn-text-smaller" aria-label="Smaller text">A−</button>
+        <button type="button" class="reader-btn" id="btn-text-larger" aria-label="Larger text">A+</button>
+        <button type="button" class="reader-btn" id="btn-theme" aria-label="Colour theme: automatic">Auto</button>
+      </div>
     </div>
   </header>
 
@@ -1116,6 +1248,18 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
           </select>
         </div>
       </div>
+      <div class="my-studies" id="my-studies" hidden>
+        <div class="my-studies-row" id="saved-row" hidden>
+          <span class="my-studies-label">Saved:</span>
+          <div class="my-studies-list" id="saved-list"></div>
+          <button type="button" class="my-studies-clear" data-clear="saved">Clear</button>
+        </div>
+        <div class="my-studies-row" id="recent-row" hidden>
+          <span class="my-studies-label">Recent:</span>
+          <div class="my-studies-list" id="recent-list"></div>
+          <button type="button" class="my-studies-clear" data-clear="recent">Clear</button>
+        </div>
+      </div>
     </div>
 
     <div class="query-summary" id="query-summary" aria-live="polite">
@@ -1133,6 +1277,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
           <button type="button" class="action-btn section-action" id="btn-expand-all">Expand all</button>
           <button type="button" class="action-btn section-action" id="btn-collapse-all">Collapse all</button>
           <button type="button" class="action-btn" id="btn-copy">Copy results</button>
+          <button type="button" class="action-btn" id="btn-save" aria-pressed="false">Save</button>
           <button type="button" class="action-btn" id="btn-share">Copy link</button>
           <button type="button" class="action-btn" id="btn-print">Print</button>
         </div>
@@ -1159,10 +1304,10 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         This is a study companion, not a replacement for personal Bible reading, prayer, or thoughtful discussion. Read each passage in context and compare the perspectives offered by different sources.
       </p>
       <nav class="footer-links" aria-label="Helpful information">
-        <a href="https://github.com/victorgoh/berean-study-suite/blob/main/docs/human-user-guide.md" target="_blank" rel="noopener noreferrer">How to use this study tool</a>
+        <a href="#help" data-dialog="help-dialog">How to use this study tool</a>
         <a href="?tool=resources&amp;run=1">What's in the library</a>
-        <a href="https://github.com/victorgoh/berean-study-suite/blob/main/docs/data-sources-and-provenance.md" target="_blank" rel="noopener noreferrer">Study sources and credits</a>
-        <a href="https://github.com/victorgoh/berean-study-suite" target="_blank" rel="noopener noreferrer">About the project</a>
+        <a href="https://github.com/victorgoh/berean-study-suite/blob/main/docs/data-sources-and-provenance.md" target="_blank" rel="noopener noreferrer">Study sources and credits (GitHub)</a>
+        <a href="#about" data-dialog="about-dialog">About the project</a>
       </nav>
 
       <div class="footer-bottom">
@@ -1170,6 +1315,31 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       </div>
     </div>
   </footer>
+
+  <dialog class="info-dialog" id="help-dialog" aria-labelledby="help-dialog-title">
+    <div class="info-dialog-head">
+      <h2 id="help-dialog-title">How to use this study tool</h2>
+      <button type="button" class="ref-preview-close" data-close-dialog aria-label="Close">×</button>
+    </div>
+    <ol>
+      <li><strong>Choose a starting point.</strong> Click a category (Passage, Reflection, Commentary, Original Words or Background), then pick a tool from its menu. <em>More study tools</em> shows specialist tools.</li>
+      <li><strong>Enter what you want to study.</strong> Most tools take a passage such as <em>John 3:16</em> or <em>Psalm 23</em>. Word tools also take a word such as <em>agape</em> or <em>rest</em>; background tools take a name, place or topic. If the tool needs something else, it suggests one that fits.</li>
+      <li><strong>Read and explore.</strong> Bible references in results are links: click one to preview the passage. Strong's numbers open a word study. In Read Scripture, use the chapter buttons to keep reading.</li>
+      <li><strong>Keep or share.</strong> <em>Copy link</em> shares the study (the link opens with the results), <em>Copy results</em> copies the text, and <em>Print</em> prints it. Your recent and saved studies appear below the search box on this device.</li>
+      <li><strong>Make it comfortable.</strong> Use <em>A−</em> and <em>A+</em> at the top for text size, and the theme button for light or dark.</li>
+    </ol>
+    <p class="info-dialog-note">This is a study companion, not a replacement for reading Scripture yourself, prayer, or wise counsel. Compare sources and read every passage in its context.</p>
+  </dialog>
+
+  <dialog class="info-dialog" id="about-dialog" aria-labelledby="about-dialog-title">
+    <div class="info-dialog-head">
+      <h2 id="about-dialog-title">About Berean Study Suite</h2>
+      <button type="button" class="ref-preview-close" data-close-dialog aria-label="Close">×</button>
+    </div>
+    <p>Berean Study Suite gathers public-domain and openly licensed Bible study resources in one place: Bible translations, classic commentaries, Greek and Hebrew lexicons, dictionaries, maps and timelines. It retrieves sources; it does not write interpretations for you.</p>
+    <p>The same library is available to AI assistants through a Model Context Protocol (MCP) server, so they can quote Scripture and sources accurately instead of from memory.</p>
+    <p>The project is free and open source. Read more, report a problem or see how it is built on <a href="https://github.com/victorgoh/berean-study-suite" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+  </dialog>
 
   <script>
     // Complete tool context configuration
@@ -1752,6 +1922,133 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       try { localStorage.setItem("berean_preferred_version", value); } catch { /* not remembered */ }
     }
     setSelectValue(prefVersionSelect, readStoredVersion());
+
+    // ----- Recent and saved studies (kept in this browser only) ---------------
+    const STUDY_LIMITS = { recent: 8, saved: 20 };
+    const myStudies = document.getElementById("my-studies");
+    const btnSave = document.getElementById("btn-save");
+
+    function readStudies(kind) {
+      try {
+        const list = JSON.parse(localStorage.getItem("berean_" + kind + "_studies") || "[]");
+        return Array.isArray(list) ? list.filter(item => item && TOOL_CONFIG[item.tool]) : [];
+      } catch { return null; }
+    }
+    function writeStudies(kind, list) {
+      try { localStorage.setItem("berean_" + kind + "_studies", JSON.stringify(list.slice(0, STUDY_LIMITS[kind]))); return true; } catch { return false; }
+    }
+    function studyKey(item) { return item.tool + "|" + item.q + "|" + item.translation; }
+    function currentStudy() {
+      const cfg = TOOL_CONFIG[activeMode] || TOOL_CONFIG.scripture;
+      return { tool: activeMode, q: queryInput.value.trim(), translation: prefVersionSelect.value || "BSB", label: cfg.btnLabel };
+    }
+    function studyText(item) { return item.q ? item.q + " · " + item.label : item.label; }
+
+    function renderMyStudies() {
+      const recent = readStudies("recent");
+      const saved = readStudies("saved");
+      if (recent === null || saved === null) { myStudies.hidden = true; btnSave.hidden = true; return; }
+      [["recent", recent], ["saved", saved]].forEach(([kind, list]) => {
+        const row = document.getElementById(kind + "-row");
+        const holder = document.getElementById(kind + "-list");
+        holder.replaceChildren();
+        list.forEach(item => {
+          const chip = document.createElement("button");
+          chip.type = "button";
+          chip.className = "sample-tag";
+          chip.textContent = studyText(item);
+          chip.addEventListener("click", () => {
+            setSelectValue(prefVersionSelect, item.translation);
+            selectMode(item.tool, categoryForMode(item.tool));
+            queryInput.value = item.q;
+            executeStudy();
+          });
+          holder.append(chip);
+        });
+        row.hidden = list.length === 0;
+      });
+      myStudies.hidden = recent.length === 0 && saved.length === 0;
+      const isSaved = saved.some(item => studyKey(item) === studyKey(currentStudy()));
+      btnSave.setAttribute("aria-pressed", String(isSaved));
+      btnSave.textContent = isSaved ? "Saved" : "Save";
+    }
+
+    function rememberStudy() {
+      const recent = readStudies("recent");
+      if (recent === null) return;
+      const item = currentStudy();
+      writeStudies("recent", [item].concat(recent.filter(other => studyKey(other) !== studyKey(item))));
+      renderMyStudies();
+    }
+
+    btnSave.addEventListener("click", () => {
+      const saved = readStudies("saved");
+      if (saved === null) return;
+      const item = currentStudy();
+      const exists = saved.some(other => studyKey(other) === studyKey(item));
+      const next = exists ? saved.filter(other => studyKey(other) !== studyKey(item)) : [item].concat(saved);
+      if (writeStudies("saved", next)) setStatus(exists ? "Removed from saved studies." : "Saved to your studies on this device.");
+      renderMyStudies();
+    });
+    document.querySelectorAll("[data-clear]").forEach(button => {
+      button.addEventListener("click", () => {
+        writeStudies(button.getAttribute("data-clear"), []);
+        renderMyStudies();
+      });
+    });
+
+    // Help and About dialogs opened from the footer.
+    document.querySelectorAll("[data-dialog]").forEach(link => {
+      link.addEventListener("click", event => {
+        const dialog = document.getElementById(link.getAttribute("data-dialog"));
+        if (!dialog || typeof dialog.showModal !== "function") return; // fall back to the #anchor
+        event.preventDefault();
+        dialog.showModal();
+      });
+    });
+    document.querySelectorAll("[data-close-dialog]").forEach(button => {
+      button.addEventListener("click", () => button.closest("dialog").close());
+    });
+    document.querySelectorAll("dialog.info-dialog").forEach(dialog => {
+      dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
+    });
+
+    // Reading settings: text size and colour theme (saved when storage allows).
+    const TEXT_SCALES = [0.9, 1, 1.1, 1.2, 1.35];
+    function storeSetting(key, value) {
+      try { if (value === null) localStorage.removeItem(key); else localStorage.setItem(key, value); } catch { /* not remembered */ }
+    }
+    function currentScale() {
+      const value = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--reading-scale"));
+      return isNaN(value) ? 1 : value;
+    }
+    function setScale(step) {
+      const index = TEXT_SCALES.reduce((best, s, i) => Math.abs(s - currentScale()) < Math.abs(TEXT_SCALES[best] - currentScale()) ? i : best, 1);
+      const next = TEXT_SCALES[Math.max(0, Math.min(TEXT_SCALES.length - 1, index + step))];
+      document.documentElement.style.setProperty("--reading-scale", String(next));
+      storeSetting("berean_text_scale", String(next));
+      setStatus("Text size " + Math.round(next * 100) + "%.");
+    }
+    document.getElementById("btn-text-smaller").addEventListener("click", () => setScale(-1));
+    document.getElementById("btn-text-larger").addEventListener("click", () => setScale(1));
+
+    const themeButton = document.getElementById("btn-theme");
+    const THEME_LABELS = { auto: "Auto", light: "Light", dark: "Dark" };
+    function applyTheme(theme) {
+      if (theme === "auto") document.documentElement.removeAttribute("data-theme");
+      else document.documentElement.setAttribute("data-theme", theme);
+      themeButton.textContent = THEME_LABELS[theme];
+      themeButton.setAttribute("aria-label", "Colour theme: " + (theme === "auto" ? "automatic" : theme) + ". Change theme");
+    }
+    applyTheme(document.documentElement.getAttribute("data-theme") || "auto");
+    themeButton.addEventListener("click", () => {
+      const order = ["auto", "light", "dark"];
+      const current = document.documentElement.getAttribute("data-theme") || "auto";
+      const next = order[(order.indexOf(current) + 1) % order.length];
+      applyTheme(next);
+      storeSetting("berean_theme", next === "auto" ? null : next);
+      setStatus("Theme: " + THEME_LABELS[next] + ".");
+    });
     prefVersionSelect.addEventListener("change", () => storeVersion(prefVersionSelect.value));
 
     function setSelectValue(select, value) {
@@ -2108,6 +2405,28 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
       showResultsView(config.btnLabel + " · " + q);
     }
 
+    // ----- Map for Biblical Places ---------------------------------------------
+    // An OpenStreetMap view, loaded only when a place result is shown.
+    function addPlaceMap(place) {
+      const lat = Number(place.latitude);
+      const lon = Number(place.longitude);
+      if (!isFinite(lat) || !isFinite(lon) || (lat === 0 && lon === 0)) return;
+      const d = 0.12;
+      const bbox = [lon - d, lat - d, lon + d, lat + d].map(n => n.toFixed(4)).join(",");
+      const figure = document.createElement("figure");
+      figure.className = "place-map";
+      const frame = document.createElement("iframe");
+      frame.src = "https://www.openstreetmap.org/export/embed.html?bbox=" + bbox + "&layer=mapnik&marker=" + lat.toFixed(5) + "," + lon.toFixed(5);
+      frame.title = "Map of " + (place.name || "this place");
+      frame.loading = "lazy";
+      frame.referrerPolicy = "no-referrer";
+      const caption = document.createElement("figcaption");
+      caption.innerHTML = 'Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors. Locations of ancient sites are approximate.';
+      figure.append(frame, caption);
+      const firstHeading = resultsBody.querySelector("h3");
+      if (firstHeading) firstHeading.before(figure); else resultsBody.append(figure);
+    }
+
     // ----- Previous / next chapter for Read Scripture -------------------------
     function addChapterNavigation(navigation) {
       const build = () => {
@@ -2420,10 +2739,12 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
         linkifyReferences(resultsBody);
         linkifyStrongs(resultsBody);
         if (activeMode === "scripture" && parsed.navigation) addChapterNavigation(parsed.navigation);
+        if (activeMode === "location" && parsed.result) addPlaceMap(parsed.result);
 
         enhanceResultNavigation(isSectionedResult, md);
         showResultsView(requestSummary(config, q, payload));
         updateUrlState(q);
+        rememberStudy();
         setStatus("Results loaded for " + (q || config.btnLabel) + ".");
 
         resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2725,6 +3046,7 @@ export function renderExplorerHtml(analyticsSnippet: string = ""): string {
     // "Copy link") run the study automatically.
     restoreUrlState();
     updateContextualControls();
+    renderMyStudies();
     if (new URLSearchParams(window.location.search).get("run") === "1") {
       executeStudy();
     }

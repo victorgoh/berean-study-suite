@@ -176,7 +176,7 @@ larger pages, or the human Explorer to read long articles in one view.
 - **`daily_reading`**: Daily Bible reading plan with scripture retrieval.
 - **`get_available_resources`**: Real-time listing of active bibles, commentaries, lexicons, and study packs.
 
-Every tool is marked read-only and accepts `output_mode` (page size) and `page`. Errors start with a code and a hint, for example `Error (RESOURCE_UNAVAILABLE): No verses found for Genesis 50:99 in BSB`. The full tool list, with each tool's description, comes from `tools/list`.
+Every tool is marked read-only and accepts `output_mode` (page size) and `page`. Clients that support resource templates can attach a passage directly with `berean://passage/{version}/{reference}`, for example `berean://passage/BSB/John%203%3A16`. Errors start with a code and a hint, for example `Error (RESOURCE_UNAVAILABLE): No verses found for Genesis 50:99 in BSB`. The full tool list, with each tool's description, comes from `tools/list`.
 
 ---
 

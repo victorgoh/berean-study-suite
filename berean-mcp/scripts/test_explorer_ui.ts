@@ -45,6 +45,19 @@ assert.match(clientScript, /target="_blank" rel="noopener noreferrer">\$1<\/a>/,
 
 console.log("Explorer UI regression tests passed.");
 
+// Reading comfort and site features.
+assert.match(html, /:root\[data-theme="dark"\] \{/, "Dark theme variables exist");
+assert.match(html, /@media \(prefers-color-scheme: dark\)/, "Dark theme follows the system setting");
+assert.match(html, /id="btn-theme"/, "Theme switch is present");
+assert.match(html, /id="btn-text-larger"/, "Text size controls are present");
+assert.match(html, /<meta name="description" content="Free Bible study companion/, "Page has a description for search and link previews");
+assert.match(html, /<meta property="og:title"/, "Page has Open Graph tags");
+assert.match(html, /id="help-dialog"/, "Help opens in the site");
+assert.match(html, /id="btn-save"/, "Studies can be saved");
+assert.match(clientScript, /function addPlaceMap\(place\)/, "Places show a map");
+assert.match(renderExplorerHtml("", "https://example.org"), /<link rel="canonical" href="https:\/\/example\.org\/">/, "Canonical URL uses the origin");
+assert.doesNotMatch(html.slice(html.indexOf("<style>"), html.indexOf("</style>")).replace(/@media print[\s\S]*?\}\s*\}/g, ""), /background: #fff;/, "Surfaces use theme variables");
+
 // The result formatter renders bold, italics and bullets correctly.
 const formatterCode = clientScript.slice(clientScript.indexOf("function renderMarkdownTables("), clientScript.indexOf("// Result actions"));
 const formatMarkdown = new Function(formatterCode + "; return formatMarkdown;")() as (md: string) => string;
