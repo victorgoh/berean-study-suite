@@ -1,6 +1,7 @@
 import { lookupEntityDisambiguation, convertAncientUnits } from "../src/services/unitsAndEntitiesService.js";
+import { createLocalEnv } from "./lib/localEnv.js";
 
-const mockEnv: any = {};
+const mockEnv = createLocalEnv();
 
 async function runTests() {
   console.log("==================================================================");

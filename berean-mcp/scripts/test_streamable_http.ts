@@ -1,44 +1,9 @@
 import assert from "node:assert/strict";
 import worker from "../src/index.js";
 import { toolCallsInJsonRpc, toolCost } from "../src/rateLimit.js";
-import path from "path";
-import os from "os";
-import fs from "fs/promises";
 import { Env } from "../src/types.js";
+import { createLocalEnv } from "./lib/localEnv.js";
 
-function createMockR2(localDataDir: string, serverDataDir: string) {
-  return {
-    async get(key: string) {
-      const p1 = path.join(localDataDir, key);
-      try {
-        const data = await fs.readFile(p1);
-        return {
-          async arrayBuffer() {
-            return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-          },
-          async text() {
-            return data.toString("utf-8");
-          }
-        };
-      } catch (_) {}
-
-      const p2 = path.join(serverDataDir, key);
-      try {
-        const data = await fs.readFile(p2);
-        return {
-          async arrayBuffer() {
-            return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-          },
-          async text() {
-            return data.toString("utf-8");
-          }
-        };
-      } catch (_) {}
-
-      return null;
-    }
-  } as any;
-}
 
 const MCP_HEADERS = { "Content-Type": "application/json", Accept: "application/json, text/event-stream" };
 
@@ -57,9 +22,7 @@ function fakeLimiter(limit: number) {
 }
 
 async function testStreamableHttp() {
-  const localDataDir = process.env.BIBLEMATE_DATA || path.join(os.homedir(), "biblemate", "data");
-  const serverDataDir = path.join(process.cwd());
-  const baseEnv: Env = { BIBLEMATE_DATA: createMockR2(localDataDir, serverDataDir) };
+  const baseEnv: Env = createLocalEnv();
   const ctx = { waitUntil: (p: any) => p } as any;
 
   const call = (env: Env, pathname: string, init?: RequestInit) =>

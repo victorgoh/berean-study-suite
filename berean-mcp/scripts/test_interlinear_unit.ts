@@ -1,5 +1,6 @@
 import { lookupInterlinear, getInterlinearStudyPack } from "../src/services/interlinearService.js";
 import { Env, MorphologyWord } from "../src/types.js";
+import { createLocalEnv } from "./lib/localEnv.js";
 
 async function runUnitTests() {
   console.log("==================================================================");
@@ -72,9 +73,9 @@ async function runUnitTests() {
     }
   };
 
-  const mockEnvNt: Env = {
+  const mockEnvNt: Env = createLocalEnv({
     MORPHOLOGY_DB: mockD1Nt
-  };
+  });
 
   // 1. Test NT Inline Mode (Default) with Alphabetic Labels & No Brackets on English words
   console.log("▶ 1. Testing NT Interlinear Study Pack (Inline Mode with Alpha Labels): Philippians 4:4...");

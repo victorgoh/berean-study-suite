@@ -1,54 +1,17 @@
 #!/usr/bin/env tsx
 import http from "node:http";
-import path from "node:path";
-import os from "node:os";
-import fs from "node:fs/promises";
 import worker from "../src/index.js";
 import { Env } from "../src/types.js";
+import { createLocalEnv, localDataDirs } from "./lib/localEnv.js";
 
 const PORT = parseInt(process.env.PORT || "7860", 10);
 const HOST = "0.0.0.0";
 
-function createMockR2(localDataDir: string, serverDataDir: string) {
-  return {
-    async get(key: string) {
-      const p1 = path.join(localDataDir, key);
-      try {
-        const data = await fs.readFile(p1);
-        return {
-          async arrayBuffer() {
-            return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-          },
-          async text() {
-            return data.toString("utf-8");
-          }
-        };
-      } catch (_) {}
 
-      const p2 = path.join(serverDataDir, key);
-      try {
-        const data = await fs.readFile(p2);
-        return {
-          async arrayBuffer() {
-            return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-          },
-          async text() {
-            return data.toString("utf-8");
-          }
-        };
-      } catch (_) {}
-
-      return null;
-    }
-  } as any;
-}
-
-const localDataDir = process.env.DATA_DIR || process.env.BIBLEMATE_DATA || path.join(os.homedir(), "biblemate", "data");
-const serverDataDir = path.join(process.cwd());
-const env: Env = {
-  BIBLEMATE_DATA: createMockR2(localDataDir, serverDataDir),
-  API_KEY: process.env.API_KEY
-};
+const env: Env = createLocalEnv({
+  API_KEY: process.env.API_KEY,
+  MCP_PROFILE: process.env.MCP_PROFILE === "human" ? "human" : undefined
+});
 const ctx = { waitUntil: (p: any) => p } as any;
 
 const server = http.createServer(async (req, res) => {
@@ -114,6 +77,6 @@ server.listen(PORT, HOST, () => {
   console.log(`🚀 Berean MCP HTTP Server running at http://${HOST}:${PORT}`);
   console.log(`   MCP Endpoint: http://${HOST}:${PORT}/mcp`);
   console.log(`   Health Check: http://${HOST}:${PORT}/health`);
-  console.log(`   Data Directory: ${localDataDir}`);
+  console.log(`   Data search path: ${localDataDirs()[0]} (+${localDataDirs().length - 1} fallbacks, see scripts/lib/localEnv.ts)`);
   console.log("==================================================");
 });

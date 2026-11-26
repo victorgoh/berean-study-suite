@@ -1,8 +1,9 @@
 import { lookupCommentary } from "../src/services/commentaryService.js";
 import { getCommentaryStudyPack } from "../src/services/studyPackService.js";
 import { lookupDictionary } from "../src/services/dictionaryService.js";
+import { createLocalEnv } from "./lib/localEnv.js";
 
-const mockEnv: any = {};
+const mockEnv = createLocalEnv();
 
 async function runTests() {
   console.log("==================================================================");

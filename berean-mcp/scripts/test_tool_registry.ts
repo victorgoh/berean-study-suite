@@ -3,13 +3,10 @@
  * error policy, output shape, and drift between the registry and the
  * hand-written OpenAPI spec / Explorer UI.
  *
- * Uses local data from $BIBLEMATE_DATA or ~/biblemate/data for the few calls
+ * Uses local data (see scripts/lib/localEnv.ts) for the few calls
  * that reach real services (bible_lookup, get_available_resources).
  */
 import assert from "node:assert/strict";
-import fs from "node:fs/promises";
-import os from "node:os";
-import path from "node:path";
 import worker from "../src/index.js";
 import {
   TOOLS,
@@ -22,25 +19,9 @@ import {
 import { getOpenApiSpec } from "../src/ui/openapi.js";
 import { renderExplorerHtml } from "../src/ui/explorer.js";
 import { Env } from "../src/types.js";
+import { createLocalEnv } from "./lib/localEnv.js";
 
-const dataDir = process.env.BIBLEMATE_DATA || path.join(os.homedir(), "biblemate", "data");
-const bucket = {
-  async get(key: string) {
-    try {
-      const data = await fs.readFile(path.join(dataDir, key));
-      return {
-        arrayBuffer: async () => data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength),
-        text: async () => data.toString("utf-8")
-      };
-    } catch {
-      return null;
-    }
-  },
-  async head() {
-    return null;
-  }
-};
-const envFor = (profile?: "ai" | "human") => ({ BIBLEMATE_DATA: bucket, MCP_PROFILE: profile }) as unknown as Env;
+const envFor = (profile?: "ai" | "human") => createLocalEnv({ MCP_PROFILE: profile });
 const ctx = { waitUntil: () => {} } as unknown as ExecutionContext;
 
 const call = (env: Env, pathname: string, init?: RequestInit) =>

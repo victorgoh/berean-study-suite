@@ -1,5 +1,6 @@
 import { lookupLexiconEntry } from "../src/services/lexiconService.js";
 import { getWordStudyPack } from "../src/services/studyPackService.js";
+import { createLocalEnv } from "./lib/localEnv.js";
 
 // Mock environment with D1 support
 const mockD1Database: any = {
@@ -56,9 +57,7 @@ const mockD1Database: any = {
   })
 };
 
-const mockEnv: any = {
-  REFERENCE_DB: mockD1Database
-};
+const mockEnv = createLocalEnv({ REFERENCE_DB: mockD1Database as unknown as D1Database });
 
 async function runTests() {
   console.log("==================================================================");
@@ -81,7 +80,7 @@ async function runTests() {
 
   // 2. Hebrew Disambiguated Word Test: H7225 (reshit with sub-lemmas from SQLite)
   console.log("▶ 2. Testing Hebrew H7225 (reshit from SQLite step_lexicon)...");
-  const emptyEnv: any = {};
+  const emptyEnv = createLocalEnv();
   const hebrewRes = await lookupLexiconEntry(emptyEnv, "H7225", "step");
   if (hebrewRes.error) {
     console.error("❌ Hebrew lookup failed:", hebrewRes.error);

@@ -1,7 +1,8 @@
 import { lookupOtQuotations, getOtInNtStudyPack } from "../src/services/otInNtService.js";
 import { getCovenantTheologyPack } from "../src/services/studyPackService.js";
+import { createLocalEnv } from "./lib/localEnv.js";
 
-const mockEnv: any = {};
+const mockEnv = createLocalEnv();
 
 async function runTests() {
   console.log("==================================================================");

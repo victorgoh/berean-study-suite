@@ -1,8 +1,9 @@
 import { lookupSeptuagint, getSeptuagintStudyPack } from "../src/services/septuagintService.js";
 import { lookupBiblePassage } from "../src/services/bibleService.js";
 import { getPassageExegesisPack } from "../src/services/studyPackService.js";
+import { createLocalEnv } from "./lib/localEnv.js";
 
-const mockEnv: any = {};
+const mockEnv = createLocalEnv();
 
 async function runTests() {
   console.log("==================================================================");

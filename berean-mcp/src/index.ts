@@ -1,10 +1,4 @@
-if (typeof (globalThis as any).location === "undefined") {
-  (globalThis as any).location = { href: "http://localhost/" };
-}
-if (typeof (globalThis as any).self === "undefined") {
-  (globalThis as any).self = globalThis;
-}
-
+import "./polyfills.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { createMcpServer, MCP_TOOL_COUNTS } from "./mcp/server.js";
 import { TOOLS, TOOLS_BY_NAME, validateRestArgs, formatValidationError } from "./mcp/toolRegistry.js";
