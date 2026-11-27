@@ -6,6 +6,7 @@ import { getAvailableResources } from "../src/services/catalogService.js";
 const context = {} as ExecutionContext;
 const env = {
   ENVIRONMENT: "test",
+  TOOL_CALL_LOGS: "off",
   BIBLEMATE_DATA: { head: async (key: string) => key === "data/lookup/bible_names.json" || key === "bibles/BSB.bible" ? {} : null } as any,
   MORPHOLOGY_DB: { prepare: () => ({ first: async () => ({ ok: 1 }) }) } as any,
   REFERENCE_DB: { prepare: () => ({ first: async () => ({ ok: 1 }) }) } as any

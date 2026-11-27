@@ -61,3 +61,7 @@ cmti/
 berean-mcp/data/
 berean-mcp/scripts/upload_asv_to_r2.sh
 .agents/
+
+# Small sample data used by the CI tests (scripts/build_test_fixtures.py)
+!berean-mcp/test/fixtures/
+!berean-mcp/test/fixtures/**

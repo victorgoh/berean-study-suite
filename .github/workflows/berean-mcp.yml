@@ -1,0 +1,32 @@
+name: berean-mcp
+
+# Typecheck and test the MCP server against the small sample Bibles in
+# berean-mcp/test/fixtures (built by scripts/build_test_fixtures.py). Checks
+# that need the full commentary, lexicon and topic databases run locally only.
+on:
+  push:
+    branches: [main]
+    paths: ["berean-mcp/**", ".github/workflows/berean-mcp.yml"]
+  pull_request:
+    paths: ["berean-mcp/**", ".github/workflows/berean-mcp.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: berean-mcp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: berean-mcp/package-lock.json
+      - run: npm ci
+      - run: npm run test:ci

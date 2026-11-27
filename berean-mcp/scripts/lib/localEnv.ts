@@ -71,5 +71,11 @@ export function createLocalBucket(dirs: string[] = localDataDirs()): R2Bucket {
 
 /** An Env wired to local data; pass overrides for D1 mocks, profile, limiters, etc. */
 export function createLocalEnv(overrides: Partial<Env> = {}): Env {
-  return { BIBLEMATE_DATA: createLocalBucket(), ...overrides } as Env;
+  // Tool-call log lines are useful in production, noisy in tests:
+  // set BEREAN_TOOL_LOGS=on to see them locally.
+  return {
+    BIBLEMATE_DATA: createLocalBucket(),
+    TOOL_CALL_LOGS: process.env.BEREAN_TOOL_LOGS === "on" ? "on" : "off",
+    ...overrides
+  } as Env;
 }

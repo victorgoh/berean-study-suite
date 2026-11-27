@@ -204,6 +204,10 @@ npm run start:http
     -d '{"version":"BSB","reference":"John 3:16"}'
   ```
 
+### Tests
+
+`npm run test:ci` typechecks the server and runs the MCP, registry and Explorer tests against small sample Bibles in `test/fixtures`, so it needs no local data; GitHub Actions runs it on every push. With your full data in place, `npm test` runs everything. See [Verify](../docs/local-deployment.md#verify) for what each test needs.
+
 ### Optional Cloudflare Deployment
 
 Cloudflare is useful when you want a hosted endpoint or a shared Explorer. It uses R2 for larger read-only resource files and D1 for the configured indexes. See [Cloudflare Deployment](../docs/cloudflare-deployment.md) for the complete, separate setup guide.

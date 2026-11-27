@@ -63,10 +63,22 @@ Every tool is defined once in `berean-mcp/src/mcp/toolRegistry.ts`: name, title,
 description, tier (catalog, study pack or specialized), Zod argument schema
 (`src/mcp/tools.ts`), MCP error policy, legacy REST argument aliases and the
 handler. That single list drives MCP registration and profile filtering, the
-REST routes, the `/health` tool list and the MCP tool counts. The OpenAPI
-document (`src/ui/openapi.ts`) and the Explorer configuration are still written
-by hand; `npm run test:registry` fails if either lists a tool the registry does
-not.
+REST routes, the `/health` tool list, the MCP tool counts and the OpenAPI
+document. `src/ui/openapi.ts` builds `/openapi.json` from the registry: one path
+per tool, its description, its request schema (converted from the same Zod
+schema) and the typed error responses. Only each tool's tag, summary and example
+request are kept by hand in `TOOL_DOCS`. The Explorer's forms and categories are
+written by hand for readers. `npm run test:registry` fails if `TOOL_DOCS` or the
+Explorer lists a tool the registry does not, or if an example request is invalid.
+
+## Tool-call logs
+
+`runTool()` writes one JSON line per tool call to the Worker log, for example
+`{"event":"tool_call","tool":"bible_lookup","surface":"mcp","ms":12,"cache":"miss","ok":true}`.
+Arguments are never logged. With `observability` enabled in `wrangler.jsonc`,
+these lines can be searched and charted in the Cloudflare dashboard (Workers
+Logs, included in the free plan). Set the `TOOL_CALL_LOGS` variable to `off` to
+turn them off; local test runs turn them off unless `BEREAN_TOOL_LOGS=on`.
 
 ## Result cache
 

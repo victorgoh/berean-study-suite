@@ -43,6 +43,29 @@ assert.match(clientScript, /function addChapterNavigation\(navigation\)/, "Read 
 assert.match(clientScript, /function linkifyReferences\(root\)/, "Bible references in results become links");
 assert.match(clientScript, /target="_blank" rel="noopener noreferrer">\$1<\/a>/, "Markdown web links render as links");
 
+// Accessibility: contrast, focus, motion and keyboard access.
+const luminance = (hex: string) => {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const contrast = (a: string, b: string) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+const themeBlocks = [html.slice(html.indexOf(":root {"), html.indexOf("}", html.indexOf(":root {"))), html.slice(html.indexOf(':root[data-theme="dark"] {'), html.indexOf("}", html.indexOf(':root[data-theme="dark"] {')))];
+for (const block of themeBlocks) {
+  const token = (name: string) => block.match(new RegExp(`--${name}: (#[0-9a-f]{6});`))![1];
+  for (const bg of ["bg", "surface", "surface-hover", "accent-gold-bg"]) {
+    for (const fg of ["text-main", "text-muted", "text-dim"]) assert.ok(contrast(token(fg), token(bg)) >= 4.5, `${fg} on ${bg} meets WCAG AA`);
+    assert.ok(contrast(token("focus-outline"), token(bg)) >= 3, `focus outline on ${bg} is visible`);
+  }
+  for (const bg of ["surface", "input-bg"]) assert.ok(contrast(token("control-border"), token(bg)) >= 3, `form-control border on ${bg} is visible`);
+}
+assert.match(html, /<a class="skip-link" href="#query-input">/, "Skip link goes to the search box");
+assert.match(html, /@media \(prefers-reduced-motion: reduce\)/, "Animations respect reduced motion");
+assert.doesNotMatch(clientScript, /behavior: ["']smooth["']/, "Smooth scrolling respects reduced motion");
+assert.match(clientScript, /showRefPreview\(refLink, event\.detail === 0\)/, "Keyboard users are moved into verse previews");
+assert.match(html, /class="cat-tab active" data-cat="passage" aria-current="true"/, "The selected category is announced");
 console.log("Explorer UI regression tests passed.");
 
 // Reading comfort and site features.

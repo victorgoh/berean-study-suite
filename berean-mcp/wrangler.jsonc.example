@@ -2,7 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "berean-mcp",
   "main": "src/index.ts",
-  "compatibility_date": "2025-02-14",
+  "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
     "MCP_PROFILE": "ai"

@@ -30,18 +30,20 @@
     "test:smoke": "npm run test:mcp-http && npm run test:registry && npm run test:phase4 && npm run test:commentary-ranges && npm run test:ecf && npm run test:explorer",
     "test": "npm run test:smoke",
     "test:mcp-http": "tsx scripts/test_streamable_http.ts",
-    "test:registry": "tsx scripts/test_tool_registry.ts"
+    "test:registry": "tsx scripts/test_tool_registry.ts",
+    "test:ci": "export DATA_DIR=test/fixtures BEREAN_TEST_FIXTURES=1 && npm run typecheck && npm run test:mcp-http && npm run test:registry && npm run test:explorer"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.1",
     "sql.js": "^1.14.2",
-    "zod": "^3.24.2"
+    "zod": "^3.24.2",
+    "zod-to-json-schema": "3.25.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260826.1",
     "@types/sql.js": "^1.4.11",
     "tsx": "^4.23.12",
     "typescript": "^5.7.3",
-    "wrangler": "^4.126.0"
+    "wrangler": "^4.161.0"
   }
 }

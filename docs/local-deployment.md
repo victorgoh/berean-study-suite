@@ -76,10 +76,13 @@ npm run test:registry
 
 | Command | What it checks | Needs local data |
 |---|---|---|
+| `npm run test:ci` | Typecheck, `test:mcp-http`, `test:registry` and `test:explorer` against the sample Bibles in `test/fixtures`; checks that need the full databases are skipped | None (GitHub Actions runs this) |
 | `npm run test:mcp-http` | Stateless `/mcp`, concurrent calls, rate-limit metering (with stand-in limiters) | A few Bible files |
 | `npm run test:registry` | Tool registry, MCP tool list and annotations, REST validation and error codes, paging, drift against the OpenAPI spec and Explorer | Bibles, commentaries, cross-references, lexicons |
 | `npm run test:phase4`, `test:commentary-ranges`, `test:explorer` | Explorer and commentary behaviour | Some commentaries |
 | `npm test` | All of the above plus `test:ecf` | Includes `data/commentaries/cECF_*.commentary` |
+
+GitHub Actions (`.github/workflows/berean-mcp.yml`) runs `npm run test:ci` on every push to `main` and every pull request that touches `berean-mcp/`. The sample Bibles hold a few chapters of BSB, KJV, NET and WEB; rebuild them with `python3 scripts/build_test_fixtures.py` if a test needs another chapter.
 
 `npm test` stops at the first failing step, so it fails early if the ECF commentary shards are not present. Focused service scripts under `scripts/` (for example `npx tsx scripts/test_all_services.ts`) validate individual resources such as STEPBible lexicons or Tyndale Open Study Notes; a test that reports a missing resource usually means that data file is not in the search path above.
 

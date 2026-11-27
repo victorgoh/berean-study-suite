@@ -15,9 +15,10 @@ import {
   mcpToolsForProfile,
   mcpErrorFor,
   applyRestAliases,
+  validateRestArgs,
   clearResultCache
 } from "../src/mcp/toolRegistry.js";
-import { getOpenApiSpec } from "../src/ui/openapi.js";
+import { TOOL_DOCS, getOpenApiSpec } from "../src/ui/openapi.js";
 import { internalError } from "../src/services/errors.js";
 import { paginateText, normalizeMcpToolResult } from "../src/mcp/output.js";
 import { tidyNameMeaning } from "../src/services/namesService.js";
@@ -43,6 +44,13 @@ const rpc = async (env: Env, method: string, params?: unknown) => {
 const post = (env: Env, tool: string, body: unknown) =>
   call(env, `/tools/${tool}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 
+/**
+ * BEREAN_TEST_FIXTURES=1 runs against the small sample Bibles in test/fixtures
+ * (as GitHub Actions does): checks that need the large commentary, lexicon,
+ * topic or cross-reference databases are skipped. Locally, with full data, all run.
+ */
+const FULL_DATA = process.env.BEREAN_TEST_FIXTURES !== "1";
+
 async function main() {
   const names = TOOLS.map((t) => t.name);
 
@@ -57,6 +65,24 @@ async function main() {
     .map((p) => p.slice("/tools/".length))
     .sort();
   assert.deepEqual(specPaths, [...names].sort());
+  // The spec is generated from the registry; only TOOL_DOCS is hand-kept.
+  assert.deepEqual(Object.keys(TOOL_DOCS).sort(), [...names].sort(), "TOOL_DOCS lists exactly the registered tools");
+  const spec = getOpenApiSpec("http://localhost") as any;
+  for (const tool of TOOLS) {
+    const path = spec.paths[`/tools/${tool.name}`];
+    assert.deepEqual(Object.keys(path).sort(), [...(tool.restMethods ?? ["POST"])].map((m) => m.toLowerCase()).sort(), `${tool.name}: methods`);
+    const op = path.post ?? path.get;
+    assert.equal(op.description, tool.description, `${tool.name}: description comes from the registry`);
+    for (const code of ["200", "400", "404", "429", "500", "503"]) assert.ok(op.responses[code], `${tool.name}: documents ${code}`);
+    const example = TOOL_DOCS[tool.name].example;
+    for (const key of Object.keys(example)) assert.ok(key in tool.schema, `${tool.name}: example key ${key} is an argument`);
+    assert.equal(validateRestArgs(tool, example).success, true, `${tool.name}: example request is valid`);
+    if (path.post) {
+      const schema = path.post.requestBody.content["application/json"].schema;
+      assert.deepEqual(Object.keys(schema.properties ?? {}).sort(), Object.keys(tool.schema).sort(), `${tool.name}: request properties`);
+    }
+  }
+  assert.ok(spec.components.schemas.Error, "Error schema is defined");
 
   console.log("3. Drift: every Explorer endpoint is a registered tool");
   const explorerTools = [...renderExplorerHtml("").matchAll(/endpoint:\s*"\/tools\/([a-z_]+)"/g)].map((m) => m[1]);
@@ -170,10 +196,12 @@ async function main() {
   const textOnly = normalizeMcpToolResult({ formattedText: "# Heading\n\nBody" }, {}) as any;
   assert.equal(textOnly.structuredContent, undefined, "no structuredContent when there is no structured data");
   assert.equal(textOnly.content[0].text, "# Heading\n\nBody");
+if (FULL_DATA) {
   const xref = (await rpc(envFor(), "tools/call", { name: "cross_references", arguments: { reference: "Matthew 11:28", limit: 5 } })).result;
-  assert.ok(!xref.isError, JSON.stringify(xref));
-  assert.match(xref.content[0].text, /Cross References: Matthew 11:28/);
-  assert.equal(xref.structuredContent.references.length, 5, "cross_references now sends its reference list");
+    assert.ok(!xref.isError, JSON.stringify(xref));
+    assert.match(xref.content[0].text, /Cross References: Matthew 11:28/);
+    assert.equal(xref.structuredContent.references.length, 5, "cross_references now sends its reference list");
+  }
   const verses = (await rpc(envFor(), "tools/call", { name: "bible_lookup", arguments: { reference: "John 11:35" } })).result;
   assert.ok(Array.isArray(verses.structuredContent.verses), "structured data is still sent when present");
 
@@ -183,43 +211,51 @@ async function main() {
   assert.ok(samplePages.length > 1);
   for (const pg of samplePages) assert.ok(pg.length <= 1000);
   assert.equal(samplePages.join("").replace(/\s+/g, ""), sample.replace(/\s+/g, ""), "pages must cover all text");
+if (FULL_DATA) {
   const callTopic = async (args: Record<string, unknown>) =>
-    (await rpc(envFor(), "tools/call", { name: "topic_study", arguments: { query: "Prayer", ...args } })).result;
-  const first = await callTopic({});
-  assert.ok(!first.isError, first.content?.[0]?.text?.slice(0, 200));
-  const match = /Part 1 of (\d+) of this result\..*page: 2/.exec(first.content[0].text);
-  assert.ok(match, "first page must say how to continue");
-  const total = Number(match[1]);
-  assert.ok(first.content[0].text.length <= 12000);
-  const last = await callTopic({ page: total });
-  assert.match(last.content[0].text, new RegExp(`Part ${total} of ${total} of this result\\.\\*$`));
-  const beyond = await callTopic({ page: total + 1 });
-  assert.equal(beyond.isError, true);
-  assert.match(beyond.content[0].text, /^Error \(REQUEST_FAILED\): page \d+ does not exist/);
-  const full = await callTopic({ output_mode: "full" });
-  assert.ok(!full.isError);
+      (await rpc(envFor(), "tools/call", { name: "topic_study", arguments: { query: "Prayer", ...args } })).result;
+    const first = await callTopic({});
+    assert.ok(!first.isError, first.content?.[0]?.text?.slice(0, 200));
+    const match = /Part 1 of (\d+) of this result\..*page: 2/.exec(first.content[0].text);
+    assert.ok(match, "first page must say how to continue");
+    const total = Number(match[1]);
+    assert.ok(first.content[0].text.length <= 12000);
+    const last = await callTopic({ page: total });
+    assert.match(last.content[0].text, new RegExp(`Part ${total} of ${total} of this result\\.\\*$`));
+    const beyond = await callTopic({ page: total + 1 });
+    assert.equal(beyond.isError, true);
+    assert.match(beyond.content[0].text, /^Error \(REQUEST_FAILED\): page \d+ does not exist/);
+    const full = await callTopic({ output_mode: "full" });
+    assert.ok(!full.isError);
+  }
 
   console.log("16. Result-quality fixes");
   const restJson = async (tool: string, body: unknown) => (await (await post(envFor(), tool, body)).json()) as any;
+if (FULL_DATA) {
   assert.equal((await restJson("biblical_promises", { topic: "Fear", include_text: false })).topic, "When you are afraid");
-  assert.equal((await restJson("biblical_promises", { topic: "Worry", include_text: false })).topic, "When you worry");
-  assert.equal((await restJson("biblical_promises", { topic: "Peace", include_text: false })).topic, "PEACE", "exact topic names still win");
-  const xr = await restJson("cross_references", { reference: "Matthew 11:28", limit: 5 });
-  assert.equal(xr.references.length, 5);
-  assert.match(xr.formattedText, /Showing 5 of \d+ references/);
-  const barnes = await restJson("commentary_lookup", { reference: "Romans 8", version: "Barnes" });
-  assert.match(barnes.formattedText, /^# \[Barnes\] Commentary on Romans 8\n\nThis chapter/, "no stray 0 before the introduction");
-  assert.equal(barnes.result.verses, undefined);
-  assert.equal((await restJson("commentary_lookup", { reference: "Romans 8:28", version: "Barnes" })).result.verses, "28");
+    assert.equal((await restJson("biblical_promises", { topic: "Worry", include_text: false })).topic, "When you worry");
+    assert.equal((await restJson("biblical_promises", { topic: "Peace", include_text: false })).topic, "PEACE", "exact topic names still win");
+    const xr = await restJson("cross_references", { reference: "Matthew 11:28", limit: 5 });
+    assert.equal(xr.references.length, 5);
+    assert.match(xr.formattedText, /Showing 5 of \d+ references/);
+    const barnes = await restJson("commentary_lookup", { reference: "Romans 8", version: "Barnes" });
+    assert.match(barnes.formattedText, /^# \[Barnes\] Commentary on Romans 8\n\nThis chapter/, "no stray 0 before the introduction");
+    assert.equal(barnes.result.verses, undefined);
+    assert.equal((await restJson("commentary_lookup", { reference: "Romans 8:28", version: "Barnes" })).result.verses, "28");
+  }
   assert.equal(tidyNameMeaning("The Father'S Joy"), "The Father's Joy");
   assert.equal(tidyNameMeaning("A Teacher; Lofty; Mountain Of Strength"), "A Teacher; Lofty; Mountain of Strength");
   assert.equal(tidyNameMeaning("Uncle, Or Father'S Brother"), "Uncle, or Father's Brother");
+if (FULL_DATA) {
   const praus = await restJson("lexicon_lookup", { strongs_number: "G4239", lexicon: "thayer" });
-  assert.match(praus.classicalDefinition, /see \*\*πρᾷός\*\*[\s\S]*G4235 — πρᾷός/, "Thayer pointer entries are followed");
+    assert.match(praus.classicalDefinition, /see \*\*πρᾷός\*\*[\s\S]*G4235 — πρᾷός/, "Thayer pointer entries are followed");
+  }
   assert.equal(translationOf("vvv"), undefined);
   assert.equal(translationOf(" rest "), "rest");
+if (FULL_DATA) {
   const morph = await restJson("morphology_lookup", { reference: "Matthew 11:28" });
-  assert.ok(!JSON.stringify(morph).includes('"vvv"'), "placeholder translations are not exposed");
+    assert.ok(!JSON.stringify(morph).includes('"vvv"'), "placeholder translations are not exposed");
+  }
 
   console.log("17. Priority-1 fixes from the Explorer/MCP audit");
   const restJ = async (tool: string, body: unknown) => {
@@ -227,50 +263,58 @@ async function main() {
     return { status: res.status, body: (await res.json()) as any };
   };
   // AI-only notes stay out of REST/Explorer results but reach MCP clients.
+if (FULL_DATA) {
   const devo = await restJ("devotional_study_pack", { reference: "Matthew 11:28-30" });
-  assert.equal(devo.status, 200);
-  assert.doesNotMatch(devo.body.formattedText, /persona|\[!TIP\]/i, "reader-facing text has no AI tip");
-  assert.match(devo.body.aiNote, /Compassionate Pastor/);
-  const devoMcp = (await rpc(envFor("human"), "tools/call", { name: "devotional_study_pack", arguments: { reference: "Matthew 11:28-30", output_mode: "full" } })).result;
-  assert.match(devoMcp.content[0].text, /Note for AI assistants:\*\* Use this data pack with the \*\*Compassionate Pastor\*\*/);
-  assert.doesNotMatch((await restJ("cross_references", { reference: "Matthew 11:28", limit: 3 })).body.formattedText, /Increase limit/);
-  // Search reports the real total, not the display limit.
-  const search = (await restJ("bible_search", { query: "weary", limit: 3 })).body;
-  assert.equal(search.matches.length, 3);
-  assert.ok(search.totalCount > 3, `totalCount ${search.totalCount}`);
-  assert.match(search.formattedText, new RegExp(`^Found ${search.totalCount} matches .*; showing the first 3:`));
+    assert.equal(devo.status, 200);
+    assert.doesNotMatch(devo.body.formattedText, /persona|\[!TIP\]/i, "reader-facing text has no AI tip");
+    assert.match(devo.body.aiNote, /Compassionate Pastor/);
+    const devoMcp = (await rpc(envFor("human"), "tools/call", { name: "devotional_study_pack", arguments: { reference: "Matthew 11:28-30", output_mode: "full" } })).result;
+    assert.match(devoMcp.content[0].text, /Note for AI assistants:\*\* Use this data pack with the \*\*Compassionate Pastor\*\*/);
+    assert.doesNotMatch((await restJ("cross_references", { reference: "Matthew 11:28", limit: 3 })).body.formattedText, /Increase limit/);
+    // Search reports the real total, not the display limit.
+    const search = (await restJ("bible_search", { query: "weary", limit: 3 })).body;
+    assert.equal(search.matches.length, 3);
+    assert.ok(search.totalCount > 3, `totalCount ${search.totalCount}`);
+    assert.match(search.formattedText, new RegExp(`^Found ${search.totalCount} matches .*; showing the first 3:`));
+  }
   // MCP clients get usage instructions when they connect.
   const init = await rpc(envFor(), "initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "t", version: "1" } });
   assert.match(init.result.instructions, /bible_lookup/);
   assert.match(init.result.instructions, /page: 2/);
   // Morphology exposes Strong's numbers.
+if (FULL_DATA) {
   const morphWords = (await restJ("morphology_lookup", { reference: "Matthew 11:28" })).body.words as any[];
-  assert.equal(morphWords.find((w) => w.Lexeme === "ἀναπαύω")?.Strongs, "G373");
-  assert.ok(morphWords.every((w) => !("LexicalEntry" in w)), "raw LexicalEntry is not exposed");
+    assert.equal(morphWords.find((w) => w.Lexeme === "ἀναπαύω")?.Strongs, "G373");
+    assert.ok(morphWords.every((w) => !("LexicalEntry" in w)), "raw LexicalEntry is not exposed");
+  }
   // A word study with no lexicon entry is an error, with a hint for non-Strong's input.
   const ws = await restJ("word_study_pack", { strongs_number: "xyzzyq" });
   assert.equal(ws.status, 404);
   assert.match(ws.body.error.message, /Strong's number such as G26/);
   const wsMcp = (await rpc(envFor("human"), "tools/call", { name: "word_study_pack", arguments: { strongs_number: "xyzzyq" } })).result;
   assert.equal(wsMcp.isError, true);
+if (FULL_DATA) {
   assert.equal((await restJ("word_study_pack", { strongs_number: "G373" })).status, 200);
+  }
 
   console.log("18. Words instead of Strong's numbers");
+if (FULL_DATA) {
   const agape = await restJ("lexicon_lookup", { strongs_number: "agape" });
-  assert.equal(agape.status, 200);
-  assert.match(agape.body.formattedText.normalize("NFC"), /^\*\u201Cagape\u201D is G26 \S+ \(agap\S+, \u201Clove\u201D\)/);
-  assert.equal((await restJ("lexicon_lookup", { strongs_number: "αγαπη" })).status, 200, "unaccented Greek lemma");
-  const shalom = (await restJ("lexicon_lookup", { strongs_number: "shalom" })).body;
-  assert.match(shalom.formattedText, /H7965/, "Hebrew variants collapse to their base number");
-  const rest = (await restJ("lexicon_lookup", { strongs_number: "rest" })).body;
-  assert.ok(rest.candidates.length > 1);
-  assert.match(rest.formattedText, /^# Words matching \u201Crest\u201D[\s\S]*\| G372 \| /);
-  const restPack = await restJ("word_study_pack", { strongs_number: "rest" });
-  assert.equal(restPack.status, 200);
-  assert.ok(restPack.body.result.candidates.length > 1, "word study offers a choice for an ambiguous word");
-  const agapePack = (await restJ("word_study_pack", { strongs_number: "agape" })).body;
-  assert.match(agapePack.formattedText, /Lexical Definition[\s\S]*G26/);
-  assert.equal((await restJ("lexicon_lookup", { strongs_number: "G26" })).status, 200, "Strong's numbers still work");
+    assert.equal(agape.status, 200);
+    assert.match(agape.body.formattedText.normalize("NFC"), /^\*\u201Cagape\u201D is G26 \S+ \(agap\S+, \u201Clove\u201D\)/);
+    assert.equal((await restJ("lexicon_lookup", { strongs_number: "αγαπη" })).status, 200, "unaccented Greek lemma");
+    const shalom = (await restJ("lexicon_lookup", { strongs_number: "shalom" })).body;
+    assert.match(shalom.formattedText, /H7965/, "Hebrew variants collapse to their base number");
+    const rest = (await restJ("lexicon_lookup", { strongs_number: "rest" })).body;
+    assert.ok(rest.candidates.length > 1);
+    assert.match(rest.formattedText, /^# Words matching \u201Crest\u201D[\s\S]*\| G372 \| /);
+    const restPack = await restJ("word_study_pack", { strongs_number: "rest" });
+    assert.equal(restPack.status, 200);
+    assert.ok(restPack.body.result.candidates.length > 1, "word study offers a choice for an ambiguous word");
+    const agapePack = (await restJ("word_study_pack", { strongs_number: "agape" })).body;
+    assert.match(agapePack.formattedText, /Lexical Definition[\s\S]*G26/);
+    assert.equal((await restJ("lexicon_lookup", { strongs_number: "G26" })).status, 200, "Strong's numbers still work");
+  }
 
   console.log("19. Compare translations");
   const cmp = await restJ("compare_translations", { reference: "John 11:35" });
@@ -286,24 +330,26 @@ async function main() {
   assert.equal(pair.verses.length, 2);
 
   console.log("20. Priority-3 content clean-up");
+if (FULL_DATA) {
   const david = (await restJ("character_lookup", { name: "David" })).body.formattedText as string;
-  assert.doesNotMatch(david, /Entry Code|Click for more details|Ocurrence|Occurence\b|Occurences/);
-  assert.match(david, /First Occurrence:\*\* Ruth 4:17/);
-  assert.doesNotMatch(david, /[a-z0-9][.:;][A-Z][a-z]/, "sentences are separated by a space");
-  const joy = (await restJ("topic_study", { query: "Joy" })).body.formattedText as string;
-  assert.doesNotMatch(joy, /Code: |UNCLASSIFIED|Habbakkuk|^\* /m);
-  assert.match((await restJ("location_lookup", { location: "Capernaum" })).body.formattedText, /\[Open in Google Maps\]\(https:/);
-  // Matching: alternative names, exact entries first, no wrong short near-misses.
-  assert.equal((await restJ("character_lookup", { name: "Paul" })).body.character, "Saul/Paul/Mercurius");
-  assert.equal((await restJ("character_lookup", { name: "Abrahm" })).body.character, "Abram/Abraham", "typos still match");
-  assert.match((await restJ("topic_study", { query: "Humility" })).body.formattedText, /^# Topic Study: Humility\n/);
-  const smithGrace = await restJ("theological_dictionary", { term: "Grace", source: "smith" });
-  assert.equal(smithGrace.status, 404);
-  assert.match(smithGrace.body.error.message, /closest entry is 'Grape'/);
-  assert.match((await restJ("theological_dictionary", { term: "Atonment", source: "easton" })).body.formattedText, /: Atonement/);
-  // Reflection prompts.
-  assert.match((await restJ("devotional_study_pack", { reference: "Matthew 11:28-30" })).body.formattedText, /Questions for Reflection\n- \*\*Observe:\*\* Read Matthew 11:28-30/);
-  assert.match((await restJ("prayer_guide_study_pack", { reference: "Psalm 23" })).body.formattedText, /A Pattern for Prayer \(ACTS\)\n- \*\*Adoration:\*\*/);
+    assert.doesNotMatch(david, /Entry Code|Click for more details|Ocurrence|Occurence\b|Occurences/);
+    assert.match(david, /First Occurrence:\*\* Ruth 4:17/);
+    assert.doesNotMatch(david, /[a-z0-9][.:;][A-Z][a-z]/, "sentences are separated by a space");
+    const joy = (await restJ("topic_study", { query: "Joy" })).body.formattedText as string;
+    assert.doesNotMatch(joy, /Code: |UNCLASSIFIED|Habbakkuk|^\* /m);
+    assert.match((await restJ("location_lookup", { location: "Capernaum" })).body.formattedText, /\[Open in Google Maps\]\(https:/);
+    // Matching: alternative names, exact entries first, no wrong short near-misses.
+    assert.equal((await restJ("character_lookup", { name: "Paul" })).body.character, "Saul/Paul/Mercurius");
+    assert.equal((await restJ("character_lookup", { name: "Abrahm" })).body.character, "Abram/Abraham", "typos still match");
+    assert.match((await restJ("topic_study", { query: "Humility" })).body.formattedText, /^# Topic Study: Humility\n/);
+    const smithGrace = await restJ("theological_dictionary", { term: "Grace", source: "smith" });
+    assert.equal(smithGrace.status, 404);
+    assert.match(smithGrace.body.error.message, /closest entry is 'Grape'/);
+    assert.match((await restJ("theological_dictionary", { term: "Atonment", source: "easton" })).body.formattedText, /: Atonement/);
+    // Reflection prompts.
+    assert.match((await restJ("devotional_study_pack", { reference: "Matthew 11:28-30" })).body.formattedText, /Questions for Reflection\n- \*\*Observe:\*\* Read Matthew 11:28-30/);
+    assert.match((await restJ("prayer_guide_study_pack", { reference: "Psalm 23" })).body.formattedText, /A Pattern for Prayer \(ACTS\)\n- \*\*Adoration:\*\*/);
+  }
   // Chapter navigation.
   assert.deepEqual((await restJ("bible_lookup", { reference: "Malachi 4:1" })).body.navigation, { previous: "Malachi 3", next: "Matthew 1" });
   assert.deepEqual((await restJ("bible_lookup", { reference: "Genesis 1:1" })).body.navigation, { next: "Genesis 2" });
@@ -333,7 +379,7 @@ async function main() {
   assert.equal(page.headers.get("Cache-Control"), "public, max-age=300");
   assert.match(await page.text(), /<link rel="canonical" href="http:\/\/localhost\/">/);
 
-  console.log("\n🎉 Tool registry tests passed.");
+  console.log(FULL_DATA ? "\n🎉 Tool registry tests passed." : "\n🎉 Tool registry tests passed (sample-data mode: checks needing the full databases were skipped).");
 }
 
 main().catch((err) => {

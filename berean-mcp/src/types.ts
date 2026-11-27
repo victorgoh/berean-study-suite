@@ -6,6 +6,8 @@ export interface Env {
   MORPHOLOGY_DB?: D1Database;
   REFERENCE_DB?: D1Database;
   API_KEY?: string;
+  /** "off" silences the per-call tool log lines (see runTool in toolRegistry.ts). */
+  TOOL_CALL_LOGS?: string;
   ENVIRONMENT?: string;
   /** MCP tool exposure profile. Defaults to "ai"; use "human" to expose Study Packs. */
   MCP_PROFILE?: "ai" | "human";

@@ -649,10 +649,41 @@ export function clearResultCache(): void {
 }
 
 /**
- * Runs a tool through the result cache. Returns the (shared, read-only) result
- * and whether it came from the cache.
+ * Runs a tool through the result cache and logs one line per call. Returns the
+ * (shared, read-only) result and whether it came from the cache.
+ *
+ * Log line (Workers Logs, included in the free plan), e.g.
+ *   {"event":"tool_call","tool":"bible_lookup","surface":"rest","ms":42,"cache":"miss","ok":true}
+ * Arguments are deliberately not logged. In Workers, Date.now() only advances
+ * across I/O, so `ms` is time spent waiting on storage, not CPU time.
+ * Set TOOL_CALL_LOGS=off to silence it (local test runs do).
  */
 export async function runTool(
+  tool: ToolDefinition,
+  env: Env,
+  args: Record<string, unknown>,
+  ctx: ToolContext
+): Promise<{ result: ServiceResult; cached: boolean }> {
+  const started = Date.now();
+  const log = (fields: Record<string, unknown>) => {
+    if (env.TOOL_CALL_LOGS === "off") return;
+    console.log(JSON.stringify({ event: "tool_call", tool: tool.name, surface: ctx.surface, ms: Date.now() - started, ...fields }));
+  };
+  try {
+    const outcome = await runToolCached(tool, env, args, ctx);
+    log({
+      cache: UNCACHED_TOOLS.has(tool.name) ? "skip" : outcome.cached ? "hit" : "miss",
+      ok: !outcome.result.error,
+      ...(outcome.result.errorCode ? { errorCode: outcome.result.errorCode } : {})
+    });
+    return outcome;
+  } catch (error) {
+    log({ cache: "miss", ok: false, errorCode: "INTERNAL_ERROR" });
+    throw error;
+  }
+}
+
+async function runToolCached(
   tool: ToolDefinition,
   env: Env,
   args: Record<string, unknown>,

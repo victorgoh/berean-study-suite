@@ -82,7 +82,9 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
       --accent-gold-border: #bdbdb6;
       --text-main: #242421;
       --text-muted: #666660;
-      --text-dim: #85857e;
+      --text-dim: #6b6b65;
+      --control-border: #8a8a83;
+      --focus-outline: #555550;
       --input-bg: #ffffff;
       --card-radius: 10px;
       --header-bg: rgba(255,255,255,.94);
@@ -112,6 +114,8 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
         --text-main: #ecece6;
         --text-muted: #b6b6ae;
         --text-dim: #93938c;
+        --control-border: #76766f;
+        --focus-outline: #d6d6cf;
         --input-bg: #1a1a18;
         --header-bg: rgba(22,22,20,.94);
         --popover-bg: #252523;
@@ -138,6 +142,8 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
       --text-main: #ecece6;
       --text-muted: #b6b6ae;
       --text-dim: #93938c;
+      --control-border: #76766f;
+      --focus-outline: #d6d6cf;
       --input-bg: #1a1a18;
       --header-bg: rgba(22,22,20,.94);
       --popover-bg: #252523;
@@ -782,9 +788,35 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
     .action-btn:focus-visible,
     .study-pack-toggle:focus-visible,
     .footer-links a:focus-visible,
-    .result-contents a:focus-visible {
-      outline: 3px solid #555550;
+    .result-contents a:focus-visible,
+    :focus-visible {
+      outline: 3px solid var(--focus-outline);
       outline-offset: 2px;
+    }
+    /* Results take focus after a search; the region itself needs no ring. */
+    #results-body:focus-visible { outline: none; }
+
+    .skip-link {
+      position: absolute;
+      left: 1rem;
+      top: -4rem;
+      z-index: 1000;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .skip-link:focus { top: 0.75rem; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
     }
 
     .verse-badge {
@@ -894,13 +926,14 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
     .tool-more-toggle { border-top: 1px solid var(--surface-border); border-radius: 0; font-weight: 700; grid-column: 1 / -1; margin-top: .2rem; padding-top: .7rem; }
     .tool-help { color: var(--text-muted); font-size: .79rem; line-height: 1.5; min-height: 1.2em; }
     .search-row { margin-top: .3rem; }
-    .search-input-wrapper input, .sub-select { color: var(--text-main); border-color: var(--surface-border); background: var(--input-bg); border-radius: 7px; }
+    .search-input-wrapper input, .sub-select { color: var(--text-main); border-color: var(--control-border); background: var(--input-bg); border-radius: 7px; }
     .search-input-wrapper input:focus { border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--focus-ring); }
     .sub-select option { background: var(--surface); color: var(--text-main); }
     .btn-study { background: var(--btn-bg); color: var(--btn-text); border-radius: 7px; box-shadow: none; }
     .btn-study:hover { background: var(--btn-bg-hover); box-shadow: none; transform: none; }
     .card-footer { border-color: var(--surface-border); }
     .pref-version-wrapper, .sample-tag { background: transparent; border-color: var(--surface-border); color: var(--text-muted); }
+    .pref-version-wrapper { border-color: var(--control-border); }
     .pref-version-select { color: var(--text-main); }
     .pref-version-select option { background: var(--surface); color: var(--text-main); }
     .sample-tag:hover { background: var(--surface-hover); border-color: var(--accent-gold-border); color: var(--text-main); }
@@ -1079,6 +1112,7 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#query-input">Skip to search</a>
 
   <!-- Top Navigation Header -->
   <header>
@@ -1115,7 +1149,7 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
 
       <!-- Categories reveal their tools on hover, focus, or click. -->
       <div class="category-tabs" id="category-tabs">
-        <button class="cat-tab active" data-cat="passage" aria-expanded="false" aria-haspopup="menu" aria-controls="tool-popover">Passage</button>
+        <button class="cat-tab active" data-cat="passage" aria-current="true" aria-expanded="false" aria-haspopup="menu" aria-controls="tool-popover">Passage</button>
         <button class="cat-tab" data-cat="reflection" aria-expanded="false" aria-haspopup="menu" aria-controls="tool-popover">Reflection</button>
         <button class="cat-tab" data-cat="study" aria-expanded="false" aria-haspopup="menu" aria-controls="tool-popover">Commentary</button>
         <button class="cat-tab" data-cat="words" aria-expanded="false" aria-haspopup="menu" aria-controls="tool-popover">Original Words</button>
@@ -1895,6 +1929,15 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
     const modePills = document.querySelectorAll(".mode-pill");
     const toolPopover = document.getElementById("tool-popover");
     const searchPanel = document.getElementById("search-panel");
+    const scrollBehavior = () => (window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth");
+    /** Marks the selected category tab, visually and for screen readers. */
+    function markActiveCategory(category) {
+      catTabs.forEach(tab => {
+        const current = tab.getAttribute("data-cat") === category;
+        tab.classList.toggle("active", current);
+        if (current) tab.setAttribute("aria-current", "true"); else tab.removeAttribute("aria-current");
+      });
+    }
     const querySummary = document.getElementById("query-summary");
     const querySummaryText = document.getElementById("query-summary-text");
     const toolHelp = document.getElementById("tool-help");
@@ -2076,7 +2119,7 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
       setSelectValue(dictSelect, params.get("dictionary"));
 
       const category = categoryForMode(activeMode);
-      catTabs.forEach(tab => tab.classList.toggle("active", tab.getAttribute("data-cat") === category));
+      markActiveCategory(category);
       modePills.forEach(pill => pill.classList.toggle("active", pill.getAttribute("data-mode") === activeMode));
     }
 
@@ -2145,7 +2188,7 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
     function selectMode(mode, category) {
       cancelActiveRequest();
       activeMode = mode;
-      catTabs.forEach(tab => tab.classList.toggle("active", tab.getAttribute("data-cat") === category));
+      markActiveCategory(category);
       modePills.forEach(p => p.classList.toggle("active", p.getAttribute("data-mode") === mode));
       updateContextualControls();
       closeToolPopover();
@@ -2158,6 +2201,7 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
       option.type = "button";
       option.className = "tool-option" + (mode === activeMode ? " active" : "");
       option.setAttribute("role", "menuitem");
+      if (mode === activeMode) option.setAttribute("aria-current", "true");
       option.textContent = pill.textContent.trim();
       option.hidden = hidden;
       option.addEventListener("click", () => selectMode(mode, category));
@@ -2309,7 +2353,7 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
       searchPanel.hidden = false;
       querySummary.classList.remove("visible");
       window.setTimeout(() => {
-        searchPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+        searchPanel.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
         queryInput.focus();
       }, 10);
     }
@@ -2605,7 +2649,7 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
       refPreview.replaceChildren(head, body, open);
     }
 
-    async function showRefPreview(link) {
+    async function showRefPreview(link, fromKeyboard = false) {
       const reference = link.dataset.ref;
       const version = prefVersionSelect.value || "BSB";
       refPreviewLink = link;
@@ -2634,6 +2678,9 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
       if (refPreviewLink !== link) return; // another preview was opened meanwhile
       const cached = refPreviewCache.get(key);
       renderRefPreview(reference, link.href, cached.verses || [], cached.error);
+      // A keyboard user cannot Tab to the preview (it sits at the end of the
+      // page), so move focus into it; Escape or Close returns to the link.
+      if (fromKeyboard) refPreview.querySelector(".ref-preview-close")?.focus();
     }
 
     document.addEventListener("click", event => {
@@ -2747,7 +2794,7 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
         rememberStudy();
         setStatus("Results loaded for " + (q || config.btnLabel) + ".");
 
-        resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        resultsCard.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
         resultsBody.focus({ preventScroll: true });
 
       } catch (err) {
@@ -2875,7 +2922,7 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
           selectMode(refLink.dataset.mode, categoryForMode(refLink.dataset.mode));
           executeStudy();
         } else {
-          showRefPreview(refLink);
+          showRefPreview(refLink, event.detail === 0);
         }
       }
     });
@@ -3020,7 +3067,7 @@ export function renderExplorerHtml(analyticsSnippet: string = "", origin: string
     btnExpandAll.addEventListener("click", () => setAllStudyPackSections(true));
     btnCollapseAll.addEventListener("click", () => setAllStudyPackSections(false));
     btnChangeSearch.addEventListener("click", showSearchPanel);
-    btnResultTop.addEventListener("click", () => resultsCard.scrollIntoView({ behavior: "smooth", block: "start" }));
+    btnResultTop.addEventListener("click", () => resultsCard.scrollIntoView({ behavior: scrollBehavior(), block: "start" }));
 
     // Enter Key to Study
     queryInput.addEventListener("keydown", (e) => {
